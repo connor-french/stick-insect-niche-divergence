@@ -1,0 +1,167 @@
+﻿genus,species,id,latitude,longitude,locality,Crosby Code,sex,clade
+clitarchus,tepaki,clit-tepa_1,-34.407783,173.007183,North Cape Scientific Reserve,ND,M/F,F
+clitarchus,tepaki,clit-tepa_2,-34.430017,172.8667,Spirits Bay,ND,M/F,F
+clitarchus,tepaki,clit-tepa_3,-34.456383,172.98735,"Waikuku Flat, Tom Bowling Bay",ND,M/F,F
+clitarchus,tepaki,clit-tepa_4,-34.4725,172.764417,"Kauri Bush, Te Paki",ND,M/F,F
+clitarchus,tepaki,clit-tepa_5,-34.473183,172.764033,"Kauri Bush Trk, Te Paki",ND,M/F,F
+clitarchus,tepaki,clit-tepa_6,-34.483333,172.816667,"Trk from Papawiri to Kohuranaki, Te Paki Rec Res",ND,M/F,F
+clitarchus,tepaki,clit-tepa_7,-34.4914,172.836517,"Kohuranaki, Te Paki",ND,M/F,F
+clitarchus,tepaki,clit-tepa_8,-34.539867,172.92015,"Parengarenga, Paua",ND,M/F,F
+clitarchus,tepaki,clit-tepa_9,-34.559417,172.837717,Karatia Rd,ND,M/F,F
+clitarchus,rakauwhakanekeneke,clit-raka_1,-35.48060503,174.7437284,Aorangi,ND,,A
+clitarchus,rakauwhakanekeneke,clit-raka_2,-35.45391226,174.7390467,Tawhiti Rahi,ND,,A
+clitarchus,hookeri,clit-hook_1,-34.79785,173.0648,Trig Rd,ND,M/F,G
+clitarchus,hookeri,clit-hook_2,-34.943,173.195183,Heath Rd,ND,M/F,G
+clitarchus,hookeri,clit-hook_3,-35.027033,173.198917,Lake Ngatu,ND,M/F,G
+clitarchus,hookeri,clit-hook_4,-35.13685,173.879583,"Junction of SH10 and Takou Bay Rd, 2 km N of Te Whau, Kerikeri",ND,M/F,G
+clitarchus,hookeri,clit-hook_5,-35.1581,173.42535,"Mangamuka Gorge Scenic Reserve, roadside",ND,M/F,G
+clitarchus,hookeri,clit-hook_6,-35.184483,173.1219,"Ahipara, road to Gumlands",ND,M/F,G
+clitarchus,hookeri,clit-hook_7,-35.205,173.183583,"Herekino Gorge, Kaitaia Awaroa Rd",ND,M/F,G
+clitarchus,hookeri,clit-hook_8,-35.209783,173.194167,"Herekino Forest Track, Herekino Forest",ND,M/F,G
+clitarchus,hookeri,clit-hook_9,-35.32085,174.0656,"Opua Forest, Oromahoe Rd",ND,M/F,K
+clitarchus,hookeri,clit-hook_10,-35.358283,173.250733,"Pawarenga, Warawara Forest",ND,M/F,D
+clitarchus,hookeri,clit-hook_11,-35.369317,173.283367,Warawara Forest,ND,F,E
+clitarchus,hookeri,clit-hook_12,-35.4445,173.755167,Whakaruangangana gumland,ND,F,K
+clitarchus,hookeri,clit-hook_13,-35.53775,173.382517,"Corner Signal Station Rd & SH12, Pakia rest area, Omapere",ND,M/F,K
+clitarchus,hookeri,clit-hook_14,-35.652183,173.557083,Waipoua Forest,ND,M/F,
+clitarchus,hookeri,clit-hook_15,-35.939817,175.146367,"Fanal I, Mokohinau Is",ND,M/F,R
+clitarchus,hookeri,clit-hook_16,-35.895967,173.806117,"Roadside SH12, 2 km N of Babylon Coast Rd, Dargaville",ND,M/F,K
+clitarchus,hookeri,clit-hook_17,-35.720467,173.649333,Trounson Kauri Park,ND,M/F,K
+clitarchus,hookeri,clit-hook_18,-36.060267,174.572633,"Roadside, Cove Rd, Robert Hastie Reserve",ND,F,K
+clitarchus,hookeri,clit-hook_19,-35.866833,173.735833,"Maitahi Wetland Scientific Reserve, Maitahi Rd",ND,F,K
+clitarchus,hookeri,clit-hook_20,-35.922667,173.854383,"Memorial Park, Dargaville",ND,F,K
+clitarchus,hookeri,clit-hook_21,-36.06728283,174.5756056,Brynderwyn,ND,M/F,L
+clitarchus,hookeri,clit-hook_22,-35.8866,174.7783,"Coppermine I, Hen and Chicken Is, track campsite to Lighthouse",ND,M/F,J
+clitarchus,hookeri,clit-hook_23,-36.11354,174.55425,NW of Mangawhai,AK,M/F,K
+clitarchus,hookeri,clit-hook_24,-36.505067,174.793523,"Home Bay, Motuora I",AK,M/F,C
+clitarchus,hookeri,clit-hook_25,-36.504717,174.789933,"Still Bay, Motuora I",AK,M/F,C
+clitarchus,hookeri,clit-hook_26,-36.351667,174.302,"Tapora, West of Wellsford",AK,F,R
+clitarchus,hookeri,clit-hook_27,-36.537517,174.705283,"Wenderholm Regional Park, Waiwera",AK,M/F,C
+clitarchus,hookeri,clit-hook_28,-36.5118,174.662433,"Puhoi Motorway extension, Puhoi",AK,M/F,J
+clitarchus,hookeri,clit-hook_29,-36.447183,174.4419,Mt Auckland,AK,F,
+clitarchus,hookeri,clit-hook_30,-36.695,174.696667,"Wright Rd, Redvale, Albany",AK,M/F,N
+clitarchus,hookeri,clit-hook_31,-36.893717,174.450967,"Bethells, Matuku Res",AK,M/F,
+clitarchus,hookeri,clit-hook_32,-36.925583,174.603083,"Oratia, Auckland",AK,M/F,
+clitarchus,hookeri,clit-hook_33,-36.840233,174.612183,"Massey, Auckland, off Don Bucks Rd",AK,M/F,
+clitarchus,hookeri,clit-hook_34,-36.782183,174.993417,Waiheke Is,AK,M/F,
+clitarchus,hookeri,clit-hook_35,-36.93555,174.635317,"Titirangi, Auckland",AK,M/F,
+clitarchus,hookeri,clit-hook_36,-36.696733,174.9738,"Noises Is, Otata I",AK,M/F,
+clitarchus,hookeri,clit-hook_37,-36.888233,174.6169,"Shona restoration plot, Border Rd, Opanuku stream, Henderson",AK,M/F,I
+clitarchus,hookeri,clit-hook_38,-36.7266,174.6917,"Gills Reserve, Albany, North Shore",AK,M/F,N
+clitarchus,hookeri,clit-hook_39,-36.72345,174.691967,"Lucas Creek, Albany",AK,M/F,
+clitarchus,hookeri,clit-hook_40,-36.831817,174.426317,"Muriwai Beach, Maori Bay Trk",AK,M/F,N
+clitarchus,hookeri,clit-hook_41,-36.929333,174.751133,"Hillsborough, Auckland",AK,M/F,
+clitarchus,hookeri,clit-hook_42,-36.889583,174.726667,"Auckland, Mt Albert Res Centre",AK,M/F,
+clitarchus,hookeri,clit-hook_43,-36.8978,174.709317,"Owairaka, Auckland",AK,M/F,
+clitarchus,hookeri,clit-hook_44,-36.876417,174.795617,Remuera,AK,M/F,
+clitarchus,hookeri,clit-hook_45,-36.866583,174.8284,"Auckland, Meadowbank",AK,M/F,
+clitarchus,hookeri,clit-hook_46,-36.916667,174.45,"Anawhata, Auckland",AK,M/F,
+clitarchus,hookeri,clit-hook_47,-36.9661,174.611717,"Parau Trk, Lower Nihoputu Reservoir, Auckland",AK,M/F,I
+clitarchus,hookeri,clit-hook_48,-36.9767,175.256317,"Tapapakanga Reg.Park, Orere",AK,M/F,I
+clitarchus,hookeri,clit-hook_49,-37.04155,175.290367,"Waharau Reg.Park, Hunua Ranges",AK,M/F,H
+clitarchus,hookeri,clit-hook_50,-36.726617,175.614583,"Whangapoua, 4.6 km N of SH25 turnoff and Te Rerenga, Coromandel",CL,M/F,P/S
+clitarchus,hookeri,clit-hook_51,-36.2196,175.056817,"Little Barrier I, DoC Rangers graden",CL,M/F,N
+clitarchus,hookeri,clit-hook_52,-36.215667,175.057933,"Valley Track, Little Barrier Island",CL,M/F,N
+clitarchus,hookeri,clit-hook_53,-36.241583,175.399533,"Great Barrier I, Whangaparapara, Witheys Track",CL,M/F,
+clitarchus,hookeri,clit-hook_54,-36.18335,175.37695,"Great Barrier I, Kaiarara Valley",CL,M/F,
+clitarchus,hookeri,clit-hook_55,-36.8804,175.428117,"Wilson Bay, SH25 roadside, 2.5 km N of Tapu, Coromandel",CL,M/F,M
+clitarchus,hookeri,clit-hook_56,-36.974767,176.081283,"Ruamahuaiti Is, Alderman Is",CL,M/F,
+clitarchus,hookeri,clit-hook_57,-36.658383,175.84875,"Mercury Is, Korapuki",CL,M/F,P
+clitarchus,hookeri,clit-hook_58,-37.026667,175.525,Waiomu,CL,M/F,M
+clitarchus,hookeri,clit-hook_59,-36.51195,175.419183,"3.7 km N of Stony Bay, on road to Stony Bay, Port Charles area",CL,M/F,I/Q
+clitarchus,hookeri,clit-hook_60,-37.143183,175.65905,"Start of Piranui trk, Kopu-Hikuai Rd",CL,M/F,M
+clitarchus,hookeri,clit-hook_61,-37.147633,175.670767,"Coromandel summit, Kopu-Hikuai road",CL,M/F,
+clitarchus,hookeri,clit-hook_62,-36.755367,175.726733,"Kuaotona (Kuaotunu), Wharekano Rd, rest area, near Whitianga",CL,M/F,P
+clitarchus,hookeri,clit-hook_63,-36.669733,175.454267,"19 km N of Coromandel town, S of Colville",CL,M/F,P
+clitarchus,hookeri,clit-hook_64,-37.121317,175.62925,"Kauaeranga Valley, Thames",CL,M/F,
+clitarchus,hookeri,clit-hook_65,-37.393267,175.835917,Waihi,CL,M/F,R
+clitarchus,hookeri,clit-hook_66,-37.305217,176.256017,Mayor Island,CL,M/F,
+clitarchus,hookeri,clit-hook_67,-37.279433,175.324033,"Waitakaruru Reserve, roadside",WO,M/F,H
+clitarchus,hookeri,clit-hook_68,-37.967533,175.154283,"Mangakora Nature Walk, Mt Pirongia",WO,M/F,R
+clitarchus,hookeri,clit-hook_69,-37.88,174.792333,"Mt Karioi, Pirongia State Forest Pk, Start of Waireke Track",WO,M/F,Q
+clitarchus,hookeri,clit-hook_70,-37.907333,174.898667,Bridal Veil Falls,WO,F,Q
+clitarchus,hookeri,clit-hook_71,-37.859867,175.53075,"Cambridge, Maungakawa Scenic Reserve",WO,M/F,R
+clitarchus,hookeri,clit-hook_72,-37.520267,175.727317,"Mt Te Aroha, bottom of Summit Rd",WO,M/F,R
+clitarchus,hookeri,clit-hook_73,-38.283333,175.666667,"Waipapa Scenic Reserve, Lake Waipapa",WO,M/F,R
+clitarchus,hookeri,clit-hook_74,-37.811283,175.293733,"Hillcrest, Hamilton",WO,M/F,
+clitarchus,hookeri,clit-hook_75,-38.052533,174.863933,"SH31, 3 km E of Kawhia",WO,M/F,Q
+clitarchus,hookeri,clit-hook_76,-37.61051986,175.1545609,Hakarimata,WO,M/F,
+clitarchus,hookeri,clit-hook_77,-37.42871268,175.7283339,Karangahake Gorge,BP,M/F,R
+clitarchus,hookeri,clit-hook_78,-37.544367,175.873283,"Katikati, Track at top of Lindeman Rd",BP,F,R
+clitarchus,hookeri,clit-hook_79,-37.5048,175.869533,"Waitengaue Stm, Kaimai Ra",BP,F,R
+clitarchus,hookeri,clit-hook_80,-38.100033,176.429267,"Lk Okataina, S end of Lk Okataina Rd, near lodge",BP,M/F,R
+clitarchus,hookeri,clit-hook_81,-37.986717,176.18795,"Te Pu, Mamaku",BP,M/F,
+clitarchus,hookeri,clit-hook_82,-37.855267,176.974117,Moutohora Island,BP,F,R
+clitarchus,hookeri,clit-hook_83,-37.546717,178.105867,Omaruparoa,BP,F,
+clitarchus,hookeri,clit-hook_84,-37.565583,178.040217,Rereauira,BP,F,
+clitarchus,hookeri,clit-hook_85,-37.595233,178.320183,Te Koau,BP,F,
+clitarchus,hookeri,clit-hook_86,-37.654033,178.29685,Karakatuwhero V.,BP,F,
+clitarchus,hookeri,clit-hook_87,-37.591117,178.292333,Hicks Bay? East Cape,BP,F,
+clitarchus,hookeri,clit-hook_88,-38.8163,177.1357,"Maori Track, Awaawaroa Strm, Lake Waikaremoana, Te Urewera Nat.Pak.",GB,F,S
+clitarchus,hookeri,clit-hook_89,-37.6064,178.313933,"Te Araroa Campground, East Cape",GB,F,S
+clitarchus,hookeri,clit-hook_90,-37.6898,178.547267,"East Cape Lighthouse Trk, Otiki",GB,F,S
+clitarchus,hookeri,clit-hook_91,-38.808,177.153833,"Lake Whakamarino, Lake Waikaremoana",GB,F,S
+clitarchus,hookeri,clit-hook_92,-39.074283,177.128433,"Mohaka River, SH2 rest area",HB,F,S
+clitarchus,hookeri,clit-hook_93,-38.8959,174.599167,"Summit of Mt Messenger, SH 3",TK,F,Q
+clitarchus,hookeri,clit-hook_94,-39.155183,174.699767,"Whangamomona Saddle, Awahou Ridge Track, top of saddle",TK,M/F,Q
+clitarchus,hookeri,clit-hook_95,-39.396167,176.314333,"Gentle Annie Rd, West of Kuripapango",RI,F,S
+clitarchus,hookeri,clit-hook_96,-39.726933,175.08318,"Atene Skyline Tk, north entrance",WI,M/F,Q
+clitarchus,hookeri,clit-hook_97,-39.8495,175.123283,5.7 km N of Upokongaro,WI,M/F,Q
+clitarchus,hookeri,clit-hook_98,-40.0828,175.906667,"Kahikatea walkway, Pohangina Valley",WI,F,S
+clitarchus,hookeri,clit-hook_99,-40.22435,176.272033,Te Uri/Dannevirke,WA,F,S
+clitarchus,hookeri,clit-hook_100,-40.396317,176.237633,"4.7 km N of Waihi Valley Rd, on road from Waimiro to Waipatiki, Wairarapa",WA,F,S
+clitarchus,hookeri,clit-hook_101,-40.559583,176.054583,"Puketoi Ra, Pahiatua-Pongaroa Rd, NE of Makuri, 6.7km N of road JCT in Makuri",WA,F,S
+clitarchus,hookeri,clit-hook_102,-40.55995,176.405033,8.5 km N of Akitio Esplanade on Coast Rd,WA,F,S
+clitarchus,hookeri,clit-hook_103,-40.86075,175.872683,"Bideford, Waterfalls Rd",WA,F,S
+clitarchus,hookeri,clit-hook_104,-40.865817,176.145333,"Tinui, 3 km E of junction of Castle Point Rd and Tinui Vly Rd",WA,F,S
+clitarchus,hookeri,clit-hook_105,-40.900483,175.468167,"Donnelly's clearing, Mt Holdsworth",WA,F,S
+clitarchus,hookeri,clit-hook_106,-40.993233,175.50235,"Fensham Scenic Reserve, Carterton",WA,F,
+clitarchus,hookeri,clit-hook_107,-41.028217,175.95685,Ngaumu State Forest,WA,F,S
+clitarchus,hookeri,clit-hook_108,-41.4497,175.240883,"Putangirua Pinnacles, Haurangi Mountains",WA,F,S
+clitarchus,hookeri,clit-hook_109,-40.86,175.05,"Jacks Bush Rd, Waikanae",WN,M/F,S
+clitarchus,hookeri,clit-hook_110,-41.274617,174.752133,"145 Creswick Tce, Northland, Wellington",WN,F,S
+clitarchus,hookeri,clit-hook_111,-41.26715,174.757483,"Otari-Wiltons Bush, Wellington",WN,M/F,S
+clitarchus,hookeri,clit-hook_112,-41.251233,174.9088,"Francis Bell Res, Pt Howard, Wellington",WN,F,S
+clitarchus,hookeri,clit-hook_113,-41.0701,175.233617,"Smiths Creek Tk, Kaitoke, Rimutaka Forest Pk",WN,F,S
+clitarchus,hookeri,clit-hook_114,-41.24735,174.794483,"Khandallah, Wellington",WN,F,
+clitarchus,hookeri,clit-hook_115,-41.297833,174.825533,Miramar Res.,WN,F,
+clitarchus,hookeri,clit-hook_116,-41.25615,174.95395,"Wainui-o-mata, Wgtn",WN,F,
+clitarchus,hookeri,clit-hook_117,-41.3394,174.978883,"Orongorongo River Valley, Rimutaka State Forest Pk",WN,F,S
+clitarchus,hookeri,clit-hook_118,-41.111817,173.66375,Okiwi Bay,SD,F,
+clitarchus,hookeri,clit-hook_119,-40.838067,174.001,Trio Is (iii),SD,F,
+clitarchus,hookeri,clit-hook_120,-41.311667,173.292333,"Brook Motor Camp, Nelson",NN,F,S
+clitarchus,hookeri,clit-hook_121,-41.3762,173.09905,"Brightwater, Nelson",NN,F,
+clitarchus,hookeri,clit-hook_122,-41.304717,173.223017,"Nelson, Monaco",NN,F,
+clitarchus,hookeri,clit-hook_123,-41.1569,173.418883,"Paremata Reserve, Delaware Bay, Waipuka Rivermouth",NN,F,S
+clitarchus,hookeri,clit-hook_124,-42.286217,173.7304,"0.5 km S of carpark, Puhipuhi Scenic Reserve, Kaikoura",KA,F,S
+clitarchus,hookeri,clit-hook_125,-42.336033,173.640633,"Mt Fyffe, Fyffe Palmer Scenic Reserve",KA,F,S
+clitarchus,hookeri,clit-hook_126,-42.35145,173.567233,Mt Fyffe carpark,KA,F,S
+clitarchus,hookeri,clit-hook_127,-42.9428,173.247017,Napenape Scenic Reserve,NC,F,S
+clitarchus,hookeri,clit-hook_128,-43.63155,172.624767,"Kennedys Bush Scenic Reserve, Port Hills, Banks Peninsula",MC,F,S
+clitarchus,hookeri,clit-hook_129,-43.8992,171.234033,Peel Forest,MC,F,S
+clitarchus,hookeri,clit-hook_130,-43.766367,172.7146,"Prices Valley, Banks Peninsula",MC,F,S
+clitarchus,hookeri,clit-hook_131,-43.783233,172.834283,"Banks Peninsula, Okuti Scenic Reserve",MC,F,S
+clitarchus,hookeri,clit-hook_132,-45.891683,170.451967,"Dunedin City Reservoir, Dunedin",DN,F,S
+clitarchus,hookeri,clit-hook_133,-45.9298,170.0559,"Waipori Falls Rd, first picnic area",DN,F,S
+clitarchus,hookeri,clit-hook_134,-35.2708,173.184167,"Herekino Nth Head, Rangikohu Rd, far end",,,
+clitarchus,hookeri,clit-hook_135,-35.288533,174.087,Paihia,,,
+clitarchus,hookeri,clit-hook_136,-35.538583,173.383117,Omapere,,,
+clitarchus,hookeri,clit-hook_137,-35.612317,174.4851,"Brattys Bush Scenic Res, Tutukaka",,,
+clitarchus,hookeri,clit-hook_138,-35.8493,174.53385,"Bream Head, Peach Cove Trk, Whangarei Heads",,,
+clitarchus,hookeri,clit-hook_139,-36.038317,174.50765,"Brynderwyn Trk, East side from Waipu Cove",,,
+clitarchus,hookeri,clit-hook_140,-35.5625,174.49945,Whale Bay,,,
+clitarchus,hookeri,clit-hook_141,-35.885193,174.12625,Tangihua Forest lodge,,,
+clitarchus,hookeri,clit-hook_142,-37.29505,176.260567,"Mayor Island, Panui pen. On track to Western Bay",,,
+clitarchus,hookeri,clit-hook_143,-41.968117,173.983583,"Kekerenga Valley Rd Site 1, Kaikoura",,,
+clitarchus,hookeri,clit-hook_144,-45.773017,170.574467,Dunedin,,,
+clitarchus,hookeri,clit-hook_145,-45.84685,170.657417,Portobello,,,
+clitarchus,hookeri,clit-hook_146,-43.756417,172.9718,Robinson Bay,,,
+clitarchus,hookeri,clit-hook_147,-42.272517,173.651433,Hapuku hut,,,
+clitarchus,hookeri,clit-hook_148,-40.553333,172.603033,Whanganui Inlet,,,
+clitarchus,hookeri,clit-hook_149,-41.026517,173.886667,Maud Island,,,
+clitarchus,hookeri,clit-hook_150,-41.16095,174.235317,Snake Point,,,
+clitarchus,hookeri,clit-hook_151,-41.177133,174.311083,Arapawa,,,
+clitarchus,hookeri,clit-hook_152,-40.4691,175.24745,Foxton,,,
+clitarchus,hookeri,clit-hook_153,-41.082317,175.355833,Featherston,,,
+clitarchus,hookeri,clit-hook_154,-39.673233,177.038317,Kidnappers,,,
+clitarchus,hookeri,clit-hook_155,-36.9751,175.843383,Pumpkin hill,,,

@@ -1,0 +1,364 @@
+---
+title: "Stick Insect Climate PCA"
+output: 
+  html_notebook:
+    theme: flatly
+    highlight: tango
+---
+
+Read in the packages. The working directory is wherever the R Notebook is located. 
+
+```{r include = FALSE}
+packages <- c("raster", "data.table", "tidyverse", "sf", "RStoolbox", "leaflet", "plotly", "gdata", "BSDA", "ade4") #RStoolbox has some dependencies like openMP that can be difficult to compile on a Mac (needed for the dependent package "caret"). If you have High Sierra OS or newer, search for instructions specific to your OS- it's a lot easier than older OS's.
+lapply(packages, require, character.only = TRUE)
+source("R/plot_leaflet_function.R") #source locality plotting function
+source("R/plot_climate_pca_function.R") #source pca plotting function
+source("R/species_pca_function.R") #source function that computes climate pca per species
+source("R/min_convex_poly.R") #source function that creates a minimum convex polygon around points
+source("R/pc_centroid_fun.R") #source function for my version of assessing marginal niche hypothesis
+source("R/omi_function.R") #source function that conducts an omi analysis
+```
+
+
+Read in the spreadsheet and take a look at the data. There is one outlier (acan-sp_68). I'm throwing it out here, but need to ask about original coordinates.
+
+```{r, include=FALSE}
+###read in spreadsheet
+loc <- fread("worksheets/all-species.csv") %>% 
+  filter(latitude > -1000)
+
+
+#make locality shape file and assign WGS coord system
+coord.points <- st_as_sf(loc, coords = c("longitude", "latitude"), 
+                         crs = 4326, agr = "constant")
+
+```
+
+##Map
+Plot a leaflet map of the localities. The leaflet map is interactive. You can click on the localities and a flag with some metadata will pop up! 
+
+```{r}
+#use sourced plot_locs_leaflet script to plot localities
+all_plot <- plot_locs_leaflet(loc)
+all_plot
+```
+
+##PCA-Genera {.tabset}
+
+###Climate Data
+Obtain the bioclim layers for analysis. I'm using all 19 for this preliminary exploration. I plotted the first bioclim just to make sure nothing seems wonky.
+```{r}
+##get chelsa data
+#zip_files <- list.files("/Users/connorfrench/Dropbox/Old_Mac/climate-data/chelsa_30s_bio", full.names = TRUE)
+
+#using the Unarchiver commandline tools for Mac to unzip the 7zip chelsa layers. Regular unzip() does not work with 7z zipped files
+#for (file in zip_files) {
+  #set temp directory
+#  tempd <- tempdir()
+#  system(paste("unar", file, "-o", tempd))
+#  r <- raster(list.files(tempd, pattern = "*.tif", full.names = TRUE)) %>%
+#    crop(extent(166, 179, -48, -34))
+#  writeRaster(r, filename = paste0("~/Desktop/", list.files(tempd, pattern = "*.tif")), format = "GTiff")
+#  unlink(tempd, recursive = TRUE)
+#}
+
+clim_files <- list.files("climate", full.names = TRUE)
+w <- stack
+
+
+```
+
+
+###PCA by locality
+This is a PCA of the climate data extracted for each locality, rather than a PCA of the total climate space.
+
+Run the pca and check out variable loadings and proportion of variance explained by components.
+
+```{r}
+#extract data from worldclim for each locality. Making this into a data frame with columns labeled so the row labeling lines up after I remove the NAs.
+#extract data from worldclim for each locality.
+coords <- data.frame(latitude = loc$longitude, longitude = loc$latitude)
+
+loc.clim <- dplyr::bind_cols(loc, raster::extract(w, coords, method = "simple", df = TRUE)) %>% 
+  #na.omit() %>% 
+  select(-ID)
+
+#make a matrix of only bioclim values
+clim.mat <- loc.clim[,grep("bio", names(loc.clim))] %>% as.matrix()
+
+#run pca on climate variables
+clim.pca <- prcomp(clim.mat, scale = TRUE)
+summary.pca <- summary(clim.pca) #check out the components
+```
+
+Two plots: One plot of the PCA colored according to genus, with convex hulls surrounding the genera. It looks like this reflects a latitudinal gradient in temperature! You can interact with the PCA plot by clicking on points to view associated metadata. You can isolate the genus you want to view by double clicking the genus in the legend! You can also remove a genus by clicking on it once. There's some other functionality you can explore in the toolbar at the top of the plot.
+```{r}
+#add pca results to loc.clim data frame
+loc.clim <- data.frame(loc.clim, clim.pca$x)
+
+#use sourced plot_clim_pca function to plot the pca results. args are the data set with species names and PC axis values and the pca summary
+plot_clim_pca(loc.clim, summary.pca)
+
+```
+
+
+
+
+```{r}
+#plot tables
+summary.pca
+knitr::kable(round(clim.pca$rotation[,1:3],3)) #Table of loading scores for the first 3 PCs. 
+```
+
+
+
+
+
+##PCA-Species {.tabset}
+These are PCAs of environmental space for species within genera. Each climate PCA is of localities for a single genus, colored by species. I'm doing this even for genera with one species, so it's easy to see if certain localities group together. 
+
+###Acanthoxyla
+```{r}
+#source function to conduct a PCA on individual species
+summary.list.acan <- species_pca_fun(loc.clim, "acanthoxyla")
+#plot
+plot_clim_pca(summary.list.acan$loc.clim, summary.list.acan$summary.pca)
+
+```
+
+
+```{r}
+summary.list.acan$summary.pca
+loadings.acan <- summary.list.acan$summary.pca$rotation
+knitr::kable(round(loadings.acan[,1:3],3)) #Table of loading scores for the first 3 PCs. 
+```
+
+
+###Argosarchus
+```{r}
+#conduct pca
+summary.list.argo <- species_pca_fun(loc.clim, "argosarchus")
+#plot
+plot_clim_pca(summary.list.argo$loc.clim, summary.list.argo$summary.pca)
+
+```
+
+```{r}
+summary.list.argo$summary.pca
+loadings.argo <- summary.list.argo$summary.pca$rotation
+knitr::kable(round(loadings.argo[,1:3],3)) #Table of loading scores for the first 3 PCs. 
+```
+
+
+###Asteliaphasma
+```{r}
+#pca
+summary.list.aste <- species_pca_fun(loc.clim, "asteliaphasma")
+#plot
+plot_clim_pca(summary.list.aste$loc.clim, summary.list.aste$summary.pca)
+```
+
+
+
+```{r}
+summary.list.aste$summary.pca
+loadings.aste <- summary.list.aste$summary.pca$rotation
+knitr::kable(round(loadings.aste[,1:3],3)) #Table of loading scores for the first 3 PCs. 
+```
+
+Marginal climate hypothesis workspace. Resample from sister species data set and calculate average per sample. Compare absolute value of range-restricted species to distribution of sister species averages. Need to work on a suitable statistical test. 
+```{r}
+
+#calculate the centroid of a random sample of individuals. df = data frame, sp = string containing the species you are interested (e.g. "naomi"), len = the number of individuals to sample. Should be the number of individuals from the species that has fewer occurrences.
+
+#calculate the centroid from the range-restricted species. 
+pc.centroid.nov <- summary.list.aste$loc.clim %>% 
+  filter(species == "nov. sp.") %>%
+  select(PC1.1:PC3.1) %>%
+  summarize_all(mean) %>% 
+  rowMeans() %>%
+  abs()
+
+#resample the more widespread species many times, calculating the centroid of three individuals (number of individuals in the range-restricted species)
+pc.centroid.naomi <- replicate(1000, pc_centroid_fun(summary.list.aste$loc.clim, "naomi", 3), simplify = TRUE) %>% 
+  as.data.frame()
+names(pc.centroid.naomi) <- "centroid" #needs to be a data frame with a named column for ggplot
+
+#sampling distribution of the centroids calculated from the generalist species. The red line indicates the centroid of the range-restricted species
+ggplot(pc.centroid.naomi, aes(x = centroid)) +
+  geom_histogram(bins = 30) +
+  #scale_x_sqrt() +
+  geom_vline(xintercept = pc.centroid.nov, color = "red") + 
+  theme_linedraw()
+
+
+```
+
+
+
+Outlying Mean Index. Another test of the marginal niche hypothesis.
+```{r include=FALSE}
+#run sourced omi function. Returns a bunch of warnings that I want to silence, so I'm just putting this in its own chunk that I can silence the output of
+aste_omi <- omi_fun(summary.list.aste$loc.clim, w, use_bg = FALSE)
+```
+
+
+```{r}
+aste_omi$test_omi
+```
+
+
+
+###Clitarchus
+
+```{r}
+summary.list.clita <- species_pca_fun(loc.clim, "clitarchus")
+plot_clim_pca(summary.list.clita$loc.clim, summary.list.clita$summary.pca)
+```
+
+
+```{r}
+summary.list.clita$summary.pca
+loadings.clita <- summary.list.clita$summary.pca$rotation
+knitr::kable(round(loadings.clita[,1:3],3)) #Table of loading scores for the first 3 PCs. 
+```
+
+
+Marginal environment hypothesis
+```{r}
+#calculate the centroid from the range-restricted species. 
+pc.centroid.tepaki <- summary.list.clita$loc.clim %>% 
+  filter(species == "tepaki") %>%
+  select(PC1.1:PC3.1) %>%
+  summarize_all(mean) %>% 
+  rowMeans() %>%
+  abs()
+
+pc.centroid.hookeri <- replicate(1000, pc_centroid_fun(summary.list.clita$loc.clim, "hookeri", 3), simplify = TRUE) %>% 
+  as.data.frame()
+names(pc.centroid.hookeri) <- "centroid"
+
+ggplot(pc.centroid.hookeri, aes(x = centroid)) +
+  geom_histogram(bins = 30) +
+  #scale_x_sqrt() +
+  geom_vline(xintercept = pc.centroid.tepaki, color = "red") + 
+  theme_linedraw()
+
+
+#length(pc.centroid.hookeri$centroid[pc.centroid.hookeri$centroid > pc.centroid.tepaki])
+```
+
+Outlying Mean Index. Another test of the marginal niche hypothesis.
+```{r include=FALSE}
+clita_omi <- omi_fun(summary.list.clita$loc.clim, w, use_bg = FALSE)
+```
+
+```{r}
+clita_omi$test_omi
+```
+
+
+
+
+###Micrarchus
+```{r}
+summary.list.micra <- species_pca_fun(loc.clim, "micrarchus")
+plot_clim_pca(summary.list.micra$loc.clim, summary.list.micra$summary.pca)
+```
+
+
+```{r}
+summary.list.micra$summary.pca
+loadings.micra <- summary.list.micra$summary.pca$rotation
+knitr::kable(round(loadings.micra[,1:3],3)) #Table of loading scores for the first 3 PCs. 
+```
+
+###Niveaphasma
+
+```{r}
+summary.list.nive <- species_pca_fun(loc.clim, "niveaphasma")
+plot_clim_pca(summary.list.nive$loc.clim, summary.list.nive$summary.pca)
+```
+
+```{r}
+summary.list.nive$summary.pca
+loadings.nive <- summary.list.nive$summary.pca$rotation
+knitr::kable(round(loadings.nive[,1:3],3)) #Table of loading scores for the first 3 PCs. 
+```
+
+###Spinotectarchus
+
+```{r}
+summary.list.spin <- species_pca_fun(loc.clim, "spinotectarchus")
+plot_clim_pca(summary.list.spin$loc.clim, summary.list.spin$summary.pca)
+```
+
+
+```{r}
+summary.list.spin$summary.pca
+loadings.spin <- summary.list.spin$summary.pca$rotation
+knitr::kable(round(loadings.spin[,1:3],3)) #Table of loading scores for the first 3 PCs. 
+```
+
+Marginal environment hypothesis
+```{r}
+#calculate the centroid from the range-restricted species. 
+pc.centroid.acornutus_sub <- summary.list.spin$loc.clim %>% 
+  filter(species == "acornutus_sub") %>%
+  select(PC1.1:PC3.1) %>%
+  summarize_all(mean) %>% 
+  rowMeans() %>%
+  abs()
+
+pc.centroid.acornutus <- replicate(1000, pc_centroid_fun(summary.list.spin$loc.clim, "acornutus", 3), simplify = TRUE) %>% 
+  as.data.frame()
+names(pc.centroid.acornutus) <- "centroid"
+
+ggplot(pc.centroid.acornutus, aes(x = centroid)) +
+  geom_histogram(bins = 30) +
+  #scale_x_sqrt() +
+  geom_vline(xintercept = pc.centroid.acornutus_sub, color = "red") + 
+  theme_linedraw()
+```
+
+Outlying Mean Index. Another test of the marginal niche hypothesis.
+```{r include=FALSE}
+spin_omi <- omi_fun(summary.list.spin$loc.clim, w, use_bg = FALSE)
+```
+
+```{r}
+spin_omi$test_omi
+```
+
+
+###Tectarchus
+```{r}
+summary.list.tect <- species_pca_fun(loc.clim, "tectarchus")
+plot_clim_pca(summary.list.tect$loc.clim, summary.list.tect$summary.pca)
+```
+
+
+
+
+```{r}
+summary.list.tect$summary.pca
+loadings.tect <- summary.list.tect$summary.pca$rotation
+knitr::kable(round(loadings.tect[,1:3],3)) #Table of loading scores for the first 3 PCs. 
+```
+
+
+###Tepakiphasma
+Nothing. Only one locality.
+
+
+
+###OMI_all
+Outlying Mean Index. Another test of the marginal niche hypothesis.
+```{r include = FALSE}
+all_omi <- omi_fun(loc.clim, w, use_bg = FALSE)
+```
+
+```{r}
+all_omi$test_omi
+```
+

@@ -1,0 +1,101 @@
+wkt_geom	genus	species	id	latitude	longitude	locality	qual	FIPS	ISO2	ISO3	UN	NAME	AREA	POP2005	REGION	SUBREGION	LON	LAT
+Point (174.86151699999999209 -36.8489670000000018)	acanthoxyla	sp	acan-sp_15	-36.848967	174.861517	"Auckland, St Heliers Bay"	g											
+Point (175.05793299999999135 -36.21566700000000338)	acanthoxyla	sp	acan-sp_19	-36.215667	175.057933	"Little Barrier I, Flats"	g											
+Point (175.07873299999999972 -36.22520000000000095)	acanthoxyla	sp	acan-sp_20	-36.2252	175.078733	"Little Barrier I, Awaroa Stm"	g											
+Point (175.53333299999999895 -36.29999999999999716)	acanthoxyla	sp	acan-sp_21	-36.3	175.533333	"Great Barrier I, Little Windy Hill"	g											
+Point (175.299350000000004 -36.16676700000000011)	acanthoxyla	sp	acan-sp_22	-36.166767	175.29935	Nelson I. (Great Barrier I)	g											
+Point (174.78346700000000169 -37.85386700000000104)	acanthoxyla	sp	acan-sp_28	-37.853867	174.783467	"Mount Karioi, Pirongia State forest Park"	g											
+Point (174.89676700000001119 -37.90781700000000143)	acanthoxyla	sp	acan-sp_29	-37.907817	174.896767	Bridal Veil Falls	g											
+Point (178.15225000000000932 -37.56284999999999741)	acanthoxyla	sp	acan-sp_31	-37.56285	178.15225	"Waenga Bush, Lottin Pt Rd"	g											
+Point (178.29955000000001064 -37.59993300000000005)	acanthoxyla	sp	acan-sp_32	-37.599933	178.29955	"Te Koau, Hicks Bay"	g											
+Point (178.54721699999998918 -37.68984999999999985)	acanthoxyla	sp	acan-sp_43	-37.68985	178.547217	East Cape lighthouse Trk	g											
+Point (174.07833299999998644 -39.07166699999999793)	acanthoxyla	sp	acan-sp_51	-39.071667	174.078333	"New Plymouth, Hine Street"	g											
+Point (173.97733299999998735 -39.7052669999999992)	acanthoxyla	sp	acan-sp_53	-39.19932	173.97799	"Pukeiti, along Carrington Road, Egmont National Park"	g											
+Point (176.14533299999999372 -40.86581699999999984)	acanthoxyla	sp	acan-sp_65	-40.865817	176.145333	"Tinui, 3.0 km east of junction of Castle Point Rd and Tinui Vly Rd"	g											
+Point (175.95685000000000286 -41.02821699999999794)	acanthoxyla	sp	acan-sp_69	-41.028217	175.95685	Ngaumu State Forest	g											
+Point (174.94515000000001237 -40.82759999999999678)	acanthoxyla	sp	acan-sp_72	-40.8276	174.94515	Nth end of Kapiti Is	g											
+Point (172.54765000000000441 -40.61988300000000152)	acanthoxyla	sp	acan-sp_84	-40.619883	172.54765	"Whanganui Inlet, Kaituna Track"	g											
+Point (172.364483000000007 -40.709699999999998)	acanthoxyla	sp	acan-sp_85	-40.7097	172.364483	Anatori River Valley	g											
+Point (173.32116700000000264 -41.24016699999999958)	acanthoxyla	sp	acan-sp_90	-41.240167	173.321167	"Nelson City, Atawhai"	g											
+Point (173.87271699999999441 -42.70264999999999844)	acanthoxyla	sp	acan-sp_92	41 42.181	173 52.232	"Awatere Valley, Blairich Station, Black Birch Stream"	g											
+Point (173.8105329999999924 -42.25958299999999923)	acanthoxyla	sp	acan-sp_93	-42.259583	173.810533	"Halfmoon Bay Track head, along SH1"	g											
+Point (171.60050000000001091 -41.81568299999999994)	acanthoxyla	sp	acan-sp_94	-41.815683	171.6005	"Hwy 6 near Westport, turnoff for Buckland Peaks Track (KM025)"	g											
+Point (171.40154999999998608 -42.10208300000000037)	acanthoxyla	sp	acan-sp_95	-42.102083	171.40155	"Bullock Creek, Punakaiki"	g											
+Point (169.47444999999999027 -46.55281699999999745)	acanthoxyla	sp	acan-sp_115	-46.552817	169.47445	"The Catlins, Papatowai, Old Coach Rd"	g											
+Point (168.35349999999999682 -46.61350000000000193)	acanthoxyla	sp	acan-sp_116	-46.6135	168.3535	"Bluff, Glory Trk"	g											
+Point (174.49944999999999595 -35.5625)	acanthoxyla	sp	acan-sp_120	-35.5625	174.49945	Whale Bay	g											
+Point (178.15225000000000932 -37.56284999999999741)	acanthoxyla	sp	acan-sp_121	-37.56285	178.15225	"Waenga Bush, Lottin Pt Rd"	g											
+Point (168.00728300000000104 -44.33709999999999951)	acanthoxyla	sp	acan-sp_123	-44.3371	168.007283	"Martins Bay, along track to seal colony"	g											
+Point (166.71578299999998762 -45.69143300000000352)	acanthoxyla	sp	acan-sp_124	-45.691433	166.715783	"Dusky Sound, Resolution Is"	g											
+Point (175.0546333000000061 -36.21804999999999808)	argosarchus	sp	argo-sp_1	-36.21805	175.0546333	Hauturu	g											
+Point (178.15173329999998941 -37.56513333000000188)	argosarchus	sp	argo-sp_5	-37.56513333	178.1517333	"Lottin Pt Rd, Waenga Bush"	g											
+Point (178.29955000000001064 -37.59993332999999893)	argosarchus	sp	argo-sp_6	-37.59993333	178.29955	"Te Koau, Hicks Bay"	g											
+Point (178.54721670000000699 -37.68984999999999985)	argosarchus	sp	argo-sp_9	-37.68985	178.5472167	East Cape lighthouse Trk	g											
+Point (172.48188329999999269 -40.64139999999999731)	argosarchus	sp	argo-sp_40	-40.6414	172.4818833	"Mangarakau, West Haven, Nelson"	g											
+Point (174.92841670000001386 -40.85201666999999759)	argosarchus	sp	argo-sp_44	-40.85201667	174.9284167	Kapiti	g											
+Point (173.87518330000000333 -42.70361667000000239)	argosarchus	sp	argo-sp_67	-42.70361667	173.8751833	Blackbirch Stream	g											
+Point (173.00718299999999772 -34.407783000000002)	clitarchus	tepaki	clit-tepa_1	-34.407783	173.007183	North Cape Scientific Reserve	g											
+Point (172.86670000000000869 -34.43001699999999943)	clitarchus	tepaki	clit-tepa_2	-34.430017	172.8667	Spirits Bay	g											
+Point (172.76441700000000878 -34.47249999999999659)	clitarchus	tepaki	clit-tepa_4	-34.4725	172.764417	"Kauri Bush, Te Paki"	g											
+Point (172.76403300000001195 -34.4731829999999988)	clitarchus	tepaki	clit-tepa_5	-34.473183	172.764033	"Kauri Bush Trk, Te Paki"	g											
+Point (174.74372840000000906 -35.48060502999999954)	clitarchus	rakauwhakanekeneke	clit-raka_1	-35.48060503	174.7437284	Aorangi	g											
+Point (174.73904669999998873 -35.45391226000000273)	clitarchus	rakauwhakanekeneke	clit-raka_2	-35.45391226	174.7390467	Tawhiti Rahi	g											
+Point (173.3825170000000071 -35.53775000000000261)	clitarchus	hookeri	clit-hook_13	-35.53775	173.382517	"Corner Signal Station Rd & SH12, Pakia rest area, Omapere"	g											
+Point (175.14636699999999792 -35.9398169999999979)	clitarchus	hookeri	clit-hook_15	-35.939817	175.146367	"Fanal I, Mokohinau Is"	g											
+Point (174.77830000000000155 -35.88660000000000139)	clitarchus	hookeri	clit-hook_22	-35.8866	174.7783	"Coppermine I, Hen and Chicken Is, track campsite to Lighthouse"	g											
+Point (174.79352299999999332 -36.50506699999999682)	clitarchus	hookeri	clit-hook_24	-36.505067	174.793523	"Home Bay, Motuora I"	g											
+Point (174.78993299999999067 -36.50471699999999942)	clitarchus	hookeri	clit-hook_25	-36.504717	174.789933	"Still Bay, Motuora I"	g											
+Point (174.99341699999999378 -36.7821830000000034)	clitarchus	hookeri	clit-hook_34	-36.782183	174.993417	Waiheke Is	g											
+Point (174.97380000000001132 -36.69673300000000182)	clitarchus	hookeri	clit-hook_36	-36.696733	174.9738	"Noises Is, Otata I"	g											
+Point (175.25631699999999569 -36.97670000000000101)	clitarchus	hookeri	clit-hook_48	-36.9767	175.256317	"Tapapakanga Reg.Park, Orere"	g											
+Point (175.29036700000000337 -37.04155000000000086)	clitarchus	hookeri	clit-hook_49	-37.04155	175.290367	"Waharau Reg.Park, Hunua Ranges"	g											
+Point (175.05681699999999523 -36.2195999999999998)	clitarchus	hookeri	clit-hook_51	-36.2196	175.056817	"Little Barrier I, DoC Rangers graden"	g											
+Point (175.05793299999999135 -36.21566700000000338)	clitarchus	hookeri	clit-hook_52	-36.215667	175.057933	"Valley Track, Little Barrier Island"	g											
+Point (175.42811699999998609 -36.88040000000000163)	clitarchus	hookeri	clit-hook_55	-36.8804	175.428117	"Wilson Bay, SH25 roadside, 2.5 km N of Tapu, Coromandel"	g											
+Point (176.08128300000001332 -36.97476699999999994)	clitarchus	hookeri	clit-hook_56	-36.974767	176.081283	"Ruamahuaiti Is, Alderman Is"	g											
+Point (175.84874999999999545 -36.65838300000000061)	clitarchus	hookeri	clit-hook_57	-36.658383	175.84875	"Mercury Is, Korapuki"	g											
+Point (175.41918300000000386 -36.51194999999999879)	clitarchus	hookeri	clit-hook_59	-36.51195	175.419183	"3.7 km N of Stony Bay, on road to Stony Bay, Port Charles area"	g											
+Point (176.25601700000001415 -37.30521699999999896)	clitarchus	hookeri	clit-hook_66	-37.305217	176.256017	Mayor Island	g											
+Point (174.7923330000000135 -37.88000000000000256)	clitarchus	hookeri	clit-hook_69	-37.88	174.792333	"Mt Karioi, Pirongia State Forest Pk, Start of Waireke Track"	g											
+Point (174.898666999999989 -37.90733300000000128)	clitarchus	hookeri	clit-hook_70	-37.907333	174.898667	Bridal Veil Falls	g											
+Point (174.86393300000000295 -38.05253299999999683)	clitarchus	hookeri	clit-hook_75	-38.052533	174.863933	"SH31, 3 km E of Kawhia"	g											
+Point (178.10586699999998928 -37.54671700000000101)	clitarchus	hookeri	clit-hook_83	-37.546717	178.105867	Omaruparoa	g											
+Point (178.3201829999999859 -37.59523300000000035)	clitarchus	hookeri	clit-hook_85	-37.595233	178.320183	Te Koau	g											
+Point (178.2923330000000135 -37.59111699999999701)	clitarchus	hookeri	clit-hook_87	-37.591117	178.292333	Hicks Bay? East Cape	g											
+Point (178.31393299999999158 -37.60640000000000072)	clitarchus	hookeri	clit-hook_89	-37.6064	178.313933	"Te Araroa Campground, East Cape"	g											
+Point (178.54726700000000505 -37.68979999999999819)	clitarchus	hookeri	clit-hook_90	-37.6898	178.547267	"East Cape Lighthouse Trk, Otiki"	g											
+Point (176.14533299999999372 -40.86581699999999984)	clitarchus	hookeri	clit-hook_104	-40.865817	176.145333	"Tinui, 3 km E of junction of Castle Point Rd and Tinui Vly Rd"	g											
+Point (175.95685000000000286 -41.02821699999999794)	clitarchus	hookeri	clit-hook_107	-41.028217	175.95685	Ngaumu State Forest	g											
+Point (173.66374999999999318 -41.11181700000000205)	clitarchus	hookeri	clit-hook_118	-41.111817	173.66375	Okiwi Bay	g											
+Point (174.00100000000000477 -40.83806700000000234)	clitarchus	hookeri	clit-hook_119	-40.838067	174.001	Trio Is (iii)	g											
+Point (173.4188829999999939 -41.15690000000000026)	clitarchus	hookeri	clit-hook_123	-41.1569	173.418883	"Paremata Reserve, Delaware Bay, Waipuka Rivermouth"	g											
+Point (173.2470169999999996 -42.94279999999999831)	clitarchus	hookeri	clit-hook_127	-42.9428	173.247017	Napenape Scenic Reserve	g											
+Point (173.3831169999999986 -35.5385830000000027)	clitarchus	hookeri	clit-hook_136	-35.538583	173.383117	Omapere	g											
+Point (174.48509999999998854 -35.61231699999999734)	clitarchus	hookeri	clit-hook_137	-35.612317	174.4851	"Brattys Bush Scenic Res, Tutukaka"	g											
+Point (174.53385000000000105 -35.8492999999999995)	clitarchus	hookeri	clit-hook_138	-35.8493	174.53385	"Bream Head, Peach Cove Trk, Whangarei Heads"	g											
+Point (174.49944999999999595 -35.5625)	clitarchus	hookeri	clit-hook_140	-35.5625	174.49945	Whale Bay	g											
+Point (176.26056700000000887 -37.29505000000000337)	clitarchus	hookeri	clit-hook_142	-37.29505	176.260567	"Mayor Island, Panui pen. On track to Western Bay"	g											
+Point (170.65741700000000947 -45.84685000000000343)	clitarchus	hookeri	clit-hook_145	-45.84685	170.657417	Portobello	g											
+Point (172.60303300000001059 -40.55333300000000207)	clitarchus	hookeri	clit-hook_148	-40.553333	172.603033	Whanganui Inlet	g											
+Point (173.88666699999998855 -41.02651699999999835)	clitarchus	hookeri	clit-hook_149	-41.026517	173.886667	Maud Island	g											
+Point (174.2353170000000091 -41.1609499999999997)	clitarchus	hookeri	clit-hook_150	-41.16095	174.235317	Snake Point	g											
+Point (174.31108299999999645 -41.17713299999999776)	clitarchus	hookeri	clit-hook_151	-41.177133	174.311083	Arapawa	g											
+Point (177.03831700000000637 -39.6732330000000033)	clitarchus	hookeri	clit-hook_154	-39.673233	177.038317	Kidnappers	g											
+Point (169.80148330000000101 -46.44538332999999852)	niveaphasma	annulata	nive-annu_64	-46.44538333	169.8014833	"Roaring Bay, Nugget Point"	g											
+Point (168.2523832999999911 -46.51893333000000297)	niveaphasma	annulata	nive-annu_68	-46.51893333	168.2523833	Omaui (Tony photo)	g											
+Point (168.25396670000000654 -46.53523332999999695)	niveaphasma	annulata	nive-annu_69	-46.53523333	168.2539667	Three Sisters Hill (Tony photo)	g											
+Point (168.46723330000000374 -46.5418900000000022)	niveaphasma	annulata	nive-annu_70	-46.54189	168.4672333	"Tiwai Pt Rd, Seaward Moss Reserve"	g											
+Point (169.47323330000000396 -46.55251667000000282)	niveaphasma	annulata	nive-annu_71	-46.55251667	169.4732333	"Old Coach Rd, Papatowai"	g											
+Point (169.44419999999999504 -46.57763332999999761)	niveaphasma	annulata	nive-annu_72	-46.57763333	169.4442	"Tautuku Bay Nature Walk, Catlins"	g											
+Point (168.34991669999999431 -46.61196667000000105)	niveaphasma	annulata	nive-annu_73	-46.61196667	168.3499167	Bluff Hill (Tony photo)	g											
+Point (174.78333330000000956 -37.86666667000000075)	tectarchus	ovobessus	tect-ovob_2	-37.86666667	174.7833333	"Mt Karioi, Pirongia State Forest Pk, start of Waireke Track"	g											
+Point (174.89676670000000058 -37.90781667000000255)	tectarchus	ovobessus	tect-ovob_3	-37.90781667	174.8967667	Bridal Veil Falls	g											
+Point (175.95685000000000286 -41.02821666999999906)	tectarchus	ovobessus	tect-ovob_12	-41.02821667	175.95685	Ngaumu State Forest	g											
+Point (174.72186669999999253 -38.41641666999999671)	tectarchus	ovobessus	tect-ovob_15	-38.41641667	174.7218667	"Whareorino Forest, Mangatoa Tk"	g											
+Point (175.25366669999999658 -37.04899999999999949)	tectarchus	ovobessus	tect-ovob_16	-37.049	175.2536667	Waharau	g											
+Point (171.40154999999998608 -42.10179999999999723)	tectarchus	huttoni	tect-hutt_4	-42.1018	171.40155	Bullock Crk	g											
+Point (174.08553330000000869 -40.89538333000000137)	tectarchus	huttoni	tect-hutt_15	-40.89538333	174.0855333	Chetwood	g											
+Point (174.92363330000000587 -40.84899999999999665)	tectarchus	huttoni	tect-hutt_16	-40.849	174.9236333	Kapiti	g											
+Point (174.27913330000001224 -41.1144916699999996)	tectarchus	huttoni	tect-hutt_17	-41.11449167	174.2791333	Long Island	g											
+Point (172.36448329999998919 -40.709699999999998)	tectarchus	huttoni	tect-hutt_18	-40.7097	172.3644833	Anatori River Valley	g											
+Point (174.22556670000000167 -41.11088333000000006)	tectarchus	huttoni	tect-hutt_22	-41.11088333	174.2255667	Resolution Bay	g											

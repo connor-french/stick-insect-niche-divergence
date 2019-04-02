@@ -1,0 +1,73 @@
+﻿genus,species,id,latitude,longitude,locality,Barcode,Crosby Code
+tectarchus,salebrosus,tect-sale_1,-42.48413333,172.3902167,Dans Creek Lewis Pass,NZAC03014413,BR
+tectarchus,salebrosus,tect-sale_2,-42.5406,172.3631667,Lewis River,NZAC03014388,BR
+tectarchus,salebrosus,tect-sale_3,-42.55771667,172.3507167,"Doubtful Valley rest area, Lewis Pass",NZAC03014395,BR
+tectarchus,salebrosus,tect-sale_4,-42.57088333,172.3652333,"Roadside, Rough Creek, SH7",NZAC03009502,MB
+tectarchus,salebrosus,tect-sale_5,-42.5748,172.37305,"Poplars Fan, SH7",NZAC03009518,BR
+tectarchus,salebrosus,tect-sale_6,-43.74948333,173.0167667,"Banks Peninsula, Otepotatu Reserve, Lavericks Peak ",NZAC03009389,MC
+tectarchus,salebrosus,tect-sale_7,-43.66108333,172.6245167,"Banks Peninsula, Coopers Knob",NZAC03009407,MC
+tectarchus,salebrosus,tect-sale_8,-43.63101667,172.6244667,"Banks Peninsula, Kennedys Bush",NZAC03014634,MC
+tectarchus,salebrosus,tect-sale_9,-42.23951667,173.7528667,Puhipuhi,,
+tectarchus,salebrosus,tect-sale_10,-45.507995,170.570469,Mt Trotter,,
+tectarchus,salebrosus,tect-sale_11,-42.32395,173.5928833,"Mt Fyffe Hut geocache, Kaikoura",NZAC03015238,KA
+tectarchus,salebrosus,tect-sale_12,-42.05048333,173.4415,"Tone River, Inland Kaikoura Ra",,
+tectarchus,salebrosus,tect-sale_13,-43.524,172.6092833,Riccarton Bush,,
+tectarchus,salebrosus,tect-sale_14,-42.47138333,172.823,Jacks Pass,,
+tectarchus,salebrosus,tect-sale_15,-43.75683333,172.7313667,Prices Valley,,
+tectarchus,salebrosus,tect-sale_16,-43.78351667,172.8339667,Okuti Valley,,
+tectarchus,salebrosus,tect-sale_17,-43.81116667,173.0253667,Akaroa,,
+tectarchus,salebrosus,tect-sale_18,-42.31676667,172.2646167,Lake Daniels Walkway,,
+tectarchus,ovobessus,tect-ovob_1,-37.61175,175.1554167,"Hakarimata Ra, Kauri Loop Trk",NZAC03006302,WO
+tectarchus,ovobessus,tect-ovob_2,-37.86666667,174.7833333,"Mt Karioi, Pirongia State Forest Pk, start of Waireke Track",NZAC03006280,WO
+tectarchus,ovobessus,tect-ovob_3,-37.90781667,174.8967667,Bridal Veil Falls,NZAC03006391,WO
+tectarchus,ovobessus,tect-ovob_4,-38.47083333,175.5721667,"Track behind Pureora Lodge, Waitaramoa Rd, Pureora Forest",NZAC03005583,TO
+tectarchus,ovobessus,tect-ovob_5,-38.73333333,177.0333333,"Puketukutuku Peninsula, Lk Waikaremoana",NZAC03006306,GB
+tectarchus,ovobessus,tect-ovob_6,-38.7405,177.1638333,"Lk Waikareiti Tk, Lake Waikaremoana",NZAC03006291,GB
+tectarchus,ovobessus,tect-ovob_7,-38.78296667,177.1357,"Maori Track, Awaawaroa Strm, Lake Waikaremoana",NZAC03006282,GB
+tectarchus,ovobessus,tect-ovob_8,-38.90345,174.59405,Mt Messenger,NZAC03005582,TK
+tectarchus,ovobessus,tect-ovob_9,-39.15518333,174.6997667,"Whangamomona Saddle, Awahou Ridge Track, top of saddle",NZAC03005584,TK
+tectarchus,ovobessus,tect-ovob_10,-39.19928333,175.9745667,"Pukeiti Lodge Bush, Egmont Nat. Park",NZAC03006336,TK
+tectarchus,ovobessus,tect-ovob_11,-39.64478333,175.7101,"Paengaroa Scenic reserve, Mataroa, near Taihape",NZAC03005585,RI
+tectarchus,ovobessus,tect-ovob_12,-41.02821667,175.95685,Ngaumu State Forest,NZAC03005581,WA
+tectarchus,ovobessus,tect-ovob_13,-37.53358333,175.7435167,Mt Te Aroha summit,NZAC03014408,WO
+tectarchus,ovobessus,tect-ovob_14,-38.2549,174.8633833,Piripiri Caves,NZAC03009479,WO
+tectarchus,ovobessus,tect-ovob_15,-38.41641667,174.7218667,"Whareorino Forest, Mangatoa Tk",NZAC03009481,WO
+tectarchus,ovobessus,tect-ovob_16,-37.049,175.2536667,Waharau,,
+tectarchus,ovobessus,tect-ovob_17,-40.42016667,176.03155,Waewaepa,,
+tectarchus,ovobessus,tect-ovob_18,-40.574267,175.44935,Mangaore,,
+tectarchus,ovobessus,tect-ovob_19,-39.39898333,175.4141167,Ohakune,,
+tectarchus,ovobessus,tect-ovob_20,-39.79283333,176.0458333,Rangitane,,
+tectarchus,ovobessus,tect-ovob_21,-39.961,176.0140167,Oroua,,
+tectarchus,ovobessus,tect-ovob_22,-39.41295,176.4160667,Blowhard,,
+tectarchus,ovobessus,tect-ovob_23,-37.27515,175.3272833,Waitakaruru,,
+tectarchus,ovobessus,tect-ovob_24,-39.72693333,175.1386333,Atene,,
+tectarchus,ovobessus,tect-ovob_25,-39.08865,174.1088667,Tupare,,
+tectarchus,ovobessus,tect-ovob_26,-38.69681667,175.6752667,Waihaha Trk,,
+tectarchus,ovobessus,tect-ovob_27,-39.32401667,174.10375,Dawson Falls,,
+tectarchus,ovobessus,tect-ovob_28,-39.20095,175.5419167,Chateau TO,,
+tectarchus,huttoni,tect-hutt_1,-41.03306667,172.9077667,Riwaka Scenic Res.,NZAC03015242,NN
+tectarchus,huttoni,tect-hutt_2,-41.822,172.81185,"Paddys Trk, Lk Rotoiti",NZAC03009423,NN
+tectarchus,huttoni,tect-hutt_3,-40.84788333,172.4490833,Browns hut,,
+tectarchus,huttoni,tect-hutt_4,-42.1018,171.40155,Bullock Crk,,
+tectarchus,huttoni,tect-hutt_5,-41.7551,171.8104833,Burnetts,,
+tectarchus,huttoni,tect-hutt_6,-41.2719,173.9058667,Anakiwa,,
+tectarchus,huttoni,tect-hutt_7,-40.99598333,175.3886,Waiohine Gorge,,
+tectarchus,huttoni,tect-hutt_8,-41.11495,175.2283333,Rimutaka Summitt,,
+tectarchus,huttoni,tect-hutt_9,-41.34795,174.9315167,Catchpool,,
+tectarchus,huttoni,tect-hutt_10,-41.41026667,175.3646667,Waikuku,,
+tectarchus,huttoni,tect-hutt_11,-41.08691667,174.1355,Mt Stokes,,
+tectarchus,huttoni,tect-hutt_12,-40.94833333,175.1096167,Akatarawa,,
+tectarchus,huttoni,tect-hutt_13,-40.86678333,175.2345667,Otaki,,
+tectarchus,huttoni,tect-hutt_14,-40.9068,175.4738667,Holdsworth,,
+tectarchus,huttoni,tect-hutt_15,-40.89538333,174.0855333,Chetwood,,
+tectarchus,huttoni,tect-hutt_16,-40.849,174.9236333,Kapiti,,
+tectarchus,huttoni,tect-hutt_17,-41.11449167,174.2791333,Long Island,NZAC03015260,SD
+tectarchus,huttoni,tect-hutt_18,-40.7097,172.3644833,Anatori River Valley,NZAC03005595,NN
+tectarchus,huttoni,tect-hutt_19,-41.28058333,174.9131,Eastbourne,,
+tectarchus,huttoni,tect-hutt_20,-42.4297,171.2958833,Sewell Peak,,
+tectarchus,huttoni,tect-hutt_21,-41.26745,174.75675,Wiltons Bush,,
+tectarchus,huttoni,tect-hutt_22,-41.11088333,174.2255667,Resolution Bay,,
+tectarchus,huttoni,tect-hutt_23,-41.29511667,174.7989333,Roseneath,,
+tectarchus,huttoni,tect-hutt_24,-41.23533333,174.7922833,Braodmeadows,,
+tectarchus,huttoni,tect-hutt_25,-41.3693,174.9427333,Orongorongo field station,,
+tectarchus,huttoni,tect-hutt_26,-41.30118333,173.5715,Pelorus Bridge,,
