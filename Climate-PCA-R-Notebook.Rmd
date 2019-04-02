@@ -49,10 +49,11 @@ all_plot
 ##PCA-Genera {.tabset}
 
 ###Climate Data
-Obtain the bioclim layers for analysis. I'm using all 19 for this preliminary exploration. I plotted the first bioclim just to make sure nothing seems wonky.
+Obtain the bioclim layers for analysis. I'm using all 19 for this preliminary exploration. I plotted the first bioclim just to make sure nothing seems wonky. I'm using CHELSA data downloaded from their website. Since the files are huge, I only unzip them one at a time, crop them, and write them to GeoTiff files that I can then load in as a rasterstack.
 ```{r}
 ##get chelsa data
-#zip_files <- list.files("/Users/connorfrench/Dropbox/Old_Mac/climate-data/chelsa_30s_bio", full.names = TRUE)
+#chelsa_folder <- "/Users/connorfrench/Dropbox/Old_Mac/climate-data/chelsa_30s_bio"
+#zip_files <- list.files(chelsa_folder, full.names = TRUE)
 
 #using the Unarchiver commandline tools for Mac to unzip the 7zip chelsa layers. Regular unzip() does not work with 7z zipped files
 #for (file in zip_files) {
