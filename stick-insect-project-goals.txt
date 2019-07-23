@@ -1,0 +1,3 @@
+to-do for stick insect project:
+Figure out projection problem- the CHELSA climate seems to be off from the locality projections
+Finish the cnfa

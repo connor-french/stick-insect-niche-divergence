@@ -6,7 +6,7 @@ plot_clim_pca <- function(data, pca, factor = "species"){
   #make an interactive plot in plotly
   p <- ggplot(data = data, aes_string(x = "PC1", y = "PC2", col = factor, fill = factor)) +
     geom_polygon(data = hulls, alpha = 0.4)  + 
-    geom_point(alpha = .7, size = 1, aes(text = paste("ID:", id, "<br>",
+    geom_point(alpha = 1, size = 1, aes(text = paste("ID:", id, "<br>",
                                                       genus, species, "<br>",
                                                       "Long-Lat:", latitude, longitude,"<br>",
                                                       "Locality:", locality))) + 

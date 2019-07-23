@@ -9,41 +9,58 @@ output:
 Read in the packages. The working directory is wherever the R Notebook is located. 
 
 ```{r include = FALSE}
-packages <- c("raster", "data.table", "tidyverse", "sf", "RStoolbox", "leaflet", "plotly", "gdata", "BSDA", "ade4") #RStoolbox has some dependencies like openMP that can be difficult to compile on a Mac (needed for the dependent package "caret"). If you have High Sierra OS or newer, search for instructions specific to your OS- it's a lot easier than older OS's.
+packages <- c("raster", "data.table", "tidyverse", "sf", "RStoolbox", "leaflet", "plotly", "gdata", "BSDA", "ade4", "readxl", "janitor", "rnaturalearth", "adehabitatHS") #RStoolbox has some dependencies like openMP that can be difficult to compile on a Mac (needed for the dependent package "caret"). If you have High Sierra OS or newer, search for instructions specific to your OS- it's a lot easier than older OS's.
 lapply(packages, require, character.only = TRUE)
 source("R/plot_leaflet_function.R") #source locality plotting function
 source("R/plot_climate_pca_function.R") #source pca plotting function
 source("R/species_pca_function.R") #source function that computes climate pca per species
 source("R/min_convex_poly.R") #source function that creates a minimum convex polygon around points
-source("R/pc_centroid_fun.R") #source function for my version of assessing marginal niche hypothesis
-source("R/omi_function.R") #source function that conducts an omi analysis
+source("R/enfa_calc_function.R")
+source("R/marginality_lollipop_plot.R")
+source("R/presence_absence_raster_function.R")
+source("R/crop_background_env_function.R")
 ```
 
 
-Read in the spreadsheet and take a look at the data. There is one outlier (acan-sp_68). I'm throwing it out here, but need to ask about original coordinates.
+Read in the spreadsheet and take a look at the data.
 
-```{r, include=FALSE}
+```{r}
 ###read in spreadsheet
-loc <- fread("worksheets/all-species-repro-mode.csv") %>% 
-  filter(latitude > -1000)
+loc <- read_xlsx("Original-spreadsheets/all species New_6-14-19.xlsx") %>% 
+  janitor::clean_names() %>% 
+  mutate(reproductive_mode = as.factor(reproductive_mode)) 
 
+#get the number of individuals, and the sexuality counts per species
+count_repro_mode <- loc %>% 
+  group_by(genus, species, reproductive_mode) %>% 
+  count() %>% 
+  mutate(genus_species = str_c(genus, species, sep = "_"),
+         genus_species = str_replace_all(genus_species, " ", "_"),
+         genus_species = str_replace_all(genus_species, "\\.", "")) %>% 
+  ungroup() %>% 
+  mutate(genus_species = fct_reorder(genus_species, n, sum)) %>% 
+  ggplot(aes(x = genus_species, y = n, fill = reproductive_mode)) +
+  geom_col() +
+  coord_flip() + 
+  theme_minimal()
 
-#make locality shape file and assign WGS coord system
-coord.points <- st_as_sf(loc, coords = c("longitude", "latitude"), 
-                         crs = 4326, agr = "constant")
-
+count_repro_mode
 ```
 
 ##Map
 Plot a leaflet map of the localities. The leaflet map is interactive. You can click on the localities and a flag with some metadata will pop up! 
 
 ```{r}
+#make locality shape file and assign WGS coord system
+coord_points <- st_as_sf(loc, coords = c("longitude", "latitude"), 
+                         crs = 4326, agr = "constant")
+
 #use sourced plot_locs_leaflet script to plot localities
 all_plot <- plot_locs_leaflet(loc, "reproductive_mode")
 
 all_plot
 #in case I want to save the map somewhere
-#mapview::mapshot(all_plot, url = paste0(getwd(), "/plots/repro_mode_maps/all_species.html"), file = paste0(getwd(), "/plots/repro_mode_plots/all_species.pdf"))
+#mapview::mapshot(all_plot, url = paste0(getwd(), "/plots/repro_mode_plots/all_species_map.html"), file = paste0(getwd(), "/plots/repro_mode_plots/all_species_map.pdf"))
 ```
 
 ##PCA-Genera {.tabset}
@@ -66,7 +83,7 @@ Obtain the bioclim layers for analysis. I'm using all 19 for this preliminary ex
 #  unlink(tempd, recursive = TRUE)
 #}
 
-clim_files <- list.files("climate", full.names = TRUE)
+clim_files <- "/Users/connorfrench/Dropbox/Old_Mac/climate-data/chelsa_30sec_NewZealand/chelsa_bioclims_NZ.tif"
 w <- stack(clim_files)
 
 
@@ -84,8 +101,8 @@ Run the pca and check out variable loadings and proportion of variance explained
 coords <- data.frame(latitude = loc$longitude, longitude = loc$latitude)
 
 loc.clim <- dplyr::bind_cols(loc, raster::extract(w, coords, method = "simple", df = TRUE)) %>% 
-  drop_na(CHELSA_bio10_1) %>% 
-  select(-ID)
+  drop_na(chelsa_bioclims_NZ.1) %>% 
+  dplyr::select(-ID)
 
 #make a matrix of only bioclim values
 clim.mat <- loc.clim[,grep("bio", names(loc.clim))] %>% as.matrix()
@@ -93,29 +110,37 @@ clim.mat <- loc.clim[,grep("bio", names(loc.clim))] %>% as.matrix()
 #run pca on climate variables
 clim.pca <- prcomp(clim.mat, scale = TRUE)
 summary.pca <- summary(clim.pca) #check out the components
+
+#plot tables
+summary.pca
+knitr::kable(round(clim.pca$rotation[,1:3],3)) #Table of loading scores for the first 3 PCs.
 ```
 
-Two plots: One plot of the PCA colored according to genus, with convex hulls surrounding the genera. It looks like this reflects a latitudinal gradient in temperature! You can interact with the PCA plot by clicking on points to view associated metadata. You can isolate the genus you want to view by double clicking the genus in the legend! You can also remove a genus by clicking on it once. There's some other functionality you can explore in the toolbar at the top of the plot.
+Two plots: One plot of the PCA colored according to genus, with convex hulls surrounding the genera. It looks like this reflects a latitudinal gradient in temperature! You can interact with the PCA plot by clicking on points to view associated metadata. You can isolate the genus you want to view by double clicking the genus in the legend! You can also remove a genus by clicking on it once. There's some other functionality you can explore in the toolbar at the top of the plot. The second plot is a PCA colored according to reproductive mode. It looks like asexual populations occupy slightly larger niche space, but both reproductive modes have a similar niche center.
 ```{r}
 
 #add pca results to loc.clim data frame
 loc.clim <- data.frame(loc.clim, clim.pca$x)
 
 #use sourced plot_clim_pca function to plot the pca results. args are the data set with species names and PC axis values and the pca summary
-all_pca <- plot_clim_pca(loc.clim, summary.pca, factor = "reproductive_mode")
+all_pca <- plot_clim_pca(loc.clim, summary.pca, factor = "genus")
 all_pca
 
-#htmlwidgets::saveWidget(all_pca, paste0(getwd(), "/plots/repro_mode_plots/all_species_pca.html"), selfcontained = TRUE)
+#use sourced plot_clim_pca function to plot the pca results. args are the data set with species names and PC axis values and the pca summary
+repro_pca <- plot_clim_pca(loc.clim, summary.pca, factor = "reproductive_mode")
+repro_pca
+
+#save the plot colored by genus
+#htmlwidgets::saveWidget(all_pca, paste0(getwd(), "/plots/repro_mode_plots/all_species_pca_genus.html"), selfcontained = TRUE)
+
+#save the plot colored by reproductive mode
+#htmlwidgets::saveWidget(repro_pca, paste0(getwd(), "/plots/repro_mode_plots/all_species_pca_repro.html"), selfcontained = TRUE)
+
+
+
 ```
 
 
-
-
-```{r}
-#plot tables
-summary.pca
-knitr::kable(round(clim.pca$rotation[,1:3],3)) #Table of loading scores for the first 3 PCs. 
-```
 
 
 
@@ -133,7 +158,20 @@ acan_plot <- plot_clim_pca(summary.list.acan$loc.clim, summary.list.acan$summary
 
 acan_plot
 
+#save pca plot
 #htmlwidgets::saveWidget(acan_plot, paste0(getwd(), "/plots/repro_mode_plots/acanthoxyla_pca.html"), selfcontained = TRUE)
+
+#filter localities for the focal genus
+acan_loc <- loc %>% 
+  filter(genus == "acanthoxyla")
+  
+#use sourced plot_locs_leaflet script to plot localities
+acan_map <- plot_locs_leaflet(acan_loc, "reproductive_mode")
+
+acan_map
+
+#in case I want to save the map somewhere
+#mapview::mapshot(acan_map, url = paste0(getwd(), "/plots/repro_mode_plots/acan_map.html"), file = paste0(getwd(), "/plots/repro_mode_plots/acan_map.pdf"))
 ```
 
 
@@ -154,6 +192,20 @@ argo_plot
 
 #if selfcontained = TRUE, you can remove the folder that gets added alongside the plot. It's an annoying bug that hasn't been fixed yet.
 #htmlwidgets::saveWidget(argo_plot, paste0(getwd(), "/plots/repro_mode_plots/argosarchus_pca.html"), selfcontained = TRUE)
+
+#filter localities for the focal genus
+argo_loc <- loc %>% 
+  filter(genus == "argosarchus")
+  
+#use sourced plot_locs_leaflet script to plot localities
+argo_map <- plot_locs_leaflet(argo_loc, "reproductive_mode")
+
+argo_map
+
+#in case I want to save the map somewhere
+#mapview::mapshot(argo_map, url = paste0(getwd(), "/plots/repro_mode_plots/argo_map.html"), file = paste0(getwd(), "/plots/repro_mode_plots/argo_map.pdf"))
+
+
 ```
 
 ```{r}
@@ -161,6 +213,39 @@ summary.list.argo$summary.pca
 loadings.argo <- summary.list.argo$summary.pca$rotation
 knitr::kable(round(loadings.argo[,1:3],3)) #Table of loading scores for the first 3 PCs. 
 ```
+
+Now I'm going to to environmental niche factor analysis between sexual and asexual populations within the species.
+```{r}
+
+#get background env't for the species
+ahor_bg_env <- bg_env_crop(argo_loc, 
+                           species = "horridus",
+                           environment = w, 
+                           buffer = 0.5)
+
+#enfa for the sexual species
+ahor_sexual_enfa <- enfa_calc_fun(locs = argo_loc, 
+                                  species = "horridus", 
+                                  reproductive_mode = "sexual", 
+                                  mask_raster = ahor_bg_env)
+
+#enfa for the asexual species
+ahor_asexual_enfa <- enfa_calc_fun(locs = argo_loc, 
+                                   species = "horridus", 
+                                   reproductive_mode = "asexual", 
+                                   mask_raster = ahor_bg_env)
+
+
+#plot the marginality scores
+marginality_lollipop(sex_marg = ahor_sexual_enfa$m, 
+                    asex_marg = ahor_asexual_enfa$m,
+                    full_species_name = "Argosarchus horridus")
+
+
+
+```
+
+
 
 
 ###Asteliaphasma
@@ -173,6 +258,19 @@ aste_plot
 
 #if selfcontained = TRUE, you can remove the folder that gets added alongside the plot. It's an annoying bug that hasn't been fixed yet.
 #htmlwidgets::saveWidget(aste_plot, paste0(getwd(), "/plots/repro_mode_plots/asteliaphasma_pca.html"), selfcontained = TRUE)
+
+#filter localities for the focal genus
+aste_loc <- loc %>% 
+  filter(genus == "asteliaphasma")
+  
+#use sourced plot_locs_leaflet script to plot localities
+aste_map <- plot_locs_leaflet(aste_loc, "reproductive_mode")
+
+aste_map
+
+#in case I want to save the map somewhere
+#mapview::mapshot(aste_map, url = paste0(getwd(), "/plots/repro_mode_plots/aste_map.html"), file = paste0(getwd(), "/plots/repro_mode_plots/aste_map.pdf"))
+
 ```
 
 
@@ -183,47 +281,35 @@ loadings.aste <- summary.list.aste$summary.pca$rotation
 knitr::kable(round(loadings.aste[,1:3],3)) #Table of loading scores for the first 3 PCs. 
 ```
 
-Marginal climate hypothesis workspace. Resample from sister species data set and calculate average per sample. Compare absolute value of range-restricted species to distribution of sister species averages. Need to work on a suitable statistical test. 
+
+
+Now I'm going to to environmental niche factor analysis between sexual and asexual populations within the species.
 ```{r}
+#get background env't for the species
+ajuc_bg_env <- bg_env_crop(aste_loc, 
+                           species = "jucundum",
+                           environment = w, 
+                           buffer = 0.5)
 
-#calculate the centroid of a random sample of individuals. df = data frame, sp = string containing the species you are interested (e.g. "naomi"), len = the number of individuals to sample. Should be the number of individuals from the species that has fewer occurrences.
+#enfa for the sexual species
+ajuc_sexual_enfa <- enfa_calc_fun(locs = aste_loc, 
+                                  species = "jucundum", 
+                                  reproductive_mode = "sexual", 
+                                  mask_raster = ajuc_bg_env)
 
-#calculate the centroid from the range-restricted species. 
-pc.centroid.nov <- summary.list.aste$loc.clim %>% 
-  filter(species == "nov. sp.") %>%
-  select(PC1.1:PC3.1) %>%
-  summarize_all(mean) %>% 
-  rowMeans() %>%
-  abs()
+#enfa for the asexual species
+ajuc_asexual_enfa <- enfa_calc_fun(locs = aste_loc, 
+                                   species = "jucundum", 
+                                   reproductive_mode = "asexual", 
+                                   mask_raster = ajuc_bg_env)
 
-#resample the more widespread species many times, calculating the centroid of three individuals (number of individuals in the range-restricted species)
-pc.centroid.naomi <- replicate(1000, pc_centroid_fun(summary.list.aste$loc.clim, "naomi", 3), simplify = TRUE) %>% 
-  as.data.frame()
-names(pc.centroid.naomi) <- "centroid" #needs to be a data frame with a named column for ggplot
 
-#sampling distribution of the centroids calculated from the generalist species. The red line indicates the centroid of the range-restricted species
-ggplot(pc.centroid.naomi, aes(x = centroid)) +
-  geom_histogram(bins = 30) +
-  #scale_x_sqrt() +
-  geom_vline(xintercept = pc.centroid.nov, color = "red") + 
-  theme_linedraw()
-
+#plot the marginality scores
+marginality_lollipop(sex_marg = ajuc_sexual_enfa$m, 
+                    asex_marg = ajuc_asexual_enfa$m,
+                    full_species_name = "Asteliaphasma jucundum")
 
 ```
-
-
-
-Outlying Mean Index. Another test of the marginal niche hypothesis.
-```{r include=FALSE}
-#run sourced omi function. Returns a bunch of warnings that I want to silence, so I'm just putting this in its own chunk that I can silence the output of
-aste_omi <- omi_fun(summary.list.aste$loc.clim, w, use_bg = FALSE)
-```
-
-
-```{r}
-aste_omi$test_omi
-```
-
 
 
 ###Clitarchus
@@ -235,6 +321,19 @@ clita_plot
 
 #if selfcontained = TRUE, you can remove the folder that gets added alongside the plot. It's an annoying bug that hasn't been fixed yet.
 #htmlwidgets::saveWidget(clita_plot, paste0(getwd(), "/plots/repro_mode_plots/clitarchus_pca.html"), selfcontained = TRUE)
+
+#filter localities for the focal genus
+clita_loc <- loc %>% 
+  filter(genus == "clitarchus")
+  
+#use sourced plot_locs_leaflet script to plot localities
+clita_map <- plot_locs_leaflet(clita_loc, "reproductive_mode")
+
+clita_map
+
+#in case I want to save the map somewhere
+#mapview::mapshot(clita_map, url = paste0(getwd(), "/plots/repro_mode_plots/clita_map.html"), file = paste0(getwd(), "/plots/repro_mode_plots/clita_map.pdf"))
+
 ```
 
 
@@ -245,40 +344,33 @@ knitr::kable(round(loadings.clita[,1:3],3)) #Table of loading scores for the fir
 ```
 
 
-Marginal environment hypothesis
+Now I'm going to to environmental niche factor analysis between sexual and asexual populations within the species.
 ```{r}
-#calculate the centroid from the range-restricted species. 
-pc.centroid.tepaki <- summary.list.clita$loc.clim %>% 
-  filter(species == "tepaki") %>%
-  select(PC1.1:PC3.1) %>%
-  summarize_all(mean) %>% 
-  rowMeans() %>%
-  abs()
+#get background env't for the species
+choo_bg_env <- bg_env_crop(clita_loc, 
+                           species = "hookeri",
+                           environment = w, 
+                           buffer = 0.5)
 
-pc.centroid.hookeri <- replicate(1000, pc_centroid_fun(summary.list.clita$loc.clim, "hookeri", 3), simplify = TRUE) %>% 
-  as.data.frame()
-names(pc.centroid.hookeri) <- "centroid"
+#enfa for the sexual species
+choo_sexual_enfa <- enfa_calc_fun(locs = clita_loc, 
+                                  species = "hookeri", 
+                                  reproductive_mode = "sexual", 
+                                  mask_raster = choo_bg_env)
 
-ggplot(pc.centroid.hookeri, aes(x = centroid)) +
-  geom_histogram(bins = 30) +
-  #scale_x_sqrt() +
-  geom_vline(xintercept = pc.centroid.tepaki, color = "red") + 
-  theme_linedraw()
+#enfa for the asexual species
+choo_asexual_enfa <- enfa_calc_fun(locs = clita_loc, 
+                                   species = "hookeri", 
+                                   reproductive_mode = "asexual", 
+                                   mask_raster = choo_bg_env)
 
 
-#length(pc.centroid.hookeri$centroid[pc.centroid.hookeri$centroid > pc.centroid.tepaki])
+#plot the marginality scores
+marginality_lollipop(sex_marg = choo_sexual_enfa$m, 
+                    asex_marg = choo_asexual_enfa$m,
+                    full_species_name = "Clitarchus hookeri")
+
 ```
-
-Outlying Mean Index. Another test of the marginal niche hypothesis.
-```{r include=FALSE}
-clita_omi <- omi_fun(summary.list.clita$loc.clim, w, use_bg = FALSE)
-```
-
-```{r}
-clita_omi$test_omi
-```
-
-
 
 
 ###Micrarchus
@@ -289,6 +381,18 @@ micra_plot
 
 #if selfcontained = TRUE, you can remove the folder that gets added alongside the plot. It's an annoying bug that hasn't been fixed yet.
 #htmlwidgets::saveWidget(micra_plot, paste0(getwd(), "/plots/repro_mode_plots/micrarchus_pca.html"), selfcontained = TRUE)
+
+#filter localities for the focal genus
+micra_loc <- loc %>% 
+  filter(genus == "micrarchus")
+  
+#use sourced plot_locs_leaflet script to plot localities
+micra_map <- plot_locs_leaflet(micra_loc, "reproductive_mode")
+
+micra_map
+
+#in case I want to save the map somewhere
+mapview::mapshot(micra_map, url = paste0(getwd(), "/plots/repro_mode_plots/micra_map.html"), file = paste0(getwd(), "/plots/repro_mode_plots/micra_map.pdf"))
 ```
 
 
@@ -302,7 +406,25 @@ knitr::kable(round(loadings.micra[,1:3],3)) #Table of loading scores for the fir
 
 ```{r}
 summary.list.nive <- species_pca_fun(loc.clim, "niveaphasma")
-plot_clim_pca(summary.list.nive$loc.clim, summary.list.nive$summary.pca)
+nive_plot <- plot_clim_pca(summary.list.nive$loc.clim, summary.list.nive$summary.pca, factor = "reproductive_mode")
+
+nive_plot
+
+#if selfcontained = TRUE, you can remove the folder that gets added alongside the plot. It's an annoying bug that hasn't been fixed yet.
+#htmlwidgets::saveWidget(nive_plot, paste0(getwd(), "/plots/repro_mode_plots/niveaphasma_pca.html"), selfcontained = TRUE)
+
+#filter localities for the focal genus
+nive_loc <- loc %>% 
+  filter(genus == "niveaphasma")
+  
+#use sourced plot_locs_leaflet script to plot localities
+nive_map <- plot_locs_leaflet(nive_loc, "reproductive_mode")
+
+nive_map
+
+#in case I want to save the map somewhere
+#mapview::mapshot(nive_map, url = paste0(getwd(), "/plots/repro_mode_plots/nive_map.html"), file = paste0(getwd(), "/plots/repro_mode_plots/nive_map.pdf"))
+
 ```
 
 ```{r}
@@ -310,6 +432,36 @@ summary.list.nive$summary.pca
 loadings.nive <- summary.list.nive$summary.pca$rotation
 knitr::kable(round(loadings.nive[,1:3],3)) #Table of loading scores for the first 3 PCs. 
 ```
+
+
+Now I'm going to to environmental niche factor analysis between sexual and asexual populations within the species.
+```{r}
+#get background env't for the species
+nive_bg_env <- bg_env_crop(nive_loc, 
+                           species = "annulata",
+                           environment = w, 
+                           buffer = 0.5)
+
+#enfa for the sexual species
+nive_sexual_enfa <- enfa_calc_fun(locs = nive_loc, 
+                                  species = "annulata", 
+                                  reproductive_mode = "sexual", 
+                                  mask_raster = nive_bg_env)
+
+#enfa for the asexual species
+nive_asexual_enfa <- enfa_calc_fun(locs = nive_loc, 
+                                   species = "annulata", 
+                                   reproductive_mode = "asexual", 
+                                   mask_raster = nive_bg_env)
+
+
+#plot the marginality scores
+marginality_lollipop(sex_marg = nive_sexual_enfa$m, 
+                    asex_marg = nive_asexual_enfa$m,
+                    full_species_name = "Niveaphasma annulata")
+
+```
+
 
 ###Spinotectarchus
 
@@ -320,6 +472,18 @@ spin_plot
 
 #if selfcontained = TRUE, you can remove the folder that gets added alongside the plot. It's an annoying bug that hasn't been fixed yet.
 #htmlwidgets::saveWidget(spin_plot, paste0(getwd(), "/plots/repro_mode_plots/spinotectarchus_pca.html"), selfcontained = TRUE)
+
+#filter localities for the focal genus
+spin_loc <- loc %>% 
+  filter(genus == "spinotectarchus")
+  
+#use sourced plot_locs_leaflet script to plot localities
+spin_map <- plot_locs_leaflet(spin_loc, "reproductive_mode")
+
+spin_map
+
+#in case I want to save the map somewhere
+#mapview::mapshot(spin_map, url = paste0(getwd(), "/plots/repro_mode_plots/spin_map.html"), file = paste0(getwd(), "/plots/repro_mode_plots/spin_map.pdf"))
 ```
 
 
@@ -327,36 +491,6 @@ spin_plot
 summary.list.spin$summary.pca
 loadings.spin <- summary.list.spin$summary.pca$rotation
 knitr::kable(round(loadings.spin[,1:3],3)) #Table of loading scores for the first 3 PCs. 
-```
-
-Marginal environment hypothesis
-```{r}
-#calculate the centroid from the range-restricted species. 
-pc.centroid.acornutus_sub <- summary.list.spin$loc.clim %>% 
-  filter(species == "acornutus_sub") %>%
-  select(PC1.1:PC3.1) %>%
-  summarize_all(mean) %>% 
-  rowMeans() %>%
-  abs()
-
-pc.centroid.acornutus <- replicate(1000, pc_centroid_fun(summary.list.spin$loc.clim, "acornutus", 3), simplify = TRUE) %>% 
-  as.data.frame()
-names(pc.centroid.acornutus) <- "centroid"
-
-ggplot(pc.centroid.acornutus, aes(x = centroid)) +
-  geom_histogram(bins = 30) +
-  #scale_x_sqrt() +
-  geom_vline(xintercept = pc.centroid.acornutus_sub, color = "red") + 
-  theme_linedraw()
-```
-
-Outlying Mean Index. Another test of the marginal niche hypothesis.
-```{r include=FALSE}
-spin_omi <- omi_fun(summary.list.spin$loc.clim, w, use_bg = FALSE)
-```
-
-```{r}
-spin_omi$test_omi
 ```
 
 
@@ -368,6 +502,18 @@ tect_plot
 
 #if selfcontained = TRUE, you can remove the folder that gets added alongside the plot. It's an annoying bug that hasn't been fixed yet.
 #htmlwidgets::saveWidget(tect_plot, paste0(getwd(), "/plots/repro_mode_plots/tectarchus_pca.html"), selfcontained = TRUE)
+
+#filter localities for the focal genus
+tect_loc <- loc %>% 
+  filter(genus == "tectarchus")
+  
+#use sourced plot_locs_leaflet script to plot localities
+tect_map <- plot_locs_leaflet(tect_loc, "reproductive_mode")
+
+tect_map
+
+#in case I want to save the map somewhere
+#mapview::mapshot(tect_map, url = paste0(getwd(), "/plots/repro_mode_plots/tect_map.html"), file = paste0(getwd(), "/plots/repro_mode_plots/tect_map.pdf"))
 ```
 
 
@@ -380,18 +526,66 @@ knitr::kable(round(loadings.tect[,1:3],3)) #Table of loading scores for the firs
 ```
 
 
+
+Now I'm going to to environmental niche factor analysis between sexual and asexual populations within the species.
+
+This is for Tectarchus ovobessus.
+```{r}
+#get background env't for the species
+tect_bg_env <- bg_env_crop(tect_loc, 
+                           species = "ovobessus",
+                           environment = w, 
+                           buffer = 0.5)
+
+#enfa for the sexual species
+tect_sexual_enfa <- enfa_calc_fun(locs = tect_loc, 
+                                  species = "ovobessus", 
+                                  reproductive_mode = "sexual", 
+                                  mask_raster = tect_bg_env)
+
+#enfa for the asexual species
+tect_asexual_enfa <- enfa_calc_fun(locs = tect_loc, 
+                                   species = "ovobessus", 
+                                   reproductive_mode = "asexual", 
+                                   mask_raster = tect_bg_env)
+
+
+#plot the marginality scores
+marginality_lollipop(sex_marg = tect_sexual_enfa$m, 
+                    asex_marg = tect_asexual_enfa$m,
+                    full_species_name = "Tectarchus ovobessus")
+
+```
+
+This is an enfa for Tectarchus huttoni.
+```{r}
+#get background env't for the species
+tect_bg_env <- bg_env_crop(tect_loc, 
+                           species = "huttoni",
+                           environment = w, 
+                           buffer = 0.5)
+
+#enfa for the sexual species
+tect_sexual_enfa <- enfa_calc_fun(locs = tect_loc, 
+                                  species = "huttoni", 
+                                  reproductive_mode = "sexual", 
+                                  mask_raster = tect_bg_env)
+
+#enfa for the asexual species
+tect_asexual_enfa <- enfa_calc_fun(locs = tect_loc, 
+                                   species = "huttoni", 
+                                   reproductive_mode = "asexual", 
+                                   mask_raster = tect_bg_env)
+
+
+#plot the marginality scores
+marginality_lollipop(sex_marg = tect_sexual_enfa$m, 
+                    asex_marg = tect_asexual_enfa$m,
+                    full_species_name = "Tectarchus huttoni")
+
+```
+
+
 ###Tepakiphasma
 Nothing. Only one locality.
-
-
-
-###OMI_all
-Outlying Mean Index. Another test of the marginal niche hypothesis.
-```{r include = FALSE}
-all_omi <- omi_fun(loc.clim, w, use_bg = FALSE)
-```
-
-```{r}
-all_omi$test_omi
-```
 

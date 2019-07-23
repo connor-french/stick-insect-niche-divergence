@@ -21,9 +21,9 @@ plot_locs_leaflet <- function(data, factor = "species") {
   addTiles() %>%
   fitBounds(lng1 = min.lon, lng2 = max.lon, lat1 = min.lat, lat2 = max.lat) %>%
   addCircleMarkers(data = data,
-                   color = ~pal(data[[factor]]),
+                   color = pal(data[[factor]]),
                    radius = 3,
                    popup = popup.label) %>%
-  addLegend(data = data, "bottomright", pal = pal, values = ~data[[factor]], opacity = .9, title = factor)
+  addLegend(data = data, "bottomright", pal = pal, values = data[[factor]], opacity = .9, title = factor)
 }
 
