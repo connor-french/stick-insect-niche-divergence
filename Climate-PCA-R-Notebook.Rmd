@@ -538,49 +538,50 @@ tect_bg_env <- bg_env_crop(tect_loc,
                            buffer = 0.5)
 
 #enfa for the sexual species
-tect_sexual_enfa <- enfa_calc_fun(locs = tect_loc, 
+tect_ovo_sexual_enfa <- enfa_calc_fun(locs = tect_loc, 
                                   species = "ovobessus", 
                                   reproductive_mode = "sexual", 
                                   mask_raster = tect_bg_env)
 
 #enfa for the asexual species
-tect_asexual_enfa <- enfa_calc_fun(locs = tect_loc, 
+tect_ovo_asexual_enfa <- enfa_calc_fun(locs = tect_loc, 
                                    species = "ovobessus", 
                                    reproductive_mode = "asexual", 
                                    mask_raster = tect_bg_env)
 
 
 #plot the marginality scores
-marginality_lollipop(sex_marg = tect_sexual_enfa$m, 
-                    asex_marg = tect_asexual_enfa$m,
+marginality_lollipop(sex_marg = tect_ovo_sexual_enfa$m, 
+                    asex_marg = tect_ovo_asexual_enfa$m,
                     full_species_name = "Tectarchus ovobessus")
 
 ```
 
 This is an enfa for Tectarchus huttoni.
 ```{r}
+###Only need to get bg env't if you're not running the previous chunk
 #get background env't for the species
-tect_bg_env <- bg_env_crop(tect_loc, 
-                           species = "huttoni",
-                           environment = w, 
-                           buffer = 0.5)
+#tect_bg_env <- bg_env_crop(tect_loc, 
+#                           species = "huttoni",
+#                           environment = w, 
+#                           buffer = 0.5)
 
 #enfa for the sexual species
-tect_sexual_enfa <- enfa_calc_fun(locs = tect_loc, 
+tect_hutt_sexual_enfa <- enfa_calc_fun(locs = tect_loc, 
                                   species = "huttoni", 
                                   reproductive_mode = "sexual", 
                                   mask_raster = tect_bg_env)
 
 #enfa for the asexual species
-tect_asexual_enfa <- enfa_calc_fun(locs = tect_loc, 
+tect_hutt_asexual_enfa <- enfa_calc_fun(locs = tect_loc, 
                                    species = "huttoni", 
                                    reproductive_mode = "asexual", 
                                    mask_raster = tect_bg_env)
 
 
 #plot the marginality scores
-marginality_lollipop(sex_marg = tect_sexual_enfa$m, 
-                    asex_marg = tect_asexual_enfa$m,
+marginality_lollipop(sex_marg = tect_hutt_sexual_enfa$m, 
+                    asex_marg = tect_hutt_asexual_enfa$m,
                     full_species_name = "Tectarchus huttoni")
 
 ```
