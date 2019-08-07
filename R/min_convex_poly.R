@@ -1,5 +1,6 @@
 #Function to create a minimum convex polygon around a set of coordinates. 
 #Input data is Longitude, Latitude coords
+require(raster)
 min_conv_poly <- function (xy) { 
   xy <- as.data.frame(coordinates(xy))
   coords.t <- chull(xy[, 1], xy[, 2])

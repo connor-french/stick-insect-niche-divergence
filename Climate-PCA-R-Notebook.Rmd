@@ -9,7 +9,7 @@ output:
 Read in the packages. The working directory is wherever the R Notebook is located. 
 
 ```{r include = FALSE}
-packages <- c("raster", "data.table", "tidyverse", "sf", "RStoolbox", "leaflet", "plotly", "gdata", "BSDA", "ade4", "readxl", "janitor", "rnaturalearth", "adehabitatHS") #RStoolbox has some dependencies like openMP that can be difficult to compile on a Mac (needed for the dependent package "caret"). If you have High Sierra OS or newer, search for instructions specific to your OS- it's a lot easier than older OS's.
+packages <- c("raster", "data.table", "sf", "tidyverse", "RStoolbox", "leaflet", "plotly", "gdata", "BSDA", "ade4", "readxl", "janitor", "rnaturalearth", "adehabitatHS") #RStoolbox has some dependencies like openMP that can be difficult to compile on a Mac (needed for the dependent package "caret"). If you have High Sierra OS or newer, search for instructions specific to your OS- it's a lot easier than older OS's.
 lapply(packages, require, character.only = TRUE)
 source("R/plot_leaflet_function.R") #source locality plotting function
 source("R/plot_climate_pca_function.R") #source pca plotting function
@@ -19,6 +19,8 @@ source("R/enfa_calc_function.R")
 source("R/marginality_lollipop_plot.R")
 source("R/presence_absence_raster_function.R")
 source("R/crop_background_env_function.R")
+source("R/enfa_hex_plot.R")
+source("R/total_climate_pca_plot.R")
 ```
 
 
@@ -33,7 +35,7 @@ loc <- read_xlsx("Original-spreadsheets/all species New_6-14-19.xlsx") %>%
 #get the number of individuals, and the sexuality counts per species
 count_repro_mode <- loc %>% 
   group_by(genus, species, reproductive_mode) %>% 
-  count() %>% 
+  dplyr::count() %>% 
   mutate(genus_species = str_c(genus, species, sep = "_"),
          genus_species = str_replace_all(genus_species, " ", "_"),
          genus_species = str_replace_all(genus_species, "\\.", "")) %>% 
@@ -63,9 +65,9 @@ all_plot
 #mapview::mapshot(all_plot, url = paste0(getwd(), "/plots/repro_mode_plots/all_species_map.html"), file = paste0(getwd(), "/plots/repro_mode_plots/all_species_map.pdf"))
 ```
 
-##PCA-Genera {.tabset}
+## PCA-Genera {.tabset}
 
-###Climate Data
+### Climate Data
 Obtain the bioclim layers for analysis. I'm using all 19 for this preliminary exploration. I plotted the first bioclim just to make sure nothing seems wonky. I'm using CHELSA data downloaded from their website. Since the files are huge, I only unzip them one at a time, crop them, and write them to GeoTiff files that I can then load in as a rasterstack.
 ```{r}
 ##get chelsa data
@@ -90,7 +92,7 @@ w <- stack(clim_files)
 ```
 
 
-###PCA by locality
+### PCA by locality
 This is a PCA of the climate data extracted for each locality, rather than a PCA of the total climate space.
 
 Run the pca and check out variable loadings and proportion of variance explained by components.
@@ -118,7 +120,6 @@ knitr::kable(round(clim.pca$rotation[,1:3],3)) #Table of loading scores for the 
 
 Two plots: One plot of the PCA colored according to genus, with convex hulls surrounding the genera. It looks like this reflects a latitudinal gradient in temperature! You can interact with the PCA plot by clicking on points to view associated metadata. You can isolate the genus you want to view by double clicking the genus in the legend! You can also remove a genus by clicking on it once. There's some other functionality you can explore in the toolbar at the top of the plot. The second plot is a PCA colored according to reproductive mode. It looks like asexual populations occupy slightly larger niche space, but both reproductive modes have a similar niche center.
 ```{r}
-
 #add pca results to loc.clim data frame
 loc.clim <- data.frame(loc.clim, clim.pca$x)
 
@@ -146,10 +147,10 @@ repro_pca
 
 
 
-##PCA-Species {.tabset}
+## PCA-Species {.tabset}
 These are PCAs of environmental space for species within genera. Each climate PCA is of localities for a single genus, colored by species. I'm doing this even for genera with one species, so it's easy to see if certain localities group together. 
 
-###Acanthoxyla
+### Acanthoxyla
 ```{r}
 #source function to conduct a PCA on individual species
 summary.list.acan <- species_pca_fun(loc.clim, "acanthoxyla")
@@ -182,7 +183,7 @@ knitr::kable(round(loadings.acan[,1:3],3)) #Table of loading scores for the firs
 ```
 
 
-###Argosarchus
+### Argosarchus
 ```{r}
 #conduct pca
 summary.list.argo <- species_pca_fun(loc.clim, "argosarchus")
@@ -245,10 +246,44 @@ marginality_lollipop(sex_marg = ahor_sexual_enfa$m,
 
 ```
 
+A couple different ways to visualize the environmental variation. 1) Scatterplot visualizations of marginality vs axis 1 of the specialization with the labels removed (they make things indiscernable). Red = occupied e-space. Gray = Background e-space. 2) ENFA histogram visualizations of marginality and specialization axes. 3) PCA of total e-space with colors corresponding to sexual vs. asexual populations. 
+```{r}
+### 1) ENFA scatterplot
+#access the relevant values for plotting
+ahor_asexual_df <- ahor_asexual_enfa$li %>% 
+  as_tibble() %>% 
+  bind_cols(pr = ahor_asexual_enfa$pr)
 
 
+ahor_sexual_df <- ahor_sexual_enfa$li %>% 
+  as_tibble() %>% 
+  bind_cols(pr = ahor_sexual_enfa$pr)
 
-###Asteliaphasma
+
+#asexual
+enfa_hex_plot(ahor_asexual_df, marg = Mar, spec = Spe1, repro_mode = "Asexual")
+
+
+#sexual
+enfa_hex_plot(ahor_sexual_df, marg = Mar, spec = Spe1, repro_mode = "Sexual")
+
+
+### 2) ENFA histogram
+#asexual
+hist(ahor_asexual_enfa)
+title(main = "Asexual", adj = 0.7, line = -12)
+
+#sexual
+hist(ahor_sexual_enfa)
+title(main = "Sexual", adj = 0.7, line = -12)
+
+### 3) PCA of total e-space
+total_climate_pca_plot(bg_env = ahor_bg_env, locs = argo_loc, genus = "Argosarchus", species = "horridus")
+
+```
+
+
+### Asteliaphasma
 ```{r}
 #pca
 summary.list.aste <- species_pca_fun(loc.clim, "asteliaphasma")
@@ -311,8 +346,45 @@ marginality_lollipop(sex_marg = ajuc_sexual_enfa$m,
 
 ```
 
+A couple different ways to visualize the environmental variation. 1) Scatterplot visualizations of marginality vs axis 1 of the specialization with the labels removed (they make things indiscernable). Red = occupied e-space. Gray = Background e-space. 2) ENFA histogram visualizations of marginality and specialization axes. 3) PCA of total e-space with colors corresponding to sexual vs. asexual populations. 
+```{r}
+### 1) ENFA scatterplot
+#access the relevant values for plotting
+ajuc_asexual_df <- ajuc_asexual_enfa$li %>% 
+  as_tibble() %>% 
+  bind_cols(pr = ajuc_asexual_enfa$pr)
 
-###Clitarchus
+
+ajuc_sexual_df <- ajuc_sexual_enfa$li %>% 
+  as_tibble() %>% 
+  bind_cols(pr = ajuc_sexual_enfa$pr)
+
+
+#asexual
+enfa_hex_plot(ajuc_asexual_df, marg = Mar, spec = Spe1, repro_mode = "Asexual")
+
+
+#sexual
+enfa_hex_plot(ajuc_sexual_df, marg = Mar, spec = Spe1, repro_mode = "Sexual")
+
+
+### 2) ENFA histogram
+#asexual
+hist(ajuc_asexual_enfa)
+title(main = "Asexual", adj = 0.7, line = -12)
+
+#sexual
+hist(ajuc_sexual_enfa)
+title(main = "Sexual", adj = 0.7, line = -12)
+
+### 3) PCA of total e-space
+total_climate_pca_plot(bg_env = ajuc_bg_env, locs = aste_loc, genus = "Asteliophasma", species = "jucundum")
+
+```
+
+
+
+### Clitarchus
 
 ```{r}
 summary.list.clita <- species_pca_fun(loc.clim, "clitarchus")
@@ -372,8 +444,43 @@ marginality_lollipop(sex_marg = choo_sexual_enfa$m,
 
 ```
 
+A couple different ways to visualize the environmental variation. 1) Scatterplot visualizations of marginality vs axis 1 of the specialization with the labels removed (they make things indiscernable). Red = occupied e-space. Gray = Background e-space. 2) ENFA histogram visualizations of marginality and specialization axes. 3) PCA of total e-space with colors corresponding to sexual vs. asexual populations. 
+```{r}
+### 1) ENFA scatterplot
+#access the relevant values for plotting
+choo_asexual_df <- choo_asexual_enfa$li %>% 
+  as_tibble() %>% 
+  bind_cols(pr = choo_asexual_enfa$pr)
 
-###Micrarchus
+
+choo_sexual_df <- choo_sexual_enfa$li %>% 
+  as_tibble() %>% 
+  bind_cols(pr = choo_sexual_enfa$pr)
+
+
+#asexual
+enfa_hex_plot(choo_asexual_df, marg = Mar, spec = Spe1, repro_mode = "Asexual")
+
+
+#sexual
+enfa_hex_plot(choo_sexual_df, marg = Mar, spec = Spe1, repro_mode = "Sexual")
+
+
+### 2) ENFA histogram
+#asexual
+hist(choo_asexual_enfa)
+title(main = "Asexual", adj = 0.7, line = -12)
+
+#sexual
+hist(choo_sexual_enfa)
+title(main = "Sexual", adj = 0.7, line = -12)
+
+### 3) PCA of total e-space
+total_climate_pca_plot(bg_env = choo_bg_env, locs = aste_loc, genus = "Clitarchus", species = "hookeri")
+
+```
+
+### Micrarchus
 ```{r}
 summary.list.micra <- species_pca_fun(loc.clim, "micrarchus")
 micra_plot <- plot_clim_pca(summary.list.micra$loc.clim, summary.list.micra$summary.pca, factor = "reproductive_mode")
@@ -392,7 +499,7 @@ micra_map <- plot_locs_leaflet(micra_loc, "reproductive_mode")
 micra_map
 
 #in case I want to save the map somewhere
-mapview::mapshot(micra_map, url = paste0(getwd(), "/plots/repro_mode_plots/micra_map.html"), file = paste0(getwd(), "/plots/repro_mode_plots/micra_map.pdf"))
+#mapview::mapshot(micra_map, url = paste0(getwd(), "/plots/repro_mode_plots/micra_map.html"), file = paste0(getwd(), "/plots/repro_mode_plots/micra_map.pdf"))
 ```
 
 
@@ -402,7 +509,7 @@ loadings.micra <- summary.list.micra$summary.pca$rotation
 knitr::kable(round(loadings.micra[,1:3],3)) #Table of loading scores for the first 3 PCs. 
 ```
 
-###Niveaphasma
+### Niveaphasma
 
 ```{r}
 summary.list.nive <- species_pca_fun(loc.clim, "niveaphasma")
@@ -463,7 +570,43 @@ marginality_lollipop(sex_marg = nive_sexual_enfa$m,
 ```
 
 
-###Spinotectarchus
+A couple different ways to visualize the environmental variation. 1) Scatterplot visualizations of marginality vs axis 1 of the specialization with the labels removed (they make things indiscernable). Red = occupied e-space. Gray = Background e-space. 2) ENFA histogram visualizations of marginality and specialization axes. 3) PCA of total e-space with colors corresponding to sexual vs. asexual populations. 
+```{r}
+### 1) ENFA scatterplot
+#access the relevant values for plotting
+nive_asexual_df <- nive_asexual_enfa$li %>% 
+  as_tibble() %>% 
+  bind_cols(pr = nive_asexual_enfa$pr)
+
+
+nive_sexual_df <- nive_sexual_enfa$li %>% 
+  as_tibble() %>% 
+  bind_cols(pr = nive_sexual_enfa$pr)
+
+
+#asexual
+enfa_hex_plot(nive_asexual_df, marg = Mar, spec = Spe1, repro_mode = "Asexual")
+
+
+#sexual
+enfa_hex_plot(nive_sexual_df, marg = Mar, spec = Spe1, repro_mode = "Sexual")
+
+
+### 2) ENFA histogram
+#asexual
+hist(nive_asexual_enfa)
+title(main = "Asexual", adj = 0.7, line = -12)
+
+#sexual
+hist(nive_sexual_enfa)
+title(main = "Sexual", adj = 0.7, line = -12)
+
+### 3) PCA of total e-space
+total_climate_pca_plot(bg_env = nive_bg_env, locs = nive_loc, genus = "Niveaphasma", species = "annulata")
+
+```
+
+### Spinotectarchus
 
 ```{r}
 summary.list.spin <- species_pca_fun(loc.clim, "spinotectarchus")
@@ -494,7 +637,7 @@ knitr::kable(round(loadings.spin[,1:3],3)) #Table of loading scores for the firs
 ```
 
 
-###Tectarchus
+### Tectarchus
 ```{r}
 summary.list.tect <- species_pca_fun(loc.clim, "tectarchus")
 tect_plot <- plot_clim_pca(summary.list.tect$loc.clim, summary.list.tect$summary.pca, factor = "reproductive_mode")
@@ -517,22 +660,18 @@ tect_map
 ```
 
 
-
-
 ```{r}
 summary.list.tect$summary.pca
 loadings.tect <- summary.list.tect$summary.pca$rotation
 knitr::kable(round(loadings.tect[,1:3],3)) #Table of loading scores for the first 3 PCs. 
 ```
 
-
-
 Now I'm going to to environmental niche factor analysis between sexual and asexual populations within the species.
 
 This is for Tectarchus ovobessus.
 ```{r}
 #get background env't for the species
-tect_bg_env <- bg_env_crop(tect_loc, 
+tect_ovo_bg_env <- bg_env_crop(tect_loc, 
                            species = "ovobessus",
                            environment = w, 
                            buffer = 0.5)
@@ -541,13 +680,13 @@ tect_bg_env <- bg_env_crop(tect_loc,
 tect_ovo_sexual_enfa <- enfa_calc_fun(locs = tect_loc, 
                                   species = "ovobessus", 
                                   reproductive_mode = "sexual", 
-                                  mask_raster = tect_bg_env)
+                                  mask_raster = tect_ovo_bg_env)
 
 #enfa for the asexual species
 tect_ovo_asexual_enfa <- enfa_calc_fun(locs = tect_loc, 
                                    species = "ovobessus", 
                                    reproductive_mode = "asexual", 
-                                   mask_raster = tect_bg_env)
+                                   mask_raster = tect_ovo_bg_env)
 
 
 #plot the marginality scores
@@ -557,26 +696,64 @@ marginality_lollipop(sex_marg = tect_ovo_sexual_enfa$m,
 
 ```
 
+
+A couple different ways to visualize the environmental variation. 1) Scatterplot visualizations of marginality vs axis 1 of the specialization with the labels removed (they make things indiscernable). Red = occupied e-space. Gray = Background e-space. 2) ENFA histogram visualizations of marginality and specialization axes. 3) PCA of total e-space with colors corresponding to sexual vs. asexual populations. 
+```{r}
+### 1) ENFA scatterplot
+#access the relevant values for plotting
+tect_ovo_asexual_df <- tect_ovo_asexual_enfa$li %>% 
+  as_tibble() %>% 
+  bind_cols(pr = tect_ovo_asexual_enfa$pr)
+
+
+tect_ovo_sexual_df <- tect_ovo_sexual_enfa$li %>% 
+  as_tibble() %>% 
+  bind_cols(pr = tect_ovo_sexual_enfa$pr)
+
+
+#asexual
+enfa_hex_plot(tect_ovo_asexual_df, marg = Mar, spec = Spe1, repro_mode = "Asexual")
+
+
+#sexual
+enfa_hex_plot(tect_ovo_sexual_df, marg = Mar, spec = Spe1, repro_mode = "Sexual")
+
+
+### 2) ENFA histogram
+#asexual
+hist(tect_ovo_asexual_enfa)
+title(main = "Asexual", adj = 0.7, line = -12)
+
+#sexual
+hist(tect_ovo_sexual_enfa)
+title(main = "Sexual", adj = 0.7, line = -12)
+
+### 3) PCA of total e-space
+total_climate_pca_plot(bg_env = tect_ovo_bg_env, locs = tect_loc, genus = "Tectarchus", species = "ovobessus")
+
+```
+
+
 This is an enfa for Tectarchus huttoni.
 ```{r}
 ###Only need to get bg env't if you're not running the previous chunk
 #get background env't for the species
-#tect_bg_env <- bg_env_crop(tect_loc, 
-#                           species = "huttoni",
-#                           environment = w, 
-#                           buffer = 0.5)
+tect_hutt_bg_env <- bg_env_crop(tect_loc, 
+                           species = "huttoni",
+                           environment = w, 
+                           buffer = 0.5)
 
 #enfa for the sexual species
 tect_hutt_sexual_enfa <- enfa_calc_fun(locs = tect_loc, 
                                   species = "huttoni", 
                                   reproductive_mode = "sexual", 
-                                  mask_raster = tect_bg_env)
+                                  mask_raster = tect_hutt_bg_env)
 
 #enfa for the asexual species
 tect_hutt_asexual_enfa <- enfa_calc_fun(locs = tect_loc, 
                                    species = "huttoni", 
                                    reproductive_mode = "asexual", 
-                                   mask_raster = tect_bg_env)
+                                   mask_raster = tect_hutt_bg_env)
 
 
 #plot the marginality scores
@@ -586,7 +763,42 @@ marginality_lollipop(sex_marg = tect_hutt_sexual_enfa$m,
 
 ```
 
+A couple different ways to visualize the environmental variation. 1) Scatterplot visualizations of marginality vs axis 1 of the specialization with the labels removed (they make things indiscernable). Red = occupied e-space. Gray = Background e-space. 2) ENFA histogram visualizations of marginality and specialization axes. 3) PCA of total e-space with colors corresponding to sexual vs. asexual populations.
+```{r}
+### 1) ENFA scatterplot
+#access the relevant values for plotting
+tect_hutt_asexual_df <- tect_hutt_asexual_enfa$li %>% 
+  as_tibble() %>% 
+  bind_cols(pr = tect_hutt_asexual_enfa$pr)
 
-###Tepakiphasma
+
+tect_hutt_sexual_df <- tect_hutt_sexual_enfa$li %>% 
+  as_tibble() %>% 
+  bind_cols(pr = tect_hutt_sexual_enfa$pr)
+
+
+#asexual
+enfa_hex_plot(tect_hutt_asexual_df, marg = Mar, spec = Spe1, repro_mode = "Asexual")
+
+
+#sexual
+enfa_hex_plot(tect_hutt_sexual_df, marg = Mar, spec = Spe1, repro_mode = "Sexual")
+
+
+### 2) ENFA histogram
+#asexual
+hist(tect_hutt_asexual_enfa)
+title(main = "Asexual", adj = 0.7, line = -12)
+
+#sexual
+hist(tect_hutt_sexual_enfa)
+title(main = "Sexual", adj = 0.7, line = -12)
+
+### 3) PCA of total e-space
+total_climate_pca_plot(bg_env = tect_hutt_bg_env, locs = tect_loc, genus = "Tectarchus", species = "huttoni")
+
+```
+
+### Tepakiphasma
 Nothing. Only one locality.
 

@@ -1,3 +1,9 @@
+require(ggplot2)
+require(plyr)
+require(dplyr)
+require(plotly)
+
+
 plot_clim_pca <- function(data, pca, factor = "species"){
   #make convex hull of genera
   find_hull <- function(df) df[chull(df$PC1, df$PC2), ]
