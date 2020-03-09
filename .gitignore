@@ -2,4 +2,9 @@ Original-spreadsheets/
 files/
 gis_files/
 maps/
+output/archive
+output/objects
+data/climate
+.Rhistory
 .DS_Store
+.Rproj.user
