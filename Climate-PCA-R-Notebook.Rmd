@@ -6,6 +6,7 @@ output:
     highlight: tango
 ---
 
+<<<<<<< HEAD
 Sorry for all of the packages. They grew and grew and grew, and I don't want to refactor everything to reduce the dependencies.
 
 ```{r message=FALSE}
@@ -43,6 +44,22 @@ source(file.path(r_path, "enfa_hex_plot.R"))
 source(file.path(r_path, "total_climate_pca_plot.R"))
 source(file.path(r_path, "raster_correlation_function.R"))
 source(file.path(r_path, "move_to_species.R"))
+=======
+Read in the packages. The working directory is wherever the R Notebook is located. 
+
+```{r include = FALSE}
+packages <- c("raster", "data.table", "sf", "tidyverse", "RStoolbox", "leaflet", "plotly", "gdata", "BSDA", "ade4", "readxl", "janitor", "rnaturalearth", "adehabitatHS") #RStoolbox has some dependencies like openMP that can be difficult to compile on a Mac (needed for the dependent package "caret"). If you have High Sierra OS or newer, search for instructions specific to your OS- it's a lot easier than older OS's.
+lapply(packages, require, character.only = TRUE)
+source("R/plot_leaflet_function.R") #source locality plotting function
+source("R/plot_climate_pca_function.R") #source pca plotting function
+source("R/species_pca_function.R") #source function that computes climate pca per species
+source("R/min_convex_poly.R") #source function that creates a minimum convex polygon around points
+source("R/enfa_calc_function.R")
+source("R/marginality_lollipop_plot.R")
+source("R/presence_absence_raster_function.R")
+source("R/crop_background_env_function.R")
+source("R/enfa_hex_plot.R")
+source("R/total_climate_pca_plot.R")
 ```
 
 
@@ -87,6 +104,7 @@ all_plot <- plot_locs_leaflet(loc, "reproductive_mode")
 
 all_plot
 
+<<<<<<< HEAD
 # save the map
 interactive_path <- here::here("output", "interactive_plots")
 mapview::mapshot(
@@ -97,6 +115,16 @@ mapview::mapshot(
 ```
 
 ## PCA-Genera {.tabset}
+=======
+## PCA-Genera {.tabset}
+
+### Climate Data
+Obtain the bioclim layers for analysis. I'm using all 19 for this preliminary exploration. I plotted the first bioclim just to make sure nothing seems wonky. I'm using CHELSA data downloaded from their website. Since the files are huge, I only unzip them one at a time, crop them, and write them to GeoTiff files that I can then load in as a rasterstack.
+```{r}
+##get chelsa data
+#chelsa_folder <- "/Users/connorfrench/Dropbox/Old_Mac/climate-data/chelsa_30s_bio"
+#zip_files <- list.files(chelsa_folder, full.names = TRUE)
+>>>>>>> 1c25d32ca92a6215be762b53ecf09286ad98212f
 
 ### Climate Data
 Read in the bioclim layers for analysis. I'm using all 19 for this preliminary exploration. I'm using CHELSA v1.2 data downloaded from [their website](http://chelsa-climate.org/downloads/). Plotting the first temperature layer to take a look at the data.
@@ -123,7 +151,11 @@ ggplot() +
 
 
 ### PCA by locality
+<<<<<<< HEAD
 This is a PCA of the climate data extracted for each locality, rather than a PCA of the total climate space. This gives us a general idea of differences in environmental niche.
+=======
+This is a PCA of the climate data extracted for each locality, rather than a PCA of the total climate space.
+>>>>>>> 1c25d32ca92a6215be762b53ecf09286ad98212f
 
 Run the pca and check out variable loadings and proportion of variance explained by components.
 
@@ -150,9 +182,15 @@ knitr::kable(round(clim_pca$rotation[,1:3],3)) #Table of loading scores for the 
 ```
 
 Two plots: One plot of the PCA colored according to genus, with convex hulls surrounding the genera. It looks like this reflects a latitudinal gradient in temperature! You can interact with the PCA plot by clicking on points to view associated metadata. You can isolate the genus you want to view by double clicking the genus in the legend! You can also remove a genus by clicking on it once. There's some other functionality you can explore in the toolbar at the top of the plot. The second plot is a PCA colored according to reproductive mode. It looks like asexual populations occupy slightly larger niche space, but both reproductive modes have a similar niche center.
+<<<<<<< HEAD
 ```{r warning=FALSE}
 #add pca results to loc_clim data frame
 loc_clim <- data.frame(loc_clim, clim_pca$x)
+=======
+```{r}
+#add pca results to loc.clim data frame
+loc.clim <- data.frame(loc.clim, clim.pca$x)
+>>>>>>> 1c25d32ca92a6215be762b53ecf09286ad98212f
 
 #use sourced plot_clim_pca function to plot the pca results. args are the data set with species names and PC axis values and the pca summary
 all_pca <- plot_clim_pca(loc_clim, summary_pca, factor = "genus")
@@ -398,12 +436,19 @@ ggsave("overall_stability_plot.png",
 ```
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1c25d32ca92a6215be762b53ecf09286ad98212f
 ## PCA-Species {.tabset}
 These are PCAs of environmental space for species within genera. Each climate PCA is of localities for a single genus, colored by species. I'm doing this even for genera with one species, so it's easy to see if certain localities group together. 
 
 ### Acanthoxyla
+<<<<<<< HEAD
 ```{r, message=FALSE, warning=FALSE}
+=======
+```{r}
+>>>>>>> 1c25d32ca92a6215be762b53ecf09286ad98212f
 #source function to conduct a PCA on individual species
 summary_list_acan <- species_pca_fun(loc_clim, "acanthoxyla")
 #plot
@@ -436,6 +481,7 @@ knitr::kable(round(loadings_acan[,1:3],3)) #Table of loading scores for the firs
 
 
 ### Argosarchus
+<<<<<<< HEAD
 ```{r message=FALSE, warning=FALSE}
 # conduct pca
 summary_list_argo <- species_pca_fun(loc_clim, "argosarchus")
@@ -445,6 +491,13 @@ argo_plot <-
   plot_clim_pca(summary_list_argo$loc_clim,
                 summary_list_argo$summary_pca,
                 factor = "reproductive_mode")
+=======
+```{r}
+#conduct pca
+summary.list.argo <- species_pca_fun(loc.clim, "argosarchus")
+#plot
+argo_plot <- plot_clim_pca(summary.list.argo$loc.clim, summary.list.argo$summary.pca, factor = "reproductive_mode")
+>>>>>>> 1c25d32ca92a6215be762b53ecf09286ad98212f
 argo_plot
 
 htmlwidgets::saveWidget(argo_plot,
@@ -785,6 +838,23 @@ saveRDS(ahor_asexual_enfa_subset,
 rm(ahor_asexual_enfa_subset)
 ```
 
+A couple different ways to visualize the environmental variation. 1) Scatterplot visualizations of marginality vs axis 1 of the specialization with the labels removed (they make things indiscernable). Red = occupied e-space. Gray = Background e-space. 2) ENFA histogram visualizations of marginality and specialization axes. 3) PCA of total e-space with colors corresponding to sexual vs. asexual populations. 
+```{r}
+### 1) ENFA scatterplot
+#access the relevant values for plotting
+ahor_asexual_df <- ahor_asexual_enfa$li %>% 
+  as_tibble() %>% 
+  bind_cols(pr = ahor_asexual_enfa$pr)
+
+
+ahor_sexual_df <- ahor_sexual_enfa$li %>% 
+  as_tibble() %>% 
+  bind_cols(pr = ahor_sexual_enfa$pr)
+
+
+#asexual
+enfa_hex_plot(ahor_asexual_df, marg = Mar, spec = Spe1, repro_mode = "Asexual")
+```
 
 We're also interested in seeing if asexual populations live in more unstable climatic areas relative to sexual populations. 
 ```{r}
@@ -918,6 +988,23 @@ move_to_species(in_path = obj_path,
                 pattern = "ahor")
 ```
 
+#sexual
+enfa_hex_plot(ahor_sexual_df, marg = Mar, spec = Spe1, repro_mode = "Sexual")
+
+
+### 2) ENFA histogram
+#asexual
+hist(ahor_asexual_enfa)
+title(main = "Asexual", adj = 0.7, line = -12)
+
+#sexual
+hist(ahor_sexual_enfa)
+title(main = "Sexual", adj = 0.7, line = -12)
+
+### 3) PCA of total e-space
+total_climate_pca_plot(bg_env = ahor_bg_env, locs = argo_loc, genus = "Argosarchus", species = "horridus")
+
+```
 
 
 ### Asteliaphasma
@@ -1013,6 +1100,7 @@ title(main = "Asexual", adj = 0.7, line = -12)
 #sexual
 hist(ajuc_sexual_enfa)
 title(main = "Sexual", adj = 0.7, line = -12)
+<<<<<<< HEAD
 
 ### 3) PCA of total e-space
 total_climate_pca_plot(bg_env = ajuc_bg_env, locs = aste_loc, genus = "Asteliophasma", species = "jucundum")
@@ -1052,6 +1140,17 @@ ajuc_asexual_enfa_subset <- enfa_calc_fun(locs = aste_loc,
                                    species = "jucundum", 
                                    reproductive_mode = "asexual", 
                                    mask_raster = ajuc_bg_env_subset)
+=======
+
+### 3) PCA of total e-space
+total_climate_pca_plot(bg_env = ajuc_bg_env, locs = aste_loc, genus = "Asteliophasma", species = "jucundum")
+
+```
+
+
+
+### Clitarchus
+>>>>>>> 1c25d32ca92a6215be762b53ecf09286ad98212f
 
 
 #plot the marginality scores
@@ -1277,6 +1376,7 @@ choo_sexual_df <- choo_sexual_enfa$li %>%
 #asexual
 enfa_hex_plot(choo_asexual_df, marg = Mar, spec = Spe1, repro_mode = "Asexual")
 
+<<<<<<< HEAD
 
 #sexual
 enfa_hex_plot(choo_sexual_df, marg = Mar, spec = Spe1, repro_mode = "Sexual")
@@ -1395,6 +1495,25 @@ ggplot(data = evi_df_choo_annual, aes(x = reproductive_mode, y = evi_stability_s
   geom_jitter(width = 0.2, alpha = 0.6) +
   scale_color_viridis_d(option = "magma") +
   theme_dark()
+=======
+
+#sexual
+enfa_hex_plot(choo_sexual_df, marg = Mar, spec = Spe1, repro_mode = "Sexual")
+
+
+### 2) ENFA histogram
+#asexual
+hist(choo_asexual_enfa)
+title(main = "Asexual", adj = 0.7, line = -12)
+
+#sexual
+hist(choo_sexual_enfa)
+title(main = "Sexual", adj = 0.7, line = -12)
+
+### 3) PCA of total e-space
+total_climate_pca_plot(bg_env = choo_bg_env, locs = aste_loc, genus = "Clitarchus", species = "hookeri")
+
+>>>>>>> 1c25d32ca92a6215be762b53ecf09286ad98212f
 ```
 
 ### Micrarchus
@@ -1523,6 +1642,10 @@ total_climate_pca_plot(bg_env = nive_bg_env, locs = nive_loc, genus = "Niveaphas
 
 ```
 
+<<<<<<< HEAD
+=======
+### Spinotectarchus
+>>>>>>> 1c25d32ca92a6215be762b53ecf09286ad98212f
 
 We're also interested in seeing if asexual populations live in more unstable climatic areas relative to sexual populations. 
 ```{r}
@@ -1754,6 +1877,7 @@ total_climate_pca_plot(bg_env = tect_ovo_bg_env, locs = tect_loc, genus = "Tecta
 ```
 
 
+<<<<<<< HEAD
 We're also interested in seeing if asexual populations live in more unstable climatic areas relative to sexual populations. 
 ```{r}
 tect_ovo_locs_asexual <- tect_loc %>% 
@@ -1855,6 +1979,8 @@ ggplot(data = evi_df_tect_ovo_annual, aes(x = reproductive_mode, y = evi_stabili
   theme_dark()
 ```
 
+=======
+>>>>>>> 1c25d32ca92a6215be762b53ecf09286ad98212f
 This is an enfa for Tectarchus huttoni.
 ```{r}
 ###Only need to get bg env't if you're not running the previous chunk
@@ -1919,6 +2045,7 @@ title(main = "Sexual", adj = 0.7, line = -12)
 total_climate_pca_plot(bg_env = tect_hutt_bg_env, locs = tect_loc, genus = "Tectarchus", species = "huttoni")
 
 ```
+<<<<<<< HEAD
 
 
 ```{r}
@@ -2020,6 +2147,9 @@ ggplot(data = evi_df_tect_hutt_annual, aes(x = reproductive_mode, y = evi_stabil
   scale_color_viridis_d(option = "magma") +
   theme_dark()
 ```
+=======
+
+>>>>>>> 1c25d32ca92a6215be762b53ecf09286ad98212f
 ### Tepakiphasma
 Nothing. Only one locality.
 
