@@ -1,0 +1,47 @@
+---
+title: "EVI Stability Archive"
+author: "Connor French"
+date: "3/2/2020"
+output: html_document
+---
+
+## Argosarchus horridus
+Argosarchus EVI stability
+```{r}
+evi_asexual_ahor <- raster::extract(evi_stability_scaled_monthly, argo_locs_asexual) %>% 
+  enframe(name = NULL, value = "evi_stability_scaled") %>% 
+  mutate(reproductive_mode = "asexual")
+
+evi_sexual_ahor <- raster::extract(evi_stability_scaled_monthly, argo_locs_sexual) %>% 
+  enframe(name = NULL, value = "evi_stability_scaled") %>% 
+  mutate(reproductive_mode = "sexual")
+
+evi_df_ahor <- bind_rows(evi_asexual_ahor, evi_sexual_ahor)
+
+ggplot(data = evi_df_ahor, aes(x = reproductive_mode, y = evi_stability_scaled, color = reproductive_mode)) +
+  geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  scale_color_viridis_d(option = "magma") +
+  theme_dark()
+```
+
+Annual stability
+```{r}
+evi_asexual_ahor_annual <- raster::extract(evi_stability_scaled_annual, argo_locs_asexual) %>% 
+  enframe(name = NULL, value = "evi_stability_scaled_annual") %>% 
+  mutate(reproductive_mode = "asexual")
+
+evi_sexual_ahor_annual <- raster::extract(evi_stability_scaled_annual, argo_locs_sexual) %>% 
+  enframe(name = NULL, value = "evi_stability_scaled_annual") %>% 
+  mutate(reproductive_mode = "sexual")
+
+evi_df_ahor_annual <- bind_rows(evi_asexual_ahor_annual, evi_sexual_ahor_annual)
+
+ggplot(data = evi_df_ahor_annual, aes(x = reproductive_mode, y = evi_stability_scaled_annual, color = reproductive_mode)) +
+  geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  scale_color_viridis_d(option = "magma") +
+  theme_dark()
+```
+
+
