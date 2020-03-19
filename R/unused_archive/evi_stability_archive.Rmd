@@ -44,4 +44,183 @@ ggplot(data = evi_df_ahor_annual, aes(x = reproductive_mode, y = evi_stability_s
   theme_dark()
 ```
 
+## Asteliaphasma jucundum
+```{r}
+evi_asexual_ajuc <- raster::extract(evi_stability_scaled, aste_locs_asexual) %>% 
+  enframe(name = NULL, value = "evi_stability_scaled") %>% 
+  mutate(reproductive_mode = "asexual")
+
+evi_sexual_ajuc <- raster::extract(evi_stability_scaled, aste_locs_sexual) %>% 
+  enframe(name = NULL, value = "evi_stability_scaled") %>% 
+  mutate(reproductive_mode = "sexual")
+
+evi_df_ajuc <- bind_rows(evi_asexual_ajuc, evi_sexual_ajuc)
+
+ggplot(data = evi_df_ajuc, aes(x = reproductive_mode, y = evi_stability_scaled, color = reproductive_mode)) +
+  geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  scale_color_viridis_d(option = "magma") +
+  theme_dark()
+
+```
+
+Annual stability
+```{r}
+evi_asexual_ajuc_annual <- raster::extract(evi_stability_scaled_annual, aste_locs_asexual) %>% 
+  enframe(name = NULL, value = "evi_stability_scaled_annual") %>% 
+  mutate(reproductive_mode = "asexual")
+
+evi_sexual_ajuc_annual <- raster::extract(evi_stability_scaled_annual, aste_locs_sexual) %>% 
+  enframe(name = NULL, value = "evi_stability_scaled_annual") %>% 
+  mutate(reproductive_mode = "sexual")
+
+evi_df_ajuc_annual <- bind_rows(evi_asexual_ajuc_annual, evi_sexual_ajuc_annual)
+
+ggplot(data = evi_df_ajuc_annual, aes(x = reproductive_mode, y = evi_stability_scaled_annual, color = reproductive_mode)) +
+  geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  scale_color_viridis_d(option = "magma") +
+  theme_dark()
+```
+
+## Clitarchus hookeri
+
+Annual stability
+```{r}
+evi_asexual_choo_annual <- raster::extract(evi_stability_scaled_annual, clita_locs_asexual) %>% 
+  enframe(name = NULL, value = "evi_stability_scaled_annual") %>% 
+  mutate(reproductive_mode = "asexual")
+
+evi_sexual_choo_annual <- raster::extract(evi_stability_scaled_annual, clita_locs_sexual) %>% 
+  enframe(name = NULL, value = "evi_stability_scaled_annual") %>% 
+  mutate(reproductive_mode = "sexual")
+
+evi_df_choo_annual <- bind_rows(evi_asexual_choo_annual, evi_sexual_choo_annual)
+
+ggplot(data = evi_df_choo_annual, aes(x = reproductive_mode, y = evi_stability_scaled_annual, color = reproductive_mode)) +
+  geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  scale_color_viridis_d(option = "magma") +
+  theme_dark()
+```
+
+## Niveaphasma annulata
+
+```{r}
+evi_asexual_nive <- raster::extract(evi_stability_scaled, nive_locs_asexual) %>% 
+  enframe(name = NULL, value = "evi_stability_scaled") %>% 
+  mutate(reproductive_mode = "asexual")
+
+evi_sexual_nive <- raster::extract(evi_stability_scaled, nive_locs_sexual) %>% 
+  enframe(name = NULL, value = "evi_stability_scaled") %>% 
+  mutate(reproductive_mode = "sexual")
+
+evi_df_nive <- bind_rows(evi_asexual_nive, evi_sexual_nive)
+
+ggplot(data = evi_df_nive, aes(x = reproductive_mode, y = evi_stability_scaled, color = reproductive_mode)) +
+  geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  scale_color_viridis_d(option = "magma") +
+  theme_dark()
+
+```
+
+
+
+Annual stability
+```{r}
+evi_asexual_nive_annual <- raster::extract(evi_stability_scaled_annual, nive_locs_asexual) %>% 
+  enframe(name = NULL, value = "evi_stability_scaled_annual") %>% 
+  mutate(reproductive_mode = "asexual")
+
+evi_sexual_nive_annual <- raster::extract(evi_stability_scaled_annual, nive_locs_sexual) %>% 
+  enframe(name = NULL, value = "evi_stability_scaled_annual") %>% 
+  mutate(reproductive_mode = "sexual")
+
+evi_df_nive_annual <- bind_rows(evi_asexual_nive_annual, evi_sexual_nive_annual)
+
+ggplot(data = evi_df_nive_annual, aes(x = reproductive_mode, y = evi_stability_scaled_annual, color = reproductive_mode)) +
+  geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  scale_color_viridis_d(option = "magma") +
+  theme_dark()
+```
+
+
+## Tectarchus ovobessus
+
+```{r}
+evi_asexual_tect_ovo <- raster::extract(evi_stability_scaled, tect_ovo_locs_asexual) %>% 
+  enframe(name = NULL, value = "evi_stability_scaled") %>% 
+  mutate(reproductive_mode = "asexual")
+
+evi_sexual_tect_ovo <- raster::extract(evi_stability_scaled, tect_ovo_locs_sexual) %>% 
+  enframe(name = NULL, value = "evi_stability_scaled") %>% 
+  mutate(reproductive_mode = "sexual")
+
+evi_df_tect_ovo <- bind_rows(evi_asexual_tect_ovo, evi_sexual_tect_ovo)
+
+ggplot(data = evi_df_tect_ovo, aes(x = reproductive_mode, y = evi_stability_scaled, color = reproductive_mode)) +
+  geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  scale_color_viridis_d(option = "magma") +
+  theme_dark()
+```
+
+Annual stability
+```{r}
+evi_asexual_tect_ovo_annual <- raster::extract(evi_stability_scaled_annual, tect_ovo_locs_asexual) %>% 
+  enframe(name = NULL, value = "evi_stability_scaled_annual") %>% 
+  mutate(reproductive_mode = "asexual")
+
+evi_sexual_tect_ovo_annual <- raster::extract(evi_stability_scaled_annual, tect_ovo_locs_sexual) %>% 
+  enframe(name = NULL, value = "evi_stability_scaled_annual") %>% 
+  mutate(reproductive_mode = "sexual")
+
+evi_df_tect_ovo_annual <- bind_rows(evi_asexual_tect_ovo_annual, evi_sexual_tect_ovo_annual)
+
+ggplot(data = evi_df_tect_ovo_annual, aes(x = reproductive_mode, y = evi_stability_scaled_annual, color = reproductive_mode)) +
+  geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  scale_color_viridis_d(option = "magma") +
+  theme_dark()
+```
+
+## Tectarchus huttoni
+```{r}
+evi_asexual_tect_hutt <- raster::extract(evi_stability_scaled, tect_hutt_locs_asexual) %>% 
+  enframe(name = NULL, value = "evi_stability_scaled") %>% 
+  mutate(reproductive_mode = "asexual")
+
+evi_sexual_tect_hutt <- raster::extract(evi_stability_scaled, tect_hutt_locs_sexual) %>% 
+  enframe(name = NULL, value = "evi_stability_scaled") %>% 
+  mutate(reproductive_mode = "sexual")
+
+evi_df_tect_hutt <- bind_rows(evi_asexual_tect_hutt, evi_sexual_tect_hutt)
+
+ggplot(data = evi_df_tect_hutt, aes(x = reproductive_mode, y = evi_stability_scaled, color = reproductive_mode)) +
+  geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  scale_color_viridis_d(option = "magma") +
+  theme_dark()
+```
+
+Annual stability
+```{r}
+evi_asexual_tect_hutt_annual <- raster::extract(evi_stability_scaled_annual, tect_hutt_locs_asexual) %>% 
+  enframe(name = NULL, value = "evi_stability_scaled_annual") %>% 
+  mutate(reproductive_mode = "asexual")
+
+evi_sexual_tect_hutt_annual <- raster::extract(evi_stability_scaled_annual, tect_hutt_locs_sexual) %>% 
+  enframe(name = NULL, value = "evi_stability_scaled_annual") %>% 
+  mutate(reproductive_mode = "sexual")
+
+evi_df_tect_hutt_annual <- bind_rows(evi_asexual_tect_hutt_annual, evi_sexual_tect_hutt_annual)
+
+ggplot(data = evi_df_tect_hutt_annual, aes(x = reproductive_mode, y = evi_stability_scaled_annual, color = reproductive_mode)) +
+  geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  scale_color_viridis_d(option = "magma") +
+  theme_dark()
+```
 
