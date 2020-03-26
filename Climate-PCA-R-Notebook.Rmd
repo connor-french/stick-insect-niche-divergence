@@ -468,8 +468,10 @@ ggsave("overall_stability_plot.png",
 
 
 
-## PCA-Species {.tabset}
+## Environmental space per species {.tabset}
 These are PCAs of environmental space for species within genera. Each climate PCA is of localities for a single genus, colored by species. I'm doing this even for genera with one species, so it's easy to see if certain localities group together. 
+
+I'm also conducting Enviromental Niche Factor Analysis to investigate the influence of reproductive mode on niche marginality.
 
 ### Acanthoxyla
 ```{r, message=FALSE, warning=FALSE}
@@ -1329,6 +1331,8 @@ ajuc_precip_stability_plot <- ggplot(data = precip_df_ajuc, aes(x = reproductive
   scale_color_viridis_d(option = "magma") +
   theme_dark()
 
+ajuc_precip_stability_plot
+
 ggsave("ajuc_precip_stability.png",
        plot = ajuc_precip_stability_plot,
        device = "png",
@@ -1354,6 +1358,8 @@ ajuc_temp_stability_plot <- ggplot(data = temp_df_ajuc, aes(x = reproductive_mod
   scale_color_viridis_d(option = "magma") +
   theme_dark()
 
+ajuc_temp_stability_plot
+
 ggsave("ajuc_precip_stability.png",
        plot = ajuc_temp_stability_plot,
        device = "png",
@@ -1378,6 +1384,8 @@ ajuc_overall_stability_plot <- ggplot(data = overall_df_ajuc, aes(x = reproducti
   geom_jitter(width = 0.2, alpha = 0.6) +
   scale_color_viridis_d(option = "magma") +
   theme_dark()
+
+ajuc_overall_stability_plot
 
 ggsave("ajuc_overall_stability.png",
        plot = ajuc_overall_stability_plot,
@@ -3215,6 +3223,8 @@ move_to_species(in_path = obj_path,
 
 ### Tepakiphasma
 Nothing. Only one locality.
+
+
 
 ## Convenience scripts
 *These scripts aren't crucial for reproducing this analysis, but were helpful for various reasons. Some of these have hard-coded paths and such, so no guarantees for use right out of the box.*

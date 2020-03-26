@@ -1,0 +1,242 @@
+---
+title: "Publication Figures"
+author: "Connor French"
+date: "3/23/2020"
+output: 
+  html_document:
+    theme: flatly
+    highlight: tango
+---
+
+
+Load packages
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(here)
+library(readxl)
+library(sf)
+library(tidyverse)
+library(ggsn)
+library(ggtext)
+library(ggrepel)
+library(ggthemes)
+library(rmapshaper)
+library(fs)
+```
+
+
+
+## Manuscript figures and tables {.tabset}
+
+### Sampling map
+Idea: colors by species and shapes by reproductive mode
+
+```{r}
+locs <-
+  readxl::read_excel(here("data/all species New_6-14-19.xlsx")) %>%
+  rename(repro_mode = `Reproductive mode`) %>%
+  filter(
+    genus != "acanthoxyla",
+    genus != "micrarchus",
+    genus != "spinotectarchus",
+    genus != "Tepakiphasma",
+    species != "nov. sp.",
+    species != "rakauwhakanekeneke",
+    species != "tepaki",
+    species != "salebrosus"
+  ) %>%
+  mutate(genus = str_to_sentence(genus)) %>%
+  mutate(genus_sp = str_c(genus, species, sep = " ") %>% str_to_sentence()) %>% 
+  st_as_sf(coords = c("longitude", "latitude"), crs = 4326, remove = FALSE)
+
+nz_basemap <-
+  st_read(here("data", "NewZealand_Boundary.kml")) %>% st_crop(
+    xmin = 165,
+    xmax = 179,
+    ymin = -48,
+    ymax = -34
+  ) %>%
+  rmapshaper::ms_simplify()
+
+full_map <- ggplot() +
+  geom_sf(data = nz_basemap) +
+  facet_wrap(~ genus_sp) +
+  geom_sf(data = locs, aes(shape = repro_mode), show.legend = "point") +
+  expand_limits(x = 180) +
+  scale_shape_manual(values = c(1, 19), name = "Reproductive mode") +
+  scale_color_colorblind() +
+  ggsn::scalebar(
+    data = locs,
+    dist = 125,
+    height = 0.03,
+    st.bottom = FALSE,
+    st.dist = 0.05,
+    st.size = 3,
+    dist_unit = "km",
+    transform = TRUE,
+    location = "bottomright" ,
+    model = 'WGS84',
+    facet.var = c("genus_sp"),
+    facet.lev = c("Tectarchus ovobessus")
+  ) +
+  theme_map() +
+  theme(legend.position = c(0.88, 0.58))
+
+
+ggsn::north2(ggp = full_map, x = 0.81, y = 0.14, symbol = 4)
+```
+
+
+
+
+### Marginality scores
+Idea: paired lollipop plot (color = reproductive mode). Spacing to indicate pairs and single species label per pair. Stars to indicate statistical significance.
+
+```{r, message=FALSE, warning=FALSE}
+spread_path <- here("output", "spreadsheets")
+
+# get all files to read in
+dir_list <-
+  dir_ls(spread_path, glob = "*_subset_*_marginality_score.csv",
+         recurse = TRUE)
+
+# get reproductive mode. A bit hacky, but I don't want to spend too much time with this. _sexual = sexual, while sexual = asexual
+m <-
+  map(dir_list, function(x)
+    str_extract(x, "_*sexual")) %>% unlist()
+
+# get genus and species numbers for all of the values. Have to repeat each twice since we're reading in two spreadsheets per species
+genus_sp_names <-
+  dir_ls(spread_path) %>% str_extract(pattern = "[^/]+$") %>% rep(each = 2)
+
+
+# read in all csv files and bind the rows. make a new column with reproductive mode and genus_sp name.
+all_marg <- map(dir_list, read_csv) %>%
+  bind_rows() %>%
+  mutate(
+    repro_mode = case_when(m == "sexual" ~ "asexual",
+                           m == "_sexual" ~ "sexual") %>%
+      str_to_sentence(),
+    genus_sp = str_replace(genus_sp_names, "_", " ") %>% str_to_sentence()
+  ) %>%
+  tidyr::pivot_wider(names_from = repro_mode, values_from = marginality) %>%
+  rowwise() %>%
+  mutate(mean_marg = mean(c(Asexual, Sexual))) %>%
+  ungroup() %>%
+  mutate(genus_sp = fct_reorder(genus_sp, mean_marg))
+
+marg_lollipop <-
+  ggplot(data = all_marg, aes(x = repro_mode, y = marginality, group = genus_sp)) +
+  geom_segment(aes(
+    x = genus_sp,
+    xend = genus_sp,
+    y = Asexual,
+    yend = Sexual
+  )) +
+  geom_point(
+    aes(x = genus_sp, y = Asexual),
+    shape = 21,
+    size = 4,
+    fill = "white"
+  ) +
+  geom_point(aes(x = genus_sp, y = Sexual), shape = 19, size = 4) +
+  labs(x = "Species", y = "Marginality") +
+  coord_flip() +
+  theme_minimal()
+
+marg_lollipop
+
+```
+
+
+### Environmental space
+Should I do PC space or the marginality vs specificity plots? Or both and put one in Supp material.
+
+Idea 1: Just use the hex plot with species env. space scatterplot on top that I've already made. Might choose a different way to represent density of background environmental space.
+
+Idea 2: contour plot in PC space (the dimension reduction ENFA outputs or PCA): unique contours for each reproductive mode and background e-space. 
+
+
+
+
+### Stability
+Idea: boxplots faceted by species. Decision- do I want to plot temperature, precipitation, and overall, or just pick one? I think it's possible to represent all three in a single facet, since stability is scaled from 0-1. Color according to metric, rather than have the metric labeled on each plot. 
+
+
+```{r, warning=FALSE, message=FALSE}
+# get files to read in for each metric (temperature, precipitation, overall)
+temp_stab_list <-
+  dir_ls(spread_path, glob = "*temp_stability_df.csv",
+         recurse = TRUE)
+
+precip_stab_list <-
+  dir_ls(spread_path, glob = "*precip_stability_df.csv",
+         recurse = TRUE)
+
+overall_stab_list <-
+  dir_ls(spread_path, glob = "*overall_stability_df.csv",
+         recurse = TRUE)
+
+
+read_csv_sp_name <- function(file) {
+  s <- read_csv(file)
+  
+  genus_sp_file <- str_split(file, pattern = "/") %>% unlist()
+  
+  genus_sp <- genus_sp_file[length(genus_sp_file) - 1]
+  
+  mutate(s, genus_sp = genus_sp)
+}
+
+temp_stab <- map(temp_stab_list, read_csv_sp_name) %>% bind_rows()
+precip_stab <- map(precip_stab_list, read_csv_sp_name) %>% bind_rows()
+overall_stab <- map(overall_stab_list, read_csv_sp_name) %>% bind_rows()
+
+
+# this assumes all individuals are in the same order. A glance at each data set confirms this, but make sure not to rearrange observation
+all_stab <- bind_cols(temp_stab, 
+                      precip_stab %>% select(contains("stability")),
+                      overall_stab %>% select(contains("stability"))) %>% 
+  pivot_longer(cols = contains("stability"), names_to = "metric", values_to = "stability") %>% 
+  mutate(metric = str_remove(metric, "_stability_scaled"),
+         genus_sp = str_replace(genus_sp, "_", " ") %>% str_to_sentence(),
+         reproductive_mode = str_to_sentence(reproductive_mode)) %>% 
+  mutate(metric = case_when(
+    metric == "overall" ~ "Overall",
+    metric == "temp" ~ "Temperature",
+    metric == "precip" ~ "Precipitation"
+  ))
+
+ggplot(data = all_stab, aes(x = metric, y = stability, fill = reproductive_mode)) + 
+  geom_boxplot() +
+  scale_fill_manual(values = c("transparent", "darkgrey")) +
+  labs(y = "Scaled Stability", x = "", fill = "Reproductive mode") +
+  facet_wrap(~ genus_sp) + 
+  theme_minimal()
+```
+
+Calculating some statistics from the data (sample size, assumptions, pairwise comparisons, etc.)
+
+```{r}
+library(performance)
+# counts per species per reproductive mode
+all_stab %>% 
+  group_by(genus_sp, reproductive_mode) %>% 
+  tally() 
+  
+# check models
+ahor_temp_stab <- all_stab %>% filter(genus_sp == "Argosarchus horridus", metric == "Temperature")
+
+
+ahor_temp_ttest <- t.test(stability ~ reproductive_mode, data = ahor_temp_stab) %>% broom::tidy()
+
+shapiro.test(ahor_temp_stab %>% filter(reproductive_mode == "Asexual") %>% select(stability) %>% as_vector()) %>% broom::tidy() %>% select(p.value, method)
+
+var.test(stability ~ reproductive_mode, data = ahor_temp_stab) %>% broom::tidy() %>% select(p.value, method)
+
+
+
+```
+
+
+
+
