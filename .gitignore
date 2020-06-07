@@ -1,10 +1,9 @@
-Original-spreadsheets/
-files/
-gis_files/
-maps/
-output/archive
-output/objects
-data/climate
+Original-spreadsheets/*
+files/*
+gis_files/*
+maps/*
+output/*
+data/climate/*
 .Rhistory
 .DS_Store
 .Rproj.user

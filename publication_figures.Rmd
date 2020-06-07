@@ -1,39 +1,80 @@
 ---
 title: "Publication Figures"
 author: "Connor French"
-date: "3/23/2020"
 output: 
   html_document:
+    code_folding: hide
     theme: flatly
     highlight: tango
 ---
 
 
 Load packages
-```{r, echo=FALSE, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE}
 library(here)
+library(raster)
 library(readxl)
 library(sf)
 library(tidyverse)
+library(furrr)
 library(ggsn)
 library(ggtext)
 library(ggrepel)
 library(ggthemes)
 library(rmapshaper)
 library(fs)
+library(broom)
+library(adehabitatHS)
+library(gt)
+
+# set the path for spreadsheets
+spread_path <- here("output", "spreadsheets")
 ```
 
+# Methods, Results, Figures {.tabset}
+
+## Methods
+
+### Sampling
+*Question*: Should I use the terminology asexual and sexual or unisexual and bisexual? I realized I've been using asexual and sexual without thinking too hard about it. Just because there's a unisexual population, it doesn't mean they're not at least facultatively parthenogenic, right?  
 
 
-## Manuscript figures and tables {.tabset}
+A total of six Phasmid species were sampled from across New Zealand (Table). We selected species that contain multiple asexual and sexual populations. *Need sampling details*.
+
+### Environmental data
+
+### Marginality
+Niche marginality is the magnitude which the center of species' Hutchinsonian niche differs from available environmental conditions (Hirzel et al. 2002). We estimated the marginality of each species-reproductive mode combination using the adehabitatHS v0.3.14 package in R v3.6.0 (adehabitat CITE, R CITE). Statistical significance was assessed using a permutation-based approach, implemented in the R package adehabitatHS v0.3.14 *(Elaborate?)*. We obtained 19 bioclimatic variables from the CHELSA database v1.2 to summarize current climatic conditions (Karger et al. 2017). These variables are derived from the ERA-Interim climatic analysis and capture broad-scale temperature and precipitation patterns. The variables were scaled at 1 km resolution. We sampled all environment from within a 50 km buffer placed around a minimum convex hull of each species' sampling range to represent the available background environment. 
+
+### Stability
+To capture historical climate dynamics, we obtained climate data from seven additional time periods: the late-Holocene (4.2-0.3 kya), the mid-Holocene (8.326-4.2 kya), the early-Holocene (11.7-8.326 kya), the Younger Dryas Stadial (12.9-11.7 kya), the Bølling-Allerød (14.7-12.9 kya), the Heinrich Stadial 1 (17.0-14.7 kya), and the Last Glacial Maximum (~21 kya). All variables were downloaded from the Paleoclim database (Brown cite). All variables except the Last Glacial Maximum (LGM) were derived from Fordham et al. (2017). The LGM data were derived from the CHELSA v1.2 database, which uses the PMIP3 circulation model (Karger et al. 2017). All variables were scaled to 5 km resolution, and current climate was downscaled to match the resolution of the other variables. We estimated climate stability since the LGM using the average annual temperature and average annual precipitation variables. We used the climateStability v0.1.1 R package (Owens and Guralnick 2019) to calculate stability across time periods. Briefly, the method calculates the stability of a climate variable as inverse of the mean standard deviation between time slices over time elapsed (Owens and Guralnick 2019). In addition to temperature and precipitation stability, we estimated overall climate stability as the product of the two stability values. We then extracted stability values for each species-reproductive mode combination, where a stability value was recovered for each individual locality. To assess statistical differences in occupied stability between reproductive modes, we conducted Welch's t-tests (CITE) for each species and stability metric.
+
+### Seasonality
+
+## Results
+
+### Marginality
+* Sexual individuals occupied more marginal habitat than asexual individuals for all species
+* p-values to come
+
+### Stability
+* Asexual individuals occupy siginficantly more stable climate space than sexual individuals in three species- *Asteliaphasma jucundum*, *Clitarchus hookeri*, and *Tectarchus ovobessus*. In *A. jucundum* and *C. hookeri*, this is in all three metrics. In *T. ovobessus*, this is for temperature.
+* Sexual individuals occupy significantly more stable climate space than asexual individuals in *Argosarchus horridus* according to all three metrics 
+* See table for significant results
+
+### Seasonality
+
+## Figures and Tables {.tabset}
+
 
 ### Sampling map
-Idea: colors by species and shapes by reproductive mode
 
-```{r}
+Caption: Sampling localities for the six species included in this study. Open circles signify asexual individuals, while closed circles signify sexual individuals. Sample sizes are as follows: *Argosarchus horridus*: 96 asexual, 213 sexual; *Asteliaphasma jucundum*: 21 asexual, 159 sexual; *Clitarchus hookeri*: 147 asexual, 351 sexual; *Niveaphasma annulata*: 111 asexual, 114 sexual; *Tectarchus huttoni*: 33 asexual, 45 sexual; *Tectarchus ovobessus*: 60 asexual, 27 sexual.
+
+```{r, message=FALSE, warning=FALSE, fig.height=7, fig.width=10}
 locs <-
   readxl::read_excel(here("data/all species New_6-14-19.xlsx")) %>%
-  rename(repro_mode = `Reproductive mode`) %>%
+  rename(reproductive_mode = `Reproductive mode`) %>%
   filter(
     genus != "acanthoxyla",
     genus != "micrarchus",
@@ -49,7 +90,7 @@ locs <-
   st_as_sf(coords = c("longitude", "latitude"), crs = 4326, remove = FALSE)
 
 nz_basemap <-
-  st_read(here("data", "NewZealand_Boundary.kml")) %>% st_crop(
+  st_read(here("data", "NewZealand_Boundary.kml"), quiet = TRUE) %>% st_crop(
     xmin = 165,
     xmax = 179,
     ymin = -48,
@@ -60,44 +101,56 @@ nz_basemap <-
 full_map <- ggplot() +
   geom_sf(data = nz_basemap) +
   facet_wrap(~ genus_sp) +
-  geom_sf(data = locs, aes(shape = repro_mode), show.legend = "point") +
+  geom_sf(data = locs, aes(shape = reproductive_mode), show.legend = "point") +
   expand_limits(x = 180) +
   scale_shape_manual(values = c(1, 19), name = "Reproductive mode") +
   scale_color_colorblind() +
   ggsn::scalebar(
     data = locs,
-    dist = 125,
+    dist = 250,
+    dist_unit = "km",
     height = 0.03,
     st.bottom = FALSE,
     st.dist = 0.05,
-    st.size = 3,
-    dist_unit = "km",
+    st.size = 4,
     transform = TRUE,
     location = "bottomright" ,
-    model = 'WGS84',
+    model = "WGS84",
     facet.var = c("genus_sp"),
     facet.lev = c("Tectarchus ovobessus")
   ) +
   theme_map() +
-  theme(legend.position = c(0.88, 0.58))
+  theme(legend.position = "bottom", 
+        legend.text = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        strip.text = element_text(size = 12, face = "bold.italic"))
+
+pdf(file = here("output", "manuscript_figs", "map.pdf"),
+    width = 10,
+    height= 7)
+ggsn::north2(ggp = full_map, x = 0.77, y = 0.2, symbol = 4)
+dev.off()
 
 
-ggsn::north2(ggp = full_map, x = 0.81, y = 0.14, symbol = 4)
+ggsn::north2(ggp = full_map, x = 0.77, y = 0.2, symbol = 4)
 ```
 
 
 
 
 ### Marginality scores
-Idea: paired lollipop plot (color = reproductive mode). Spacing to indicate pairs and single species label per pair. Stars to indicate statistical significance.
+Caption: Marginality estimates for each species-reproductive mode combination. In all cases, sexual individuals occupy more marginal environmental space than asexual individuals. Ecological niche factor analysis was performed to determine if a reproductive mode occupies more marginal environmental space than the background environment of the entire species. Statistical significance is indicated by asterisks, where \* indicates *p* < 0.05 and \*\* indicates *p* < 0.01.
+
+Note: going to include asterisks to indicate statistical significance or mention in the caption and reference the  table if many values are significant. Will insert significance asterisks outside of R. 
 
 ```{r, message=FALSE, warning=FALSE}
-spread_path <- here("output", "spreadsheets")
 
 # get all files to read in
 dir_list <-
-  dir_ls(spread_path, glob = "*_subset_*_marginality_score.csv",
-         recurse = TRUE)
+  dir_ls(spread_path, glob = "*_marginality_score.csv",
+         recurse = TRUE) 
+
+dir_list <- dir_list[!str_detect(dir_list, "subset")]
 
 # get reproductive mode. A bit hacky, but I don't want to spend too much time with this. _sexual = sexual, while sexual = asexual
 m <-
@@ -106,7 +159,10 @@ m <-
 
 # get genus and species numbers for all of the values. Have to repeat each twice since we're reading in two spreadsheets per species
 genus_sp_names <-
-  dir_ls(spread_path) %>% str_extract(pattern = "[^/]+$") %>% rep(each = 2)
+  dir_ls(spread_path) %>% 
+  str_extract(pattern = "[^/]+$") %>% 
+  rep(each = 2)
+
 
 
 # read in all csv files and bind the rows. make a new column with reproductive mode and genus_sp name.
@@ -116,7 +172,12 @@ all_marg <- map(dir_list, read_csv) %>%
     repro_mode = case_when(m == "sexual" ~ "asexual",
                            m == "_sexual" ~ "sexual") %>%
       str_to_sentence(),
-    genus_sp = str_replace(genus_sp_names, "_", " ") %>% str_to_sentence()
+    genus = str_split_fixed(genus_sp_names, pattern = "_", n = 2)[,1] %>% 
+      str_extract("^[a-z]") %>% 
+      str_to_sentence() %>% 
+      str_c("."),
+    species = str_split_fixed(genus_sp_names, pattern = "_", n = 2)[,2],
+    genus_sp = str_c(genus, species, sep = " ")
   ) %>%
   tidyr::pivot_wider(names_from = repro_mode, values_from = marginality) %>%
   rowwise() %>%
@@ -141,28 +202,30 @@ marg_lollipop <-
   geom_point(aes(x = genus_sp, y = Sexual), shape = 19, size = 4) +
   labs(x = "Species", y = "Marginality") +
   coord_flip() +
-  theme_minimal()
+  theme_bw() + 
+  theme(axis.title = element_text(size = 14),
+        axis.text = element_text(size = 10),
+        axis.text.y = element_text(face = "italic"))
+
+pdf(file = here("output", "manuscript_figs", "marginality.pdf"),
+    width = 7,
+    height = 4.32623792125) # divide 7 by the golden ratio
+marg_lollipop
+dev.off()
 
 marg_lollipop
 
 ```
 
 
-### Environmental space
-Should I do PC space or the marginality vs specificity plots? Or both and put one in Supp material.
-
-Idea 1: Just use the hex plot with species env. space scatterplot on top that I've already made. Might choose a different way to represent density of background environmental space.
-
-Idea 2: contour plot in PC space (the dimension reduction ENFA outputs or PCA): unique contours for each reproductive mode and background e-space. 
-
-
-
-
 ### Stability
-Idea: boxplots faceted by species. Decision- do I want to plot temperature, precipitation, and overall, or just pick one? I think it's possible to represent all three in a single facet, since stability is scaled from 0-1. Color according to metric, rather than have the metric labeled on each plot. 
+*Note: below the statistics are stability maps to put these results into context*
 
 
-```{r, warning=FALSE, message=FALSE}
+Caption: Distribution of environmental stability since the last glacial maximum (LGM) for each species-reproductive mode combination. Stability was estimated for average annual temperature, average annual precipitation, and overall stability, which is temperature multiplied by precipitation. Time periods for the  Statistical significance is indicated by asterisks, where \* indicates *p* < 0.05 and \*\* indicates *p* < 0.01.
+
+Note: I'm putting asterisks in outside of R. The top row are all significantly different across metrics (temp, precip, overall). T. ovobessus is significantly different for temperature. 
+```{r, warning=FALSE, message=FALSE, fig.width=9, fig.height=7}
 # get files to read in for each metric (temperature, precipitation, overall)
 temp_stab_list <-
   dir_ls(spread_path, glob = "*temp_stability_df.csv",
@@ -194,8 +257,8 @@ overall_stab <- map(overall_stab_list, read_csv_sp_name) %>% bind_rows()
 
 # this assumes all individuals are in the same order. A glance at each data set confirms this, but make sure not to rearrange observation
 all_stab <- bind_cols(temp_stab, 
-                      precip_stab %>% select(contains("stability")),
-                      overall_stab %>% select(contains("stability"))) %>% 
+                      precip_stab %>% dplyr::select(contains("stability")),
+                      overall_stab %>% dplyr::select(contains("stability"))) %>% 
   pivot_longer(cols = contains("stability"), names_to = "metric", values_to = "stability") %>% 
   mutate(metric = str_remove(metric, "_stability_scaled"),
          genus_sp = str_replace(genus_sp, "_", " ") %>% str_to_sentence(),
@@ -206,37 +269,592 @@ all_stab <- bind_cols(temp_stab,
     metric == "precip" ~ "Precipitation"
   ))
 
-ggplot(data = all_stab, aes(x = metric, y = stability, fill = reproductive_mode)) + 
+stab_box <- ggplot(data = all_stab, aes(x = metric, y = stability, fill = reproductive_mode)) + 
   geom_boxplot() +
   scale_fill_manual(values = c("transparent", "darkgrey")) +
-  labs(y = "Scaled Stability", x = "", fill = "Reproductive mode") +
+  labs(y = "Scaled Stability", fill = "Reproductive mode") +
   facet_wrap(~ genus_sp) + 
-  theme_minimal()
+  theme_few() +
+  theme(legend.text = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        strip.background = element_rect(fill = "lightgrey", color = "black"),
+        strip.text = element_text(size = 12, face = "bold.italic"),
+        panel.grid.major.y = element_line( size=.1, color="gray" ),
+        legend.position = "top",
+        axis.title.x = element_blank(),
+        axis.title.y = element_text(size = 16))
+
+pdf(file = here("output", "manuscript_figs", "stability.pdf"),
+    width = 9,
+    height= 7)
+stab_box
+dev.off()
+
+stab_box
 ```
+
+#### Statistics
 
 Calculating some statistics from the data (sample size, assumptions, pairwise comparisons, etc.)
 
-```{r}
-library(performance)
+```{r, warning=FALSE, message=FALSE}
+
 # counts per species per reproductive mode
+paste0("Sample size per species per reproductive mode.")
 all_stab %>% 
   group_by(genus_sp, reproductive_mode) %>% 
   tally() 
+
+# df is all_stab or all_seasonality , genus_species is formatted "Genus species", metric is "Temperature", "Precipitation", or "Overall", scale is "stability" or "seasonality
+check_assumptions <- function(df, genus_species, metric, scale = "stability") {
+  stab <- df %>% 
+    filter(genus_sp == genus_species, metric == metric)
   
-# check models
-ahor_temp_stab <- all_stab %>% filter(genus_sp == "Argosarchus horridus", metric == "Temperature")
+  asexual <- stab %>%
+    filter(reproductive_mode == "Asexual") %>%
+    dplyr::select(scale) %>%
+    as_vector()
+
+  sexual <- stab %>%
+    filter(reproductive_mode == "Sexual") %>%
+    dplyr::select(scale) %>%
+    as_vector()
+
+  # # shapiro wilk test for normality for both reproductive modes
+  shapiro_asexual <-
+    shapiro.test(asexual) %>%
+    broom::tidy() %>%
+    dplyr::select(p.value, method) %>%
+    mutate(genus_sp = genus_species,
+           reproductive_mode = "Asexual",
+           metric = metric)
+
+  shapiro_sexual <-
+    shapiro.test(sexual) %>%
+    broom::tidy() %>%
+    dplyr::select(p.value, method) %>%
+    mutate(genus_sp = genus_species,
+           reproductive_mode = "Sexual",
+           metric = metric)
+
+  var_df <- var.test(asexual, sexual) %>%
+    broom::tidy() %>%
+    dplyr::select(p.value,
+           method) %>% 
+    mutate(genus_sp = genus_species,
+           reproductive_mode = "Both",
+           metric = metric)
+
+  all_tests <- bind_rows(shapiro_asexual,
+                         shapiro_sexual,
+                         var_df)
+
+  all_tests
+
+}
 
 
-ahor_temp_ttest <- t.test(stability ~ reproductive_mode, data = ahor_temp_stab) %>% broom::tidy()
+temp_assumptions_stab <-
+  map_df(
+    unique(all_stab$genus_sp),
+    ~ check_assumptions(
+      df = all_stab,
+      genus_species = .x,
+      metric = "Temperature",
+      scale = "stability"
+    )
+  )
 
-shapiro.test(ahor_temp_stab %>% filter(reproductive_mode == "Asexual") %>% select(stability) %>% as_vector()) %>% broom::tidy() %>% select(p.value, method)
 
-var.test(stability ~ reproductive_mode, data = ahor_temp_stab) %>% broom::tidy() %>% select(p.value, method)
+precip_assumptions_stab <-
+  map_df(
+    unique(all_stab$genus_sp),
+    ~ check_assumptions(
+      df = all_stab,
+      genus_species = .x,
+      metric = "Precipitation",
+      scale = "stability"
+    )
+  )
+
+overall_assumptions_stab <- 
+  map_df(
+    unique(all_stab$genus_sp),
+    ~ check_assumptions(
+      df = all_stab,
+      genus_species = .x,
+      metric = "Overall",
+      scale = "stability"
+    )
+  )
 
 
+all_assumptions_stab <-
+  bind_rows(temp_assumptions_stab, 
+            precip_assumptions_stab, 
+            overall_assumptions_stab)
+
+# see which assumptions are violated
+paste0("Assumptions test. Too many are violated- going to go with a Welch's t-test. Sampling is uneven anyways.")
+all_assumptions_stab %>% 
+  filter(p.value < 0.05) 
+
+# Since most species have unequal sample sizes and have at least one assumption violated, I'm going to use Welch's t-tests
+
+run_ttests_stability <- function(df, genus_species, met) {
+  scale_df <- df %>%
+    filter(genus_sp == genus_species,
+           metric == met)
+  test <- t.test(stability ~ reproductive_mode,
+         data = scale_df,
+         var.equal = FALSE) %>% 
+    broom::tidy() %>% 
+    mutate(genus_sp = genus_species,
+           metric = met)
+  test
+}
+
+temp_ttests_stab <- map_df(
+    unique(all_stab$genus_sp),
+    ~ run_ttests_stability(
+      df = all_stab,
+      genus_species = .x,
+      met = "Temperature"
+    )
+  )
+
+precip_ttests_stab <- map_df(
+    unique(all_stab$genus_sp),
+    ~ run_ttests_stability(
+      df = all_stab,
+      genus_species = .x,
+      met = "Precipitation"
+    )
+  )
+
+overall_ttests_stab <- map_df(
+    unique(all_stab$genus_sp),
+    ~ run_ttests_stability(
+      df = all_stab,
+      genus_species = .x,
+      met = "Overall"
+    )
+  )
+
+all_ttests_stab <- bind_rows(temp_ttests_stab, 
+                        precip_ttests_stab,
+                        overall_ttests_stab)
 
 ```
 
+##### Table
+
+All statistically significant (P < 0.05) comparisons.
+```{r}
+all_ttests_stab %>% 
+  filter(p.value < 0.05) %>% 
+  dplyr::select(Species = genus_sp, Metric = metric, Estimate = estimate, Statistic = statistic, Pvalue = p.value) %>% 
+  group_by(Species) %>% 
+  gt() %>% 
+  tab_header(title = "Welch's two sample t-tests comparing occupied stability between reproductive modes") %>% 
+  tab_footnote(footnote = "Direction of the estimate and statistic indicate the difference in stability from sexual to asexual reproductive modes.", locations = cells_column_labels(
+      columns = vars(Estimate, Statistic))) %>% 
+  fmt_number(columns = vars(Estimate, Statistic, Pvalue),
+             decimals = 3) %>% 
+  tab_style(style = list(cell_text(style = "italic"),
+                         cell_text(weight = "bold")),
+            locations = cells_row_groups()) 
+  
+```
+
+#### Maps
+
+Overall stability:
+![](output/maps/overall_stability.png)
+
+Temperature stability:
+![](output/maps/temp_stability.png)
+
+Precipitation stability:
+![](output/maps/precip_stability.png)
+
+### Seasonality
+
+I z-normalized the temperature and precipitation seasonality values for comparison and calculated "overall seasonality" as precip_seasonality * temp_seasonality.
+```{r, warning=FALSE, message=FALSE, fig.width=9, fig.height=7}
+# get files to read in for each metric (temperature, precipitation, overall)
+temp_seasonality_list <-
+  dir_ls(spread_path, glob = "*temp_seasonality_df.csv",
+         recurse = TRUE)
+
+precip_seasonality_list <-
+  dir_ls(spread_path, glob = "*precip_seasonality_df.csv",
+         recurse = TRUE)
+
+overall_seasonality_list <-
+  dir_ls(spread_path, glob = "*overall_seasonality_df.csv",
+         recurse = TRUE)
+
+
+read_csv_sp_name <- function(file) {
+  s <- read_csv(file)
+  
+  genus_sp_file <- str_split(file, pattern = "/") %>% unlist()
+  
+  genus_sp <- genus_sp_file[length(genus_sp_file) - 1]
+  
+  mutate(s, genus_sp = genus_sp)
+}
+
+# function to z-normalize data
+z_norm <- function(x) {
+  (x - min(x)) / (max(x) - min(x))
+}
+
+# the NA I'm removing is the same observation for both data sets.
+# normalize seasonality data for comparison and add in overall seasonality column.
+temp_seasonality <- map(temp_seasonality_list, read_csv_sp_name) %>% 
+  bind_rows() %>% 
+  na.omit() %>% 
+  mutate(temp_seasonality_norm = z_norm(temp_seasonality))
+
+
+precip_seasonality <- map(precip_seasonality_list, read_csv_sp_name) %>%
+  bind_rows() %>%
+  na.omit() %>% 
+  mutate(precip_seasonality_norm = z_norm(precip_seasonality))
+
+overall_seasonality <- tibble(
+  overall_seasonality_norm = precip_seasonality$precip_seasonality_norm * temp_seasonality$temp_seasonality_norm)
+
+# this assumes all individuals are in the same order. A glance at each data set confirms this, but make sure not to rearrange observation
+all_seasonality <- bind_cols(temp_seasonality %>% 
+                               dplyr::select(-temp_seasonality), 
+                             precip_seasonality %>%
+                               dplyr::select(precip_seasonality_norm),
+                             overall_seasonality %>% 
+                               dplyr::select(overall_seasonality_norm)) %>% 
+  pivot_longer(cols = contains("seasonality"),
+               names_to = "metric",
+               values_to = "seasonality") %>%
+  mutate(metric = str_remove(metric, "_seasonality_norm"),
+         genus_sp = str_replace(genus_sp, "_", " ") %>%
+           str_to_sentence(),
+         reproductive_mode = str_to_sentence(reproductive_mode)) %>%
+  mutate(metric = case_when(
+    metric == "temp" ~ "Temperature",
+    metric == "precip" ~ "Precipitation",
+    metric == "overall" ~ "Overall"
+  ))
+
+seasonality_box <- ggplot(data = all_seasonality, aes(x = metric, y = seasonality, fill = reproductive_mode)) + 
+  geom_boxplot() +
+  scale_fill_manual(values = c("transparent", "darkgrey")) +
+  labs(y = "Seasonality", fill = "Reproductive mode") +
+  facet_wrap(~ genus_sp) + 
+  theme_few() +
+  theme(legend.text = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        strip.background = element_rect(fill = "lightgrey", color = "black"),
+        strip.text = element_text(size = 12, face = "bold.italic"),
+        panel.grid.major.y = element_line( size=.1, color="gray" ),
+        legend.position = "top",
+        axis.title.x = element_blank(),
+        axis.title.y = element_text(size = 16))
+
+pdf(file = here("output", "manuscript_figs", "seasonality.pdf"),
+    width = 9,
+    height= 7)
+seasonality_box
+dev.off()
+
+seasonality_box
+```
+
+#### Statistics
+
+Calculating some statistics from the data (sample size, assumptions, pairwise comparisons, etc.)
+
+```{r, warning=FALSE, message=FALSE}
+
+# counts per species per reproductive mode
+paste0("Sample size per species per reproductive mode.")
+all_seasonality %>% 
+  group_by(genus_sp, reproductive_mode) %>% 
+  tally() 
+
+
+temp_assumptions_seasonality <-
+  map_df(
+    unique(all_seasonality$genus_sp),
+    ~ check_assumptions(
+      df = all_seasonality,
+      genus_species = .x,
+      metric = "Temperature",
+      scale = "seasonality"
+    )
+  )
+
+
+precip_assumptions_seasonality <-
+  map_df(
+    unique(all_seasonality$genus_sp),
+    ~ check_assumptions(
+      df = all_seasonality,
+      genus_species = .x,
+      metric = "Precipitation",
+      scale = "seasonality"
+    )
+  )
+
+overall_assumptions_seasonality <- 
+  map_df(
+    unique(all_seasonality$genus_sp),
+    ~ check_assumptions(
+      df = all_seasonality,
+      genus_species = .x,
+      metric = "Overall",
+      scale = "seasonality"
+    )
+  )
+
+
+all_assumptions_seasonality <-
+  bind_rows(temp_assumptions_seasonality, 
+            precip_assumptions_seasonality, 
+            overall_assumptions_seasonality)
+
+# see which assumptions are violated
+paste0("Assumptions test. Too many are violated- going to go with a Welch's t-test. Sampling is uneven anyways.")
+all_assumptions_seasonality %>% 
+  filter(p.value < 0.05) 
+
+# Since most species have unequal sample sizes and have at least one assumption violated, I'm going to use Welch's t-tests
+
+run_ttests_seasonality <- function(df, genus_species, met) {
+  seasonality <- df %>%
+    filter(genus_sp == genus_species,
+           metric == met)
+  test <- t.test(seasonality ~ reproductive_mode,
+         data = seasonality,
+         var.equal = FALSE) %>% 
+    broom::tidy() %>% 
+    mutate(genus_sp = genus_species,
+           metric = met)
+  test
+}
+
+temp_ttests_seasonality <- map_df(
+    unique(all_seasonality$genus_sp),
+    ~ run_ttests_seasonality(
+      df = all_seasonality,
+      genus_species = .x,
+      met = "Temperature"
+    )
+  )
+
+precip_ttests_seasonality <- map_df(
+    unique(all_seasonality$genus_sp),
+    ~ run_ttests_seasonality(
+      df = all_seasonality,
+      genus_species = .x,
+      met = "Precipitation"
+    )
+  )
+
+overall_ttests_seasonality <- map_df(
+    unique(all_seasonality$genus_sp),
+    ~ run_ttests_seasonality(
+      df = all_seasonality,
+      genus_species = .x,
+      met = "Overall"
+    )
+  )
+
+all_ttests_seasonality <- bind_rows(temp_ttests_seasonality, 
+                        precip_ttests_seasonality,
+                        overall_ttests_seasonality)
+
+```
+
+##### Table
+
+All statistically significant (P < 0.05) comparisons.
+```{r}
+all_ttests_seasonality %>% 
+  filter(p.value < 0.05) %>% 
+  dplyr::select(Species = genus_sp, Metric = metric, Estimate = estimate, Statistic = statistic, Pvalue = p.value) %>% 
+  group_by(Species) %>% 
+  gt() %>% 
+  tab_header(title = "Welch's two sample t-tests comparing occupied seasonality between reproductive modes") %>% 
+  tab_footnote(footnote = "Direction of the estimate and statistic indicate the difference in seasonality from sexual to asexual reproductive modes.", locations = cells_column_labels(
+      columns = vars(Estimate, Statistic))) %>% 
+  fmt_number(columns = vars(Estimate, Statistic, Pvalue),
+             decimals = 3) %>% 
+  tab_style(style = list(cell_text(style = "italic"),
+                         cell_text(weight = "bold")),
+            locations = cells_row_groups()) 
+  
+```
+
+
+
+
+### Environmental space
+Should I make a plot of environmental PCA space to illustrate marginality further? Is it superfluous?
+
+Idea 1: Just use the hex plot with species env. space scatterplot on top that I've already made. Might choose a different way to represent density of background environmental space.
+
+Idea 2: contour plot in PC space (the dimension reduction ENFA outputs or PCA): unique contours for each reproductive mode and background e-space. 
+
+```{r, eval=FALSE, echo=FALSE}
+source(here("R", "min_convex_poly.R"))
+source(here("R", "crop_background_env_function.R"))
+
+
+clim_files <- here::here("data", "climate") %>% 
+  list.files(pattern = ".tif", full.names = TRUE)
+
+w <- stack(clim_files)
+
+#shorten the names of the bioclims
+names(w) <- paste0(
+  stringr::str_extract(names(w), "bio"), 
+  stringr::str_extract(names(w), "\\d+$")
+  )
+
+clita_loc <- locs %>% 
+  as_tibble() %>% 
+  filter(species == "hookeri")
+
+choo_bg_env <- bg_env_crop(
+  clita_loc,
+  species = "hookeri",
+  environment = w,
+  buffer = 0.5
+)
+
+total_climate_pca_plot <- function(bg_env, locs, genus, species) {
+  env_df <- raster::sampleRandom(bg_env, size = 10000) %>% 
+    as_tibble() %>% 
+    mutate(reproductive_mode = "none")
+  
+  sp_df <- raster::extract(bg_env, 
+                           locs %>% filter(species == species) %>% 
+                             dplyr::select(longitude, latitude)) %>% 
+    as_tibble() %>% 
+    mutate(reproductive_mode = locs$reproductive_mode)
+  
+  total_df <- dplyr::bind_rows(env_df, sp_df) %>% 
+    na.omit()
+  
+  pca_df <- total_df %>% dplyr::select(-reproductive_mode) 
+  
+  env_pca <- prcomp(pca_df, center = TRUE, scale. = TRUE)
+  
+  pca_out_df <- env_pca$x %>% as_tibble() %>% 
+    mutate(reproductive_mode = total_df$reproductive_mode)
+  
+  ggplot() +
+    geom_hex(data = pca_out_df %>% filter(reproductive_mode == "none"),
+             aes(x = PC1, y = PC2, fill = ..count..)) +
+    scale_fill_gradient(low = "lightgray", high = "black") +
+    labs(fill = "Count") +
+    ggnewscale::new_scale_fill() +
+    geom_point(
+      data = pca_out_df %>% filter(reproductive_mode != "none"),
+      aes(
+        x = PC1,
+        y = PC2,
+        fill = reproductive_mode,
+        color = reproductive_mode
+      ),
+      alpha = 0.8,
+      size = 3,
+      pch = 21
+    ) +
+    scale_fill_viridis_d(option = "inferno") +
+    scale_color_manual(values = c("white", "black"), guide = FALSE) +
+    labs(title = paste("Total climate space PCA for", genus, species),
+         fill = "Reproductive Mode") 
+  
+}
+
+choo_total_pca <- total_climate_pca_plot(bg_env = choo_bg_env, locs = clita_loc, genus = "Clitarchus", species = "hookeri")
+
+choo_total_pca
+
+```
+
+
+### Marginality statistics
+
+```{r, eval=FALSE}
+obj_path <- here("output", "objects")
+
+
+# get all files to read in
+dir_list_enfa <-
+  dir_ls(obj_path, glob = "*.RDS",
+         recurse = TRUE) 
+
+dir_list_enfa <- dir_list_enfa[!str_detect(dir_list_enfa, "subset")]
+
+# get reproductive mode
+m_enfa <-
+    map(dir_list_enfa, function(x)
+      str_extract(x, "_*sexual")) %>% 
+    unlist()
+
+
+get_marg_stats <- function(x) {
+  genus_sp_names <- str_split(x, "/") %>% unlist()
+  genus_sp_names <- genus_sp_names[length(genus_sp_names) - 1]
+  
+  # read in the enfa
+  enfa <- readRDS(x)
+  
+  # perform a permutation test
+  enfa_sig <- randtest(enfa)
+  
+  sig_stats <- enfa_sig$expvar %>% 
+  enframe(name = "stat", value = "value") %>%
+  pivot_wider(names_from = stat, values_from = value)
+  
+  
+  sig_table <- tibble(
+    obs = enfa_sig$obs,
+    alter = enfa_sig$alter,
+    rep = enfa_sig$rep,
+    pvalue = enfa_sig$pvalue
+  ) %>%
+    bind_cols(ahor_stats) %>%
+    mutate(
+      genus_sp = str_replace(genus_sp_names, "_", " ") %>% 
+        str_to_sentence()
+    )
+  
+  # remove large enfa from memory. idk if this does anything, but just as a safeguard
+  rm(enfa)
+  
+  sig_table
+}
+
+
+marg_stats <- furrr::future_map(dir_list_enfa, get_marg_stats)
+
+marg_stats_df <- bind_rows(marg_stats) %>%
+  mutate(
+    repro_mode = case_when(m_enfa == "sexual" ~ "asexual",
+                           m_enfa == "_sexual" ~ "sexual") %>%
+      str_to_sentence()
+  )
+
+
+marg_stats_df
+
+write_csv(marg_stats_df, here("output", "spreadsheets", "marg_stats.csv"))
+```
 
 
 

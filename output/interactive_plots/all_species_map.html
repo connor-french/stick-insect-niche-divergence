@@ -1260,7 +1260,7 @@ cursor: pointer;
 z-index: auto;
 }
 </style>
-<script>(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+<script>(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1447,8 +1447,7 @@ function getCRS(crsOptions) {
         crsOptions.options.transformation = _leaflet2.default.Transformation(crsOptions.options.transformation[0], crsOptions.options.transformation[1], crsOptions.options.transformation[2], crsOptions.options.transformation[3]);
       }
       // L.Proj.CRS.TMS is deprecated as of Leaflet 1.x, fall back to L.Proj.CRS
-      //crs = new Proj4Leaflet.CRS.TMS(crsOptions.code, crsOptions.proj4def,
-      //crsOptions.projectedBounds, crsOptions.options);
+      //crs = new Proj4Leaflet.CRS.TMS(crsOptions.code, crsOptions.proj4def, crsOptions.projectedBounds, crsOptions.options);
       crs = new _proj4leaflet2.default.CRS(crsOptions.code, crsOptions.proj4def, crsOptions.options);
       break;
   }
@@ -1462,8 +1461,6 @@ function getCRS(crsOptions) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -1547,17 +1544,11 @@ var DataFrame = function () {
 
       var colIndex = -1;
       if (typeof col === "undefined") {
-        var _ret = function () {
-          var rowData = {};
-          _this3.colnames.forEach(function (name, i) {
-            rowData[name] = _this3.columns[i][row % _this3.columns[i].length];
-          });
-          return {
-            v: rowData
-          };
-        }();
-
-        if ((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object") return _ret.v;
+        var rowData = {};
+        this.colnames.forEach(function (name, i) {
+          rowData[name] = _this3.columns[i][row % _this3.columns[i].length];
+        });
+        return rowData;
       } else if (typeof col === "string") {
         colIndex = this._colIndex(col);
       } else if (typeof col === "number") {
@@ -1905,42 +1896,40 @@ _htmlwidgets2.default.widget({
 
         // Check if the map is rendered statically (no output binding)
         if (_htmlwidgets2.default.shinyMode && /\bshiny-bound-output\b/.test(el.className)) {
-          (function () {
 
-            map.id = el.id;
+          map.id = el.id;
 
-            // Store the map on the element so we can find it later by ID
-            (0, _jquery2.default)(el).data("leaflet-map", map);
+          // Store the map on the element so we can find it later by ID
+          (0, _jquery2.default)(el).data("leaflet-map", map);
 
-            // When the map is clicked, send the coordinates back to the app
-            map.on("click", function (e) {
-              _shiny2.default.onInputChange(map.id + "_click", {
-                lat: e.latlng.lat,
-                lng: e.latlng.lng,
-                ".nonce": Math.random() // Force reactivity if lat/lng hasn't changed
-              });
+          // When the map is clicked, send the coordinates back to the app
+          map.on("click", function (e) {
+            _shiny2.default.onInputChange(map.id + "_click", {
+              lat: e.latlng.lat,
+              lng: e.latlng.lng,
+              ".nonce": Math.random() // Force reactivity if lat/lng hasn't changed
             });
+          });
 
-            var groupTimerId = null;
+          var groupTimerId = null;
 
-            map.on("moveend", function (e) {
-              updateBounds(e.target);
-            }).on("layeradd layerremove", function (e) {
-              // If the layer that's coming or going is a group we created, tell
-              // the server.
-              if (map.layerManager.getGroupNameFromLayerGroup(e.layer)) {
-                // But to avoid chattiness, coalesce events
-                if (groupTimerId) {
-                  clearTimeout(groupTimerId);
-                  groupTimerId = null;
-                }
-                groupTimerId = setTimeout(function () {
-                  groupTimerId = null;
-                  _shiny2.default.onInputChange(map.id + "_groups", map.layerManager.getVisibleGroups());
-                }, 100);
+          map.on("moveend", function (e) {
+            updateBounds(e.target);
+          }).on("layeradd layerremove", function (e) {
+            // If the layer that's coming or going is a group we created, tell
+            // the server.
+            if (map.layerManager.getGroupNameFromLayerGroup(e.layer)) {
+              // But to avoid chattiness, coalesce events
+              if (groupTimerId) {
+                clearTimeout(groupTimerId);
+                groupTimerId = null;
               }
-            });
-          })();
+              groupTimerId = setTimeout(function () {
+                groupTimerId = null;
+                _shiny2.default.onInputChange(map.id + "_groups", map.layerManager.getVisibleGroups());
+              }, 100);
+            }
+          });
         }
         this.doRenderValue(data, map);
       },
@@ -2189,77 +2178,73 @@ var LayerManager = function () {
 
       // Update crosstalk group index
       if (ctGroup) {
-        (function () {
-          if (layer.setStyle) {
-            // Need to save this info so we know what to set opacity to later
-            layer.options.origOpacity = typeof layer.options.opacity !== "undefined" ? layer.options.opacity : 0.5;
-            layer.options.origFillOpacity = typeof layer.options.fillOpacity !== "undefined" ? layer.options.fillOpacity : 0.2;
-          }
+        if (layer.setStyle) {
+          // Need to save this info so we know what to set opacity to later
+          layer.options.origOpacity = typeof layer.options.opacity !== "undefined" ? layer.options.opacity : 0.5;
+          layer.options.origFillOpacity = typeof layer.options.fillOpacity !== "undefined" ? layer.options.fillOpacity : 0.2;
+        }
 
-          var ctg = _this._byCrosstalkGroup[ctGroup];
-          if (!ctg) {
-            (function () {
-              ctg = _this._byCrosstalkGroup[ctGroup] = {};
-              var crosstalk = global.crosstalk;
+        var ctg = this._byCrosstalkGroup[ctGroup];
+        if (!ctg) {
+          ctg = this._byCrosstalkGroup[ctGroup] = {};
+          var crosstalk = global.crosstalk;
 
-              var handleFilter = function handleFilter(e) {
-                if (!e.value) {
-                  var groupKeys = Object.keys(ctg);
-                  for (var i = 0; i < groupKeys.length; i++) {
-                    var key = groupKeys[i];
-                    var _layerInfo = _this._byStamp[ctg[key]];
-                    _this._setVisibility(_layerInfo, true);
-                  }
-                } else {
-                  var selectedKeys = {};
-                  for (var _i = 0; _i < e.value.length; _i++) {
-                    selectedKeys[e.value[_i]] = true;
-                  }
-                  var _groupKeys = Object.keys(ctg);
-                  for (var _i2 = 0; _i2 < _groupKeys.length; _i2++) {
-                    var _key = _groupKeys[_i2];
-                    var _layerInfo2 = _this._byStamp[ctg[_key]];
-                    _this._setVisibility(_layerInfo2, selectedKeys[_groupKeys[_i2]]);
-                  }
-                }
-              };
-              var filterHandle = new crosstalk.FilterHandle(ctGroup);
-              filterHandle.on("change", handleFilter);
+          var handleFilter = function handleFilter(e) {
+            if (!e.value) {
+              var groupKeys = Object.keys(ctg);
+              for (var i = 0; i < groupKeys.length; i++) {
+                var key = groupKeys[i];
+                var _layerInfo = _this._byStamp[ctg[key]];
+                _this._setVisibility(_layerInfo, true);
+              }
+            } else {
+              var selectedKeys = {};
+              for (var _i = 0; _i < e.value.length; _i++) {
+                selectedKeys[e.value[_i]] = true;
+              }
+              var _groupKeys = Object.keys(ctg);
+              for (var _i2 = 0; _i2 < _groupKeys.length; _i2++) {
+                var _key = _groupKeys[_i2];
+                var _layerInfo2 = _this._byStamp[ctg[_key]];
+                _this._setVisibility(_layerInfo2, selectedKeys[_groupKeys[_i2]]);
+              }
+            }
+          };
+          var filterHandle = new crosstalk.FilterHandle(ctGroup);
+          filterHandle.on("change", handleFilter);
 
-              var handleSelection = function handleSelection(e) {
-                if (!e.value || !e.value.length) {
-                  var groupKeys = Object.keys(ctg);
-                  for (var i = 0; i < groupKeys.length; i++) {
-                    var key = groupKeys[i];
-                    var _layerInfo3 = _this._byStamp[ctg[key]];
-                    _this._setOpacity(_layerInfo3, 1.0);
-                  }
-                } else {
-                  var selectedKeys = {};
-                  for (var _i3 = 0; _i3 < e.value.length; _i3++) {
-                    selectedKeys[e.value[_i3]] = true;
-                  }
-                  var _groupKeys2 = Object.keys(ctg);
-                  for (var _i4 = 0; _i4 < _groupKeys2.length; _i4++) {
-                    var _key2 = _groupKeys2[_i4];
-                    var _layerInfo4 = _this._byStamp[ctg[_key2]];
-                    _this._setOpacity(_layerInfo4, selectedKeys[_groupKeys2[_i4]] ? 1.0 : 0.2);
-                  }
-                }
-              };
-              var selHandle = new crosstalk.SelectionHandle(ctGroup);
-              selHandle.on("change", handleSelection);
+          var handleSelection = function handleSelection(e) {
+            if (!e.value || !e.value.length) {
+              var groupKeys = Object.keys(ctg);
+              for (var i = 0; i < groupKeys.length; i++) {
+                var key = groupKeys[i];
+                var _layerInfo3 = _this._byStamp[ctg[key]];
+                _this._setOpacity(_layerInfo3, 1.0);
+              }
+            } else {
+              var selectedKeys = {};
+              for (var _i3 = 0; _i3 < e.value.length; _i3++) {
+                selectedKeys[e.value[_i3]] = true;
+              }
+              var _groupKeys2 = Object.keys(ctg);
+              for (var _i4 = 0; _i4 < _groupKeys2.length; _i4++) {
+                var _key2 = _groupKeys2[_i4];
+                var _layerInfo4 = _this._byStamp[ctg[_key2]];
+                _this._setOpacity(_layerInfo4, selectedKeys[_groupKeys2[_i4]] ? 1.0 : 0.2);
+              }
+            }
+          };
+          var selHandle = new crosstalk.SelectionHandle(ctGroup);
+          selHandle.on("change", handleSelection);
 
-              setTimeout(function () {
-                handleFilter({ value: filterHandle.filteredKeys });
-                handleSelection({ value: selHandle.value });
-              }, 100);
-            })();
-          }
+          setTimeout(function () {
+            handleFilter({ value: filterHandle.filteredKeys });
+            handleSelection({ value: selHandle.value });
+          }, 100);
+        }
 
-          if (!ctg[ctKey]) ctg[ctKey] = [];
-          ctg[ctKey].push(stamp);
-        })();
+        if (!ctg[ctKey]) ctg[ctKey] = [];
+        ctg[ctKey].push(stamp);
       }
 
       // Add to container
@@ -2504,8 +2489,6 @@ exports.default = LayerManager;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 var _jquery = require("./global/jquery");
 
@@ -2833,68 +2816,62 @@ methods.addAwesomeMarkers = function (lat, lng, icon, layerId, group, options, p
 function addLayers(map, category, df, layerFunc) {
   var _loop3 = function _loop3(i) {
     (function () {
-      var _this4 = this;
-
       var layer = layerFunc(df, i);
       if (!_jquery2.default.isEmptyObject(layer)) {
-        (function () {
-          var thisId = df.get(i, "layerId");
-          var thisGroup = df.get(i, "group");
-          _this4.layerManager.addLayer(layer, category, thisId, thisGroup, df.get(i, "ctGroup", true), df.get(i, "ctKey", true));
-          if (layer.bindPopup) {
-            var popup = df.get(i, "popup");
-            var popupOptions = df.get(i, "popupOptions");
-            if (popup !== null) {
-              if (popupOptions !== null) {
-                layer.bindPopup(popup, popupOptions);
-              } else {
-                layer.bindPopup(popup);
-              }
+        var thisId = df.get(i, "layerId");
+        var thisGroup = df.get(i, "group");
+        this.layerManager.addLayer(layer, category, thisId, thisGroup, df.get(i, "ctGroup", true), df.get(i, "ctKey", true));
+        if (layer.bindPopup) {
+          var popup = df.get(i, "popup");
+          var popupOptions = df.get(i, "popupOptions");
+          if (popup !== null) {
+            if (popupOptions !== null) {
+              layer.bindPopup(popup, popupOptions);
+            } else {
+              layer.bindPopup(popup);
             }
           }
-          if (layer.bindTooltip) {
-            var label = df.get(i, "label");
-            var labelOptions = df.get(i, "labelOptions");
-            if (label !== null) {
-              if (labelOptions !== null) {
-                layer.bindTooltip(label, labelOptions);
-              } else {
-                layer.bindTooltip(label);
-              }
+        }
+        if (layer.bindTooltip) {
+          var label = df.get(i, "label");
+          var labelOptions = df.get(i, "labelOptions");
+          if (label !== null) {
+            if (labelOptions !== null) {
+              layer.bindTooltip(label, labelOptions);
+            } else {
+              layer.bindTooltip(label);
             }
           }
-          layer.on("click", mouseHandler(_this4.id, thisId, thisGroup, category + "_click"), _this4);
-          layer.on("mouseover", mouseHandler(_this4.id, thisId, thisGroup, category + "_mouseover"), _this4);
-          layer.on("mouseout", mouseHandler(_this4.id, thisId, thisGroup, category + "_mouseout"), _this4);
-          var highlightStyle = df.get(i, "highlightOptions");
+        }
+        layer.on("click", mouseHandler(this.id, thisId, thisGroup, category + "_click"), this);
+        layer.on("mouseover", mouseHandler(this.id, thisId, thisGroup, category + "_mouseover"), this);
+        layer.on("mouseout", mouseHandler(this.id, thisId, thisGroup, category + "_mouseout"), this);
+        var highlightStyle = df.get(i, "highlightOptions");
 
-          if (!_jquery2.default.isEmptyObject(highlightStyle)) {
-            (function () {
+        if (!_jquery2.default.isEmptyObject(highlightStyle)) {
 
-              var defaultStyle = {};
-              _jquery2.default.each(highlightStyle, function (k, v) {
-                if (k != "bringToFront" && k != "sendToBack") {
-                  if (df.get(i, k)) {
-                    defaultStyle[k] = df.get(i, k);
-                  }
-                }
-              });
+          var defaultStyle = {};
+          _jquery2.default.each(highlightStyle, function (k, v) {
+            if (k != "bringToFront" && k != "sendToBack") {
+              if (df.get(i, k)) {
+                defaultStyle[k] = df.get(i, k);
+              }
+            }
+          });
 
-              layer.on("mouseover", function (e) {
-                this.setStyle(highlightStyle);
-                if (highlightStyle.bringToFront) {
-                  this.bringToFront();
-                }
-              });
-              layer.on("mouseout", function (e) {
-                this.setStyle(defaultStyle);
-                if (highlightStyle.sendToBack) {
-                  this.bringToBack();
-                }
-              });
-            })();
-          }
-        })();
+          layer.on("mouseover", function (e) {
+            this.setStyle(highlightStyle);
+            if (highlightStyle.bringToFront) {
+              this.bringToFront();
+            }
+          });
+          layer.on("mouseout", function (e) {
+            this.setStyle(defaultStyle);
+            if (highlightStyle.sendToBack) {
+              this.bringToBack();
+            }
+          });
+        }
       }
     }).call(map);
   };
@@ -3041,7 +3018,7 @@ methods.addGeoJSON = function (data, layerId, group, style) {
         featureId: feature.id,
         properties: feature.properties
       };
-      var popup = feature.properties.popup;
+      var popup = feature.properties ? feature.properties.popup : null;
       if (typeof popup !== "undefined" && popup !== null) layer.bindPopup(popup);
       layer.on("click", mouseHandler(self.id, layerId, group, "geojson_click", extraInfo), this);
       layer.on("mouseover", mouseHandler(self.id, layerId, group, "geojson_mouseover", extraInfo), this);
@@ -3155,8 +3132,6 @@ methods.clearControls = function () {
 };
 
 methods.addLegend = function (options) {
-  var _this5 = this;
-
   var legend = _leaflet2.default.control({ position: options.position });
   var gradSpan = void 0;
 
@@ -3166,81 +3141,79 @@ methods.addLegend = function (options) {
         labels = options.labels,
         legendHTML = "";
     if (options.type === "numeric") {
-      (function () {
-        // # Formatting constants.
-        var singleBinHeight = 20; // The distance between tick marks, in px
-        var vMargin = 8; // If 1st tick mark starts at top of gradient, how
-        // many extra px are needed for the top half of the
-        // 1st label? (ditto for last tick mark/label)
-        var tickWidth = 4; // How wide should tick marks be, in px?
-        var labelPadding = 6; // How much distance to reserve for tick mark?
-        // (Must be >= tickWidth)
+      // # Formatting constants.
+      var singleBinHeight = 20; // The distance between tick marks, in px
+      var vMargin = 8; // If 1st tick mark starts at top of gradient, how
+      // many extra px are needed for the top half of the
+      // 1st label? (ditto for last tick mark/label)
+      var tickWidth = 4; // How wide should tick marks be, in px?
+      var labelPadding = 6; // How much distance to reserve for tick mark?
+      // (Must be >= tickWidth)
 
-        // # Derived formatting parameters.
+      // # Derived formatting parameters.
 
-        // What's the height of a single bin, in percentage (of gradient height)?
-        // It might not just be 1/(n-1), if the gradient extends past the tick
-        // marks (which can be the case for pretty cut points).
-        var singleBinPct = (options.extra.p_n - options.extra.p_1) / (labels.length - 1);
-        // Each bin is `singleBinHeight` high. How tall is the gradient?
-        var totalHeight = 1 / singleBinPct * singleBinHeight + 1;
-        // How far should the first tick be shifted down, relative to the top
-        // of the gradient?
-        var tickOffset = singleBinHeight / singleBinPct * options.extra.p_1;
+      // What's the height of a single bin, in percentage (of gradient height)?
+      // It might not just be 1/(n-1), if the gradient extends past the tick
+      // marks (which can be the case for pretty cut points).
+      var singleBinPct = (options.extra.p_n - options.extra.p_1) / (labels.length - 1);
+      // Each bin is `singleBinHeight` high. How tall is the gradient?
+      var totalHeight = 1 / singleBinPct * singleBinHeight + 1;
+      // How far should the first tick be shifted down, relative to the top
+      // of the gradient?
+      var tickOffset = singleBinHeight / singleBinPct * options.extra.p_1;
 
-        gradSpan = (0, _jquery2.default)("<span/>").css({
-          "background": "linear-gradient(" + colors + ")",
-          "opacity": options.opacity,
-          "height": totalHeight + "px",
-          "width": "18px",
-          "display": "block",
-          "margin-top": vMargin + "px"
-        });
-        var leftDiv = (0, _jquery2.default)("<div/>").css("float", "left"),
-            rightDiv = (0, _jquery2.default)("<div/>").css("float", "left");
-        leftDiv.append(gradSpan);
-        (0, _jquery2.default)(div).append(leftDiv).append(rightDiv).append((0, _jquery2.default)("<br>"));
+      gradSpan = (0, _jquery2.default)("<span/>").css({
+        "background": "linear-gradient(" + colors + ")",
+        "opacity": options.opacity,
+        "height": totalHeight + "px",
+        "width": "18px",
+        "display": "block",
+        "margin-top": vMargin + "px"
+      });
+      var leftDiv = (0, _jquery2.default)("<div/>").css("float", "left"),
+          rightDiv = (0, _jquery2.default)("<div/>").css("float", "left");
+      leftDiv.append(gradSpan);
+      (0, _jquery2.default)(div).append(leftDiv).append(rightDiv).append((0, _jquery2.default)("<br>"));
 
-        // Have to attach the div to the body at this early point, so that the
-        // svg text getComputedTextLength() actually works, below.
-        document.body.appendChild(div);
+      // Have to attach the div to the body at this early point, so that the
+      // svg text getComputedTextLength() actually works, below.
+      document.body.appendChild(div);
 
-        var ns = "http://www.w3.org/2000/svg";
-        var svg = document.createElementNS(ns, "svg");
-        rightDiv.append(svg);
-        var g = document.createElementNS(ns, "g");
-        (0, _jquery2.default)(g).attr("transform", "translate(0, " + vMargin + ")");
-        svg.appendChild(g);
+      var ns = "http://www.w3.org/2000/svg";
+      var svg = document.createElementNS(ns, "svg");
+      rightDiv.append(svg);
+      var g = document.createElementNS(ns, "g");
+      (0, _jquery2.default)(g).attr("transform", "translate(0, " + vMargin + ")");
+      svg.appendChild(g);
 
-        // max label width needed to set width of svg, and right-justify text
-        var maxLblWidth = 0;
+      // max label width needed to set width of svg, and right-justify text
+      var maxLblWidth = 0;
 
-        // Create tick marks and labels
-        _jquery2.default.each(labels, function (i, label) {
-          var y = tickOffset + i * singleBinHeight + 0.5;
+      // Create tick marks and labels
+      _jquery2.default.each(labels, function (i, label) {
+        var y = tickOffset + i * singleBinHeight + 0.5;
 
-          var thisLabel = document.createElementNS(ns, "text");
-          (0, _jquery2.default)(thisLabel).text(labels[i]).attr("y", y).attr("dx", labelPadding).attr("dy", "0.5ex");
-          g.appendChild(thisLabel);
-          maxLblWidth = Math.max(maxLblWidth, thisLabel.getComputedTextLength());
+        var thisLabel = document.createElementNS(ns, "text");
+        (0, _jquery2.default)(thisLabel).text(labels[i]).attr("y", y).attr("dx", labelPadding).attr("dy", "0.5ex");
+        g.appendChild(thisLabel);
+        maxLblWidth = Math.max(maxLblWidth, thisLabel.getComputedTextLength());
 
-          var thisTick = document.createElementNS(ns, "line");
-          (0, _jquery2.default)(thisTick).attr("x1", 0).attr("x2", tickWidth).attr("y1", y).attr("y2", y).attr("stroke-width", 1);
-          g.appendChild(thisTick);
-        });
+        var thisTick = document.createElementNS(ns, "line");
+        (0, _jquery2.default)(thisTick).attr("x1", 0).attr("x2", tickWidth).attr("y1", y).attr("y2", y).attr("stroke-width", 1);
+        g.appendChild(thisTick);
+      });
 
-        // Now that we know the max label width, we can right-justify
-        (0, _jquery2.default)(svg).find("text").attr("dx", labelPadding + maxLblWidth).attr("text-anchor", "end");
-        // Final size for <svg>
-        (0, _jquery2.default)(svg).css({
-          width: maxLblWidth + labelPadding + "px",
-          height: totalHeight + vMargin * 2 + "px"
-        });
+      // Now that we know the max label width, we can right-justify
+      (0, _jquery2.default)(svg).find("text").attr("dx", labelPadding + maxLblWidth).attr("text-anchor", "end");
+      // Final size for <svg>
+      (0, _jquery2.default)(svg).css({
+        width: maxLblWidth + labelPadding + "px",
+        height: totalHeight + vMargin * 2 + "px"
+      });
 
-        if (options.na_color && _jquery2.default.inArray(options.na_label, labels) < 0) {
-          (0, _jquery2.default)(div).append("<div><i style=\"" + "background:" + options.na_color + ";opacity:" + options.opacity + ";margin-right:" + labelPadding + "px" + ";\"></i>" + options.na_label + "</div>");
-        }
-      })();
+      if (options.na_color && _jquery2.default.inArray(options.na_label, labels) < 0) {
+        (0, _jquery2.default)(div).append("<div><i style=\"" + "background:" + options.na_color + ";opacity:" + options.opacity + ";margin-right:" + labelPadding + "px" + ";\"></i>" + options.na_label + "</div>");
+      }
     } else {
       if (options.na_color && _jquery2.default.inArray(options.na_label, labels) < 0) {
         colors.push(options.na_color);
@@ -3256,41 +3229,39 @@ methods.addLegend = function (options) {
   };
 
   if (options.group) {
-    (function () {
-      // Auto generate a layerID if not provided
-      if (!options.layerId) {
-        options.layerId = _leaflet2.default.Util.stamp(legend);
-      }
+    // Auto generate a layerID if not provided
+    if (!options.layerId) {
+      options.layerId = _leaflet2.default.Util.stamp(legend);
+    }
 
-      var map = _this5;
-      map.on("overlayadd", function (e) {
-        if (e.name === options.group) {
-          map.controls.add(legend, options.layerId);
-        }
-      });
-      map.on("overlayremove", function (e) {
-        if (e.name === options.group) {
-          map.controls.remove(options.layerId);
-        }
-      });
-      map.on("groupadd", function (e) {
-        if (e.name === options.group) {
-          map.controls.add(legend, options.layerId);
-        }
-      });
-      map.on("groupremove", function (e) {
-        if (e.name === options.group) {
-          map.controls.remove(options.layerId);
-        }
-      });
-    })();
+    var map = this;
+    map.on("overlayadd", function (e) {
+      if (e.name === options.group) {
+        map.controls.add(legend, options.layerId);
+      }
+    });
+    map.on("overlayremove", function (e) {
+      if (e.name === options.group) {
+        map.controls.remove(options.layerId);
+      }
+    });
+    map.on("groupadd", function (e) {
+      if (e.name === options.group) {
+        map.controls.add(legend, options.layerId);
+      }
+    });
+    map.on("groupremove", function (e) {
+      if (e.name === options.group) {
+        map.controls.remove(options.layerId);
+      }
+    });
   }
 
   this.controls.add(legend, options.layerId);
 };
 
 methods.addLayersControl = function (baseGroups, overlayGroups, options) {
-  var _this6 = this;
+  var _this4 = this;
 
   // Only allow one layers control at a time
   methods.removeLayersControl.call(this);
@@ -3298,23 +3269,23 @@ methods.addLayersControl = function (baseGroups, overlayGroups, options) {
   var firstLayer = true;
   var base = {};
   _jquery2.default.each((0, _util.asArray)(baseGroups), function (i, g) {
-    var layer = _this6.layerManager.getLayerGroup(g, true);
+    var layer = _this4.layerManager.getLayerGroup(g, true);
     if (layer) {
       base[g] = layer;
 
       // Check if >1 base layers are visible; if so, hide all but the first one
-      if (_this6.hasLayer(layer)) {
+      if (_this4.hasLayer(layer)) {
         if (firstLayer) {
           firstLayer = false;
         } else {
-          _this6.removeLayer(layer);
+          _this4.removeLayer(layer);
         }
       }
     }
   });
   var overlay = {};
   _jquery2.default.each((0, _util.asArray)(overlayGroups), function (i, g) {
-    var layer = _this6.layerManager.getLayerGroup(g, true);
+    var layer = _this4.layerManager.getLayerGroup(g, true);
     if (layer) {
       overlay[g] = layer;
     }
@@ -3348,23 +3319,23 @@ methods.removeScaleBar = function () {
 };
 
 methods.hideGroup = function (group) {
-  var _this7 = this;
+  var _this5 = this;
 
   _jquery2.default.each((0, _util.asArray)(group), function (i, g) {
-    var layer = _this7.layerManager.getLayerGroup(g, true);
+    var layer = _this5.layerManager.getLayerGroup(g, true);
     if (layer) {
-      _this7.removeLayer(layer);
+      _this5.removeLayer(layer);
     }
   });
 };
 
 methods.showGroup = function (group) {
-  var _this8 = this;
+  var _this6 = this;
 
   _jquery2.default.each((0, _util.asArray)(group), function (i, g) {
-    var layer = _this8.layerManager.getLayerGroup(g, true);
+    var layer = _this6.layerManager.getLayerGroup(g, true);
     if (layer) {
-      _this8.addLayer(layer);
+      _this6.addLayer(layer);
     }
   });
 };
@@ -3404,10 +3375,10 @@ function setupShowHideGroupsOnZoom(map) {
 }
 
 methods.setGroupOptions = function (group, options) {
-  var _this9 = this;
+  var _this7 = this;
 
   _jquery2.default.each((0, _util.asArray)(group), function (i, g) {
-    var layer = _this9.layerManager.getLayerGroup(g, true);
+    var layer = _this7.layerManager.getLayerGroup(g, true);
     // This slightly tortured check is because 0 is a valid value for zoomLevels
     if (typeof options.zoomLevels !== "undefined" && options.zoomLevels !== null) {
       layer.zoomLevels = (0, _util.asArray)(options.zoomLevels);
@@ -3559,131 +3530,123 @@ methods.addRasterImage = function (uri, bounds, opacity, attribution, layerId, g
 
     getImageData(function (imgData, w, h, mipmapper) {
       try {
-        var _ret8 = function () {
-          // The Context2D we'll being drawing onto. It's always 256x256.
-          var ctx = canvas.getContext("2d");
+        // The Context2D we'll being drawing onto. It's always 256x256.
+        var ctx = canvas.getContext("2d");
 
-          // Convert our image data's top-left and bottom-right locations into
-          // x/y tile coordinates. This is essentially doing a spherical mercator
-          // projection, then multiplying by 2^zoom.
-          var topLeft = degree2tile(bounds[0][0], bounds[0][1], zoom);
-          var bottomRight = degree2tile(bounds[1][0], bounds[1][1], zoom);
-          // The size of the image in x/y tile coordinates.
-          var extent = { x: bottomRight.x - topLeft.x, y: bottomRight.y - topLeft.y };
+        // Convert our image data's top-left and bottom-right locations into
+        // x/y tile coordinates. This is essentially doing a spherical mercator
+        // projection, then multiplying by 2^zoom.
+        var topLeft = degree2tile(bounds[0][0], bounds[0][1], zoom);
+        var bottomRight = degree2tile(bounds[1][0], bounds[1][1], zoom);
+        // The size of the image in x/y tile coordinates.
+        var extent = { x: bottomRight.x - topLeft.x, y: bottomRight.y - topLeft.y };
 
-          // Short circuit if tile is totally disjoint from image.
-          if (!overlap(tilePoint.x, tilePoint.x + 1, topLeft.x, bottomRight.x)) return {
-              v: void 0
-            };
-          if (!overlap(tilePoint.y, tilePoint.y + 1, topLeft.y, bottomRight.y)) return {
-              v: void 0
-            };
+        // Short circuit if tile is totally disjoint from image.
+        if (!overlap(tilePoint.x, tilePoint.x + 1, topLeft.x, bottomRight.x)) return;
+        if (!overlap(tilePoint.y, tilePoint.y + 1, topLeft.y, bottomRight.y)) return;
 
-          // The linear resolution of the tile we're drawing is always 256px per tile unit.
-          // If the linear resolution (in either direction) of the image is less than 256px
-          // per tile unit, then use nearest neighbor; otherwise, use the canvas's built-in
-          // scaling.
-          var imgRes = {
-            x: w / extent.x,
-            y: h / extent.y
+        // The linear resolution of the tile we're drawing is always 256px per tile unit.
+        // If the linear resolution (in either direction) of the image is less than 256px
+        // per tile unit, then use nearest neighbor; otherwise, use the canvas's built-in
+        // scaling.
+        var imgRes = {
+          x: w / extent.x,
+          y: h / extent.y
+        };
+
+        // We can do the actual drawing in one of three ways:
+        // - Call drawImage(). This is easy and fast, and results in smooth
+        //   interpolation (bilinear?). This is what we want when we are
+        //   reducing the image from its native size.
+        // - Call drawImage() with imageSmoothingEnabled=false. This is easy
+        //   and fast and gives us nearest-neighbor interpolation, which is what
+        //   we want when enlarging the image. However, it's unsupported on many
+        //   browsers (including QtWebkit).
+        // - Do a manual nearest-neighbor interpolation. This is what we'll fall
+        //   back to when enlarging, and imageSmoothingEnabled isn't supported.
+        //   In theory it's slower, but still pretty fast on my machine, and the
+        //   results look the same AFAICT.
+
+        // Is imageSmoothingEnabled supported? If so, we can let canvas do
+        // nearest-neighbor interpolation for us.
+        var smoothingProperty = getCanvasSmoothingProperty(ctx);
+
+        if (smoothingProperty || imgRes.x >= 256 && imgRes.y >= 256) {
+          // Use built-in scaling
+
+          // Turn off anti-aliasing if necessary
+          if (smoothingProperty) {
+            ctx[smoothingProperty] = imgRes.x >= 256 && imgRes.y >= 256;
+          }
+
+          // Don't necessarily draw with the full-size image; if we're
+          // downscaling, use the mipmapper to get a pre-downscaled image
+          // (see comments on Mipmapper class for why this matters).
+          mipmapper.getBySize(extent.x * 256, extent.y * 256, function (mip) {
+            // It's possible that the image will go off the edge of the canvas--
+            // that's OK, the canvas should clip appropriately.
+            ctx.drawImage(mip,
+            // Convert abs tile coords to rel tile coords, then *256 to convert
+            // to rel pixel coords
+            (topLeft.x - tilePoint.x) * 256, (topLeft.y - tilePoint.y) * 256,
+            // Always draw the whole thing and let canvas clip; so we can just
+            // convert from size in tile coords straight to pixels
+            extent.x * 256, extent.y * 256);
+          });
+        } else {
+          // Use manual nearest-neighbor interpolation
+
+          // Calculate the source image pixel coordinates that correspond with
+          // the top-left and bottom-right of this tile. (If the source image
+          // only partially overlaps the tile, we use max/min to limit the
+          // sourceStart/End to only reflect the overlapping portion.)
+          var sourceStart = {
+            x: Math.max(0, Math.floor((tilePoint.x - topLeft.x) * imgRes.x)),
+            y: Math.max(0, Math.floor((tilePoint.y - topLeft.y) * imgRes.y))
+          };
+          var sourceEnd = {
+            x: Math.min(w, Math.ceil((tilePoint.x + 1 - topLeft.x) * imgRes.x)),
+            y: Math.min(h, Math.ceil((tilePoint.y + 1 - topLeft.y) * imgRes.y))
           };
 
-          // We can do the actual drawing in one of three ways:
-          // - Call drawImage(). This is easy and fast, and results in smooth
-          //   interpolation (bilinear?). This is what we want when we are
-          //   reducing the image from its native size.
-          // - Call drawImage() with imageSmoothingEnabled=false. This is easy
-          //   and fast and gives us nearest-neighbor interpolation, which is what
-          //   we want when enlarging the image. However, it's unsupported on many
-          //   browsers (including QtWebkit).
-          // - Do a manual nearest-neighbor interpolation. This is what we'll fall
-          //   back to when enlarging, and imageSmoothingEnabled isn't supported.
-          //   In theory it's slower, but still pretty fast on my machine, and the
-          //   results look the same AFAICT.
+          // The size, in dest pixels, that each source pixel should occupy.
+          // This might be greater or less than 1 (e.g. if x and y resolution
+          // are very different).
+          var pixelSize = {
+            x: 256 / imgRes.x,
+            y: 256 / imgRes.y
+          };
 
-          // Is imageSmoothingEnabled supported? If so, we can let canvas do
-          // nearest-neighbor interpolation for us.
-          var smoothingProperty = getCanvasSmoothingProperty(ctx);
+          // For each pixel in the source image that overlaps the tile...
+          for (var row = sourceStart.y; row < sourceEnd.y; row++) {
+            for (var col = sourceStart.x; col < sourceEnd.x; col++) {
+              // ...extract the pixel data...
+              var i = (row * w + col) * 4;
+              var r = imgData[i];
+              var g = imgData[i + 1];
+              var b = imgData[i + 2];
+              var a = imgData[i + 3];
+              ctx.fillStyle = "rgba(" + [r, g, b, a / 255].join(",") + ")";
 
-          if (smoothingProperty || imgRes.x >= 256 && imgRes.y >= 256) {
-            // Use built-in scaling
+              // ...calculate the corresponding pixel coord in the dest image
+              // where it should be drawn...
+              var pixelPos = {
+                x: (col / imgRes.x + topLeft.x - tilePoint.x) * 256,
+                y: (row / imgRes.y + topLeft.y - tilePoint.y) * 256
+              };
 
-            // Turn off anti-aliasing if necessary
-            if (smoothingProperty) {
-              ctx[smoothingProperty] = imgRes.x >= 256 && imgRes.y >= 256;
-            }
-
-            // Don't necessarily draw with the full-size image; if we're
-            // downscaling, use the mipmapper to get a pre-downscaled image
-            // (see comments on Mipmapper class for why this matters).
-            mipmapper.getBySize(extent.x * 256, extent.y * 256, function (mip) {
-              // It's possible that the image will go off the edge of the canvas--
-              // that's OK, the canvas should clip appropriately.
-              ctx.drawImage(mip,
-              // Convert abs tile coords to rel tile coords, then *256 to convert
-              // to rel pixel coords
-              (topLeft.x - tilePoint.x) * 256, (topLeft.y - tilePoint.y) * 256,
-              // Always draw the whole thing and let canvas clip; so we can just
-              // convert from size in tile coords straight to pixels
-              extent.x * 256, extent.y * 256);
-            });
-          } else {
-            // Use manual nearest-neighbor interpolation
-
-            // Calculate the source image pixel coordinates that correspond with
-            // the top-left and bottom-right of this tile. (If the source image
-            // only partially overlaps the tile, we use max/min to limit the
-            // sourceStart/End to only reflect the overlapping portion.)
-            var sourceStart = {
-              x: Math.max(0, Math.floor((tilePoint.x - topLeft.x) * imgRes.x)),
-              y: Math.max(0, Math.floor((tilePoint.y - topLeft.y) * imgRes.y))
-            };
-            var sourceEnd = {
-              x: Math.min(w, Math.ceil((tilePoint.x + 1 - topLeft.x) * imgRes.x)),
-              y: Math.min(h, Math.ceil((tilePoint.y + 1 - topLeft.y) * imgRes.y))
-            };
-
-            // The size, in dest pixels, that each source pixel should occupy.
-            // This might be greater or less than 1 (e.g. if x and y resolution
-            // are very different).
-            var pixelSize = {
-              x: 256 / imgRes.x,
-              y: 256 / imgRes.y
-            };
-
-            // For each pixel in the source image that overlaps the tile...
-            for (var row = sourceStart.y; row < sourceEnd.y; row++) {
-              for (var col = sourceStart.x; col < sourceEnd.x; col++) {
-                // ...extract the pixel data...
-                var i = (row * w + col) * 4;
-                var r = imgData[i];
-                var g = imgData[i + 1];
-                var b = imgData[i + 2];
-                var a = imgData[i + 3];
-                ctx.fillStyle = "rgba(" + [r, g, b, a / 255].join(",") + ")";
-
-                // ...calculate the corresponding pixel coord in the dest image
-                // where it should be drawn...
-                var pixelPos = {
-                  x: (col / imgRes.x + topLeft.x - tilePoint.x) * 256,
-                  y: (row / imgRes.y + topLeft.y - tilePoint.y) * 256
-                };
-
-                // ...and draw a rectangle there.
-                ctx.fillRect(Math.round(pixelPos.x), Math.round(pixelPos.y),
-                // Looks crazy, but this is necessary to prevent rounding from
-                // causing overlap between this rect and its neighbors. The
-                // minuend is the location of the next pixel, while the
-                // subtrahend is the position of the current pixel (to turn an
-                // absolute coordinate to a width/height). Yes, I had to look
-                // up minuend and subtrahend.
-                Math.round(pixelPos.x + pixelSize.x) - Math.round(pixelPos.x), Math.round(pixelPos.y + pixelSize.y) - Math.round(pixelPos.y));
-              }
+              // ...and draw a rectangle there.
+              ctx.fillRect(Math.round(pixelPos.x), Math.round(pixelPos.y),
+              // Looks crazy, but this is necessary to prevent rounding from
+              // causing overlap between this rect and its neighbors. The
+              // minuend is the location of the next pixel, while the
+              // subtrahend is the position of the current pixel (to turn an
+              // absolute coordinate to a width/height). Yes, I had to look
+              // up minuend and subtrahend.
+              Math.round(pixelPos.x + pixelSize.x) - Math.round(pixelPos.x), Math.round(pixelPos.y + pixelSize.y) - Math.round(pixelPos.y));
             }
           }
-        }();
-
-        if ((typeof _ret8 === "undefined" ? "undefined" : _typeof(_ret8)) === "object") return _ret8.v;
+        }
       } catch (e) {
         error = e;
       } finally {
@@ -3720,7 +3683,7 @@ methods.removeMeasure = function () {
 };
 
 methods.addSelect = function (ctGroup) {
-  var _this10 = this;
+  var _this8 = this;
 
   methods.removeSelect.call(this);
 
@@ -3731,32 +3694,30 @@ methods.addSelect = function (ctGroup) {
       title: "Make a selection",
       onClick: function onClick(btn, map) {
         btn.state("select-active");
-        _this10._locationFilter = new _leaflet2.default.LocationFilter2();
+        _this8._locationFilter = new _leaflet2.default.LocationFilter2();
 
         if (ctGroup) {
-          (function () {
-            var selectionHandle = new global.crosstalk.SelectionHandle(ctGroup);
-            selectionHandle.on("change", function (e) {
-              if (e.sender !== selectionHandle) {
-                if (_this10._locationFilter) {
-                  _this10._locationFilter.disable();
-                  btn.state("select-inactive");
-                }
+          var selectionHandle = new global.crosstalk.SelectionHandle(ctGroup);
+          selectionHandle.on("change", function (e) {
+            if (e.sender !== selectionHandle) {
+              if (_this8._locationFilter) {
+                _this8._locationFilter.disable();
+                btn.state("select-inactive");
               }
-            });
-            var handler = function handler(e) {
-              _this10.layerManager.brush(_this10._locationFilter.getBounds(), { sender: selectionHandle });
-            };
-            _this10._locationFilter.on("enabled", handler);
-            _this10._locationFilter.on("change", handler);
-            _this10._locationFilter.on("disabled", function () {
-              selectionHandle.close();
-              _this10._locationFilter = null;
-            });
-          })();
+            }
+          });
+          var handler = function handler(e) {
+            _this8.layerManager.brush(_this8._locationFilter.getBounds(), { sender: selectionHandle });
+          };
+          _this8._locationFilter.on("enabled", handler);
+          _this8._locationFilter.on("change", handler);
+          _this8._locationFilter.on("disabled", function () {
+            selectionHandle.close();
+            _this8._locationFilter = null;
+          });
         }
 
-        _this10._locationFilter.addTo(map);
+        _this8._locationFilter.addTo(map);
       }
     }, {
       stateName: "select-active",
@@ -3764,9 +3725,9 @@ methods.addSelect = function (ctGroup) {
       title: "Dismiss selection",
       onClick: function onClick(btn, map) {
         btn.state("select-inactive");
-        _this10._locationFilter.disable();
+        _this8._locationFilter.disable();
         // If explicitly dismissed, clear the crosstalk selections
-        _this10.layerManager.unbrush();
+        _this8.layerManager.unbrush();
       }
     }]
   });
@@ -3808,7 +3769,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 // pixel of the original image has some contribution to the downscaled image)
 // as opposed to a single-step downscaling which will discard a lot of data
 // (and with sparse images at small scales can give very surprising results).
-
 var Mipmapper = function () {
   function Mipmapper(img) {
     _classCallCheck(this, Mipmapper);
@@ -3946,11 +3906,11 @@ function asArray(value) {
 </head>
 <body style="background-color: white;">
 <div id="htmlwidget_container">
-<div id="htmlwidget-c9e35721706b2936fb75" class="leaflet html-widget" style="width:100%;height:400px;">
+<div id="htmlwidget-106e35044a53da723e26" class="leaflet html-widget" style="width:100%;height:400px;">
 
 </div>
 </div>
-<script type="application/json" data-for="htmlwidget-c9e35721706b2936fb75">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addCircleMarkers","args":[[-35.267483,-35.65655,-35.720467,-35.288017,-35.922667,-36.360867,-36.361717,-36.72345,-37.003433,-36.881,-36.888217,-36.8904,-36.903967,-36.9223,-36.848967,-36.9649,-36.980217,-37.009933,-36.215667,-36.2252,-36.3,-36.166767,-37.143133,-37.147983,-37.520333,-38.415583,-37.859833,-37.853867,-37.907817,-38.0544,-37.56285,-37.599933,-38.080133,-37.6105,-37.98895,-38.473333,-38.5145,-39.003117,-39.027367,-39.393333,-39.42945,-39.43895,-37.68985,-38.63285,-38.7443,-38.756667,-38.782833,-38.90345,-39.29725,-39.325883,-39.071667,-39.224767,-39.19932,-39.360717,-39.4331,-39.646783,-39.671983,-39.762267,-40.371967,-40.194633,-40.424017,-40.420167,-40.559583,-40.7735,-40.865817,-40.900483,-40.993233,-40.9043,-41.028217,-41.410267,-41.420183,-40.8276,-41.10565,-41.277333,-41.26715,-41.2955,-41.302183,-41.0701,-41.104167,-41.3394,-41.348133,-41.127917,-41.2719,-40.619883,-40.7097,-40.769033,-41.364817,-41.393167,-41.220483,-41.240167,-41.300783,-41.70301667,-42.259583,-41.815683,-42.102083,-42.346233,-42.40865,-43.2254,-43.23975,-43.381,-43.911583,-43.941517,-43.970583,-44.117433,-45.858333,-45.926167,-44.705117,-45.193167,-45.23565,-45.441017,-45.990217,-46.347583,-46.353667,-46.473333,-46.552817,-46.6135,-46.9011,-46.926017,-47.229667,-35.5625,-37.56285,-37.606367,-44.3371,-45.691433,-46.027467,-39.85725,-43.760067,-39.318233,-38.46675,-39.124283,-42.4297,-43.4857,-40.907517,-34.47249973,-36.21805,-36.53451667,-36.5434,-36.87255,-37.56513333,-37.59993333,-37.64496667,-37.68333333,-37.68985,-37.98693333,-38.5169,-38.56645,-38.63285,-38.65233333,-38.78296667,-38.11666667,-39.00311667,-39.0203,-39.104305,-39.02926667,-39.29725,-39.318833,-39.32553333,-39.3946,-39.43375,-39.43841667,-39.64491667,-39.67198333,-39.72693333,-39.796611,-39.79608333,-39.961,-40.00783333,-40.0828,-40.37091667,-40.37173333,-40.42016667,-40.56205,-40.61816667,-40.6414,-40.70548333,-40.7744,-40.09168333,-40.85201667,-40.86075,-40.99323333,-41.06081667,-41.10565,-41.24568333,-41.24596667,-41.25116667,-41.26715,-41.26863333,-41.30678333,-41.34708333,-41.34795,-41.37463333,-41.0817,-41.7999,-41.96811667,-41.96981667,-41.13903333,-42.28621667,-42.38351667,-42.4297,-42.51403333,-41.7032,-42.763,-43.63211667,-43.76636667,-43.8897,-44.0012,-44.1844,-44.34408333,-44.44105,-44.66473333,-44.6796,-44.92313333,-45.43998333,-45.06666667,-45.80799,-45.88163333,-45.92663333,-45.99021667,-46.0065,-46.35366667,-37.14344645,-37.42871268,-35.614445,-38.00246,-38.937498,-39.088058,-39.687322,-40.00796,-40.091785,-40.182692,-40.173898,-40.542235,-41.527433,-43.438163,-43.640955,-43.714741,-45.635641,-34.407783,-34.430017,-34.456383,-34.4725,-34.473183,-34.483333,-34.4914,-34.539867,-34.559417,-35.48060503,-35.45391226,-34.79785,-34.943,-35.027033,-35.13685,-35.1581,-35.184483,-35.205,-35.209783,-35.32085,-35.358283,-35.369317,-35.4445,-35.53775,-35.652183,-35.939817,-35.895967,-35.720467,-36.060267,-35.866833,-35.922667,-36.06728283,-35.8866,-36.11354,-36.505067,-36.504717,-36.351667,-36.537517,-36.5118,-36.447183,-36.695,-36.893717,-36.925583,-36.840233,-36.782183,-36.93555,-36.696733,-36.888233,-36.7266,-36.72345,-36.831817,-36.929333,-36.889583,-36.8978,-36.876417,-36.866583,-36.916667,-36.9661,-36.9767,-37.04155,-36.726617,-36.2196,-36.215667,-36.241583,-36.18335,-36.8804,-36.974767,-36.658383,-37.026667,-36.51195,-37.143183,-37.147633,-36.755367,-36.669733,-37.121317,-37.393267,-37.305217,-37.279433,-37.967533,-37.88,-37.907333,-37.859867,-37.520267,-38.283333,-37.811283,-38.052533,-37.61051986,-37.42871268,-37.544367,-37.5048,-38.100033,-37.986717,-37.855267,-37.546717,-37.565583,-37.595233,-37.654033,-37.591117,-38.8163,-37.6064,-37.6898,-38.808,-39.074283,-38.8959,-39.155183,-39.396167,-39.726933,-39.8495,-40.0828,-40.22435,-40.396317,-40.559583,-40.55995,-40.86075,-40.865817,-40.900483,-40.993233,-41.028217,-41.4497,-40.86,-41.274617,-41.26715,-41.251233,-41.0701,-41.24735,-41.297833,-41.25615,-41.3394,-41.111817,-40.838067,-41.311667,-41.3762,-41.304717,-41.1569,-42.286217,-42.336033,-42.35145,-42.9428,-43.63155,-43.8992,-43.766367,-43.783233,-45.891683,-45.9298,-35.2708,-35.288533,-35.538583,-35.612317,-35.8493,-36.038317,-35.5625,-35.885193,-37.29505,-41.968117,-45.773017,-45.84685,-43.756417,-42.272517,-40.553333,-41.026517,-41.16095,-41.177133,-40.4691,-41.082317,-39.673233,-36.9751,-43.021529,-44.160288,-44.5215,-44.689708,-44.875031,-44.975789,-45.004141,-45.05572,-45.059628,-45.059909,-45.082329,-45.11052,-45.1575,-45.171536,-45.258113,-45.40852,-45.42839,-45.536896,-45.80152,-45.812051,-45.873995,-43.0336,-43.03388333,-43.73765,-44.249,-44.25595,-44.4908,-44.66473333,-44.86666667,-44.8947,-44.89576667,-44.945,-44.99221667,-44.99236667,-44.1071,-45.02958333,-45.15561,-45.18775,-45.29183333,-45.43391667,-45.45715,-45.55356667,-45.5542,-45.55436667,-45.58423333,-45.59436667,-45.72035,-45.72166667,-45.08828333,-45.8451,-45.88233333,-45.90458333,-45.92628333,-45.92915,-45.95793333,-45.99021667,-45.99701667,-45.11666667,-46.00406667,-46.3519,-46.35366667,-46.41171667,-46.43033333,-46.44538333,-46.4732,-46.06133333,-46.06565,-46.51893333,-46.53523333,-46.54189,-46.55251667,-46.57763333,-46.61196667,-46.13393333,-46.221747,-42.48413333,-42.5406,-42.55771667,-42.57088333,-42.5748,-43.74948333,-43.66108333,-43.63101667,-42.23951667,-45.507995,-42.32395,-42.05048333,-43.524,-42.47138333,-43.75683333,-43.78351667,-43.81116667,-42.31676667,-37.61175,-37.86666667,-37.90781667,-38.47083333,-38.73333333,-38.7405,-38.78296667,-38.90345,-39.15518333,-39.19928333,-39.64478333,-41.02821667,-37.53358333,-38.2549,-38.41641667,-37.049,-40.42016667,-40.574267,-39.39898333,-39.79283333,-39.961,-39.41295,-37.27515,-39.72693333,-39.08865,-38.69681667,-39.32401667,-39.20095,-36.86438,-41.03306667,-41.822,-40.84788333,-42.1018,-41.7551,-41.2719,-40.99598333,-41.11495,-41.34795,-41.41026667,-41.08691667,-40.94833333,-40.86678333,-40.9068,-40.89538333,-40.849,-41.11449167,-40.7097,-41.28058333,-42.4297,-41.26745,-41.11088333,-41.29511667,-41.23533333,-41.3693,-41.30118333,-34.40778307,-34.47249973,-34.49139973,-34.79416659,-35.06913423,-34.9477164,-35.12214973,-35.16338307,-35.20879973,-35.18999974,-35.19368307,-35.7211664,-35.18589974,-35.19223307,-35.27558307,-35.2086664,-35.30194974,-35.3693164,-35.65654974,-35.85433307,-35.70926885,-35.56227997,-35.70268668,-35.32084974,-36.36083307,-36.34516641,-36.45841641,-35.89374861,-36.46988307,-36.94264975,-36.96609974,-36.86355808,-37.21833307,-37.01734141,-37.04899974,-36.20833307,-36.21816641,-36.22083308,-36.29679503,-36.98941641,-37.61174974,-37.14856546,-37.52141641,-37.96798308,-37.90781641,-37.85078332,-37.85983308,-37.54364974,-37.56284975,-37.59666641,-37.60636642,-37.67496641,-38.78296641,-38.51449974,-38.47083308,-38.56644975,-38.05048307,-38.25898308,-38.90345,-37.0063,-39.42945,-39.019717,-39.28678,-39.64491667,-39.39616667,-41.01366,-40.22435,-40.86075,-40.90048333,-40.99323333,-41.00753333,-41.02821667,-41.06081667,-41.25586667,-41.41026667,-41.4497,-41.34823333,-41.43348333,-41.2825,-41.08702,-41.0245,-40.84582,-40.671264,-40.92771,-41.20246667,-41.38518333,-41.11243,-40.82218333,-41.347626,-41.03296667,-41.1063,-41.10675,-41.80382,-41.73086,-41.741923,-41.21606667,-41.71788333,-42.70265,-41.3125,-41.1188,-41.39722,-41.0804,-40.97166667,-41.19786667,-41.7672,-41.10636667,-41.8341,-41.106972,-41.19731667,-41.67445,-41.637513,-41.711559,-42.076597,-41.729433,-42.4052,-42.41073333,-41.76601667,-40.87358333,-40.90106667,-41.52406667,-41.87456667,-42.2432,-42.36483333,-42.24688333,-42.25958333,-41.877422,-42.33603333,-42.35028333,-41.96981667,-42.21648333,-42.32395,-40.671199,-34.43437308,-34.47249999,-34.49139999,-35.06913448,-34.94771666,-35.12214999,-35.1859,-35.16338332,-35.20879999,-35.19,-35.19368332,-35.72116666,-35.30195,-35.36931666,-35.65655,-35.53055554,-35.85433333,-35.88696362,-36.36083332,-36.46988333,-36.55731839,-36.94265,-37.01132357,-37.04899999,-36.29679528,-36.20833332,-36.21816666,-36.22083333,-36.98941666,-36.34516666,-37.21833332,-37.52141665,-37.53448926,-37.85078357,-37.54364999,-38.10164989,-38.47083332,-35.27558333,-36.45841666,-35.89374887,-37.1485657,-35.19692777,-35.19223333,-36.86355833,-35.56228023,-35.7092691,-36.65211079,-34.47249973],[173.294733,173.563267,173.649333,174.09175,173.854383,174.61335,174.6132,174.691967,174.563083,174.853017,174.849567,174.725967,174.64045,174.593867,174.861517,174.613833,174.919633,174.906483,175.057933,175.078733,175.533333,175.29935,175.65905,175.673333,175.728167,174.880283,175.530667,174.783467,174.896767,175.562067,178.15225,178.29955,176.421917,177.9611,176.189417,175.5683,175.570167,176.5538,175.7451,175.428333,175.464517,175.45405,178.547217,177.032117,177.161217,177.013333,177.135667,174.59405,174.479283,174.285933,174.078333,173.9662,173.97799,174.513483,175.378633,175.721667,175.794967,176.040233,175.6224,176.085217,176.226317,176.03155,176.054583,176.044617,176.145333,175.468167,175.50235,175.5066,175.95685,175.364667,175.357617,174.94515,175.291467,174.755333,174.757483,174.826167,174.72145,175.233617,175.082433,174.978883,174.928167,174.1413,173.905867,172.54765,172.364483,172.706917,173.081717,173.183733,173.569183,173.321167,173.571917,173.8705333,173.810533,171.6005,171.40155,171.386917,171.257733,170.155517,170.127167,170.162483,168.897783,169.2968,168.6113,168.540017,170.538333,170.029833,167.96965,167.833767,167.81295,167.686483,167.383217,167.854817,168.007433,168.293333,169.47445,168.3535,168.125983,168.131317,167.553833,174.49945,178.15225,178.153883,168.007283,166.715783,166.539067,176.900867,169.1491,176.535417,178.049633,177.875233,171.295883,172.68725,172.85455,172.7644164,175.0546333,175.3995667,175.4093667,175.53975,178.1517333,178.29955,178.3043,177.8833333,178.5472167,176.189,175.5817667,175.7178,177.0321167,178.0331,177.1357,176.2166667,176.5538,174.7994667,176.80325,174.25535,174.4792833,176.538167,174.2966333,175.4271333,175.3764667,175.4539667,175.7138333,175.7949667,175.1386333,176.194611,174.9269167,176.0140167,176.1778667,175.9066667,175.6329167,175.61485,176.03155,176.0560667,175.4818833,172.4818833,175.6552667,175.6173167,175.8295167,174.9284167,175.8726833,175.50235,175.6038833,175.2914667,174.7945667,174.7968333,174.7808667,174.7574833,173.29205,174.8993,174.9694333,174.9315167,173.1032333,175.3552167,172.3284,173.9835833,173.9862167,174.82755,173.7304,173.44845,171.2958833,173.5024,173.8703,171.4333833,172.62575,172.7146,171.26045,171.1505333,169.2662167,170.8413167,169.2712,170.9727333,167.96325,168.0406167,167.68555,168.5454167,167.52545,170.5508667,170.0296833,167.3832167,168.4326,168.0074333,175.6596612,175.7283339,174.21666,175.575633,175.748709,174.060139,176.896318,176.177788,175.829401,175.824048,175.883189,176.194537,173.971375,172.576278,172.477023,172.749573,170.653796,173.007183,172.8667,172.98735,172.764417,172.764033,172.816667,172.836517,172.92015,172.837717,174.7437284,174.7390467,173.0648,173.195183,173.198917,173.879583,173.42535,173.1219,173.183583,173.194167,174.0656,173.250733,173.283367,173.755167,173.382517,173.557083,175.146367,173.806117,173.649333,174.572633,173.735833,173.854383,174.5756056,174.7783,174.55425,174.793523,174.789933,174.302,174.705283,174.662433,174.4419,174.696667,174.450967,174.603083,174.612183,174.993417,174.635317,174.9738,174.6169,174.6917,174.691967,174.426317,174.751133,174.726667,174.709317,174.795617,174.8284,174.45,174.611717,175.256317,175.290367,175.614583,175.056817,175.057933,175.399533,175.37695,175.428117,176.081283,175.84875,175.525,175.419183,175.65905,175.670767,175.726733,175.454267,175.62925,175.835917,176.256017,175.324033,175.154283,174.792333,174.898667,175.53075,175.727317,175.666667,175.293733,174.863933,175.1545609,175.7283339,175.873283,175.869533,176.429267,176.18795,176.974117,178.105867,178.040217,178.320183,178.29685,178.292333,177.1357,178.313933,178.547267,177.153833,177.128433,174.599167,174.699767,176.314333,175.08318,175.123283,175.906667,176.272033,176.237633,176.054583,176.405033,175.872683,176.145333,175.468167,175.50235,175.95685,175.240883,175.05,174.752133,174.757483,174.9088,175.233617,174.794483,174.825533,174.95395,174.978883,173.66375,174.001,173.292333,173.09905,173.223017,173.418883,173.7304,173.640633,173.567233,173.247017,172.624767,171.234033,172.7146,172.834283,170.451967,170.0559,173.184167,174.087,173.383117,174.4851,174.53385,174.50765,174.49945,174.12625,176.260567,173.983583,170.574467,170.657417,172.9718,173.651433,172.603033,173.886667,174.235317,174.311083,175.24745,175.355833,177.038317,175.843383,171.595373,170.226288,168.55447,169.16791,169.903908,169.05744,169.048173,169.13619,169.213405,168.948768,169.321441,169.3089,168.3994,169.019904,169.420161,169.256388,169.26278,167.305727,170.502748,169.819794,170.143676,171.7610667,171.7621,170.0965,169.79665,169.8280333,168.77835,170.9727333,168.95,168.084,168.0838667,170.2366667,168.93945,168.9396333,169.8167,168.7858,169.12819,169.29855,169.3446667,169.9404,170.4173,169.02035,169.0189667,169.0186333,168.37365,167.9515,167.73575,169.47,169.33765,170.5026833,170.5501833,169.9850333,170.0301333,170.0551,169.4712833,167.3832167,168.59185,170.05,167.4068833,167.8651,168.0074333,169.2442667,168.4215333,169.8014833,168.2946167,168.82805,168.8806667,168.2523833,168.2539667,168.4672333,169.4732333,169.4442,168.3499167,168.6027833,167.361603,172.3902167,172.3631667,172.3507167,172.3652333,172.37305,173.0167667,172.6245167,172.6244667,173.7528667,170.570469,173.5928833,173.4415,172.6092833,172.823,172.7313667,172.8339667,173.0253667,172.2646167,175.1554167,174.7833333,174.8967667,175.5721667,177.0333333,177.1638333,177.1357,174.59405,174.6997667,175.9745667,175.7101,175.95685,175.7435167,174.8633833,174.7218667,175.2536667,176.03155,175.44935,175.4141167,176.0458333,176.0140167,176.4160667,175.3272833,175.1386333,174.1088667,175.6752667,174.10375,175.5419167,174.472683333333,172.9077667,172.81185,172.4490833,171.40155,171.8104833,173.9058667,175.3886,175.2283333,174.9315167,175.3646667,174.1355,175.1096167,175.2345667,175.4738667,174.0855333,174.9236333,174.2791333,172.3644833,174.9131,171.2958833,174.75675,174.2255667,174.7989333,174.7922833,174.9427333,173.5715,173.0071831,172.7644164,172.8365164,173.1419439,173.4440349,173.544733,173.5652664,173.2699497,173.1992497,173.4556664,173.480783,173.6501664,173.782233,173.7331497,173.6857664,173.7971331,174.2335164,173.2833664,173.5632664,174.577683,174.3319699,174.4992368,174.2647129,174.0655997,174.613333,174.6141664,174.467033,174.1365627,174.5981497,174.475933,174.6117164,174.4736803,175.0266664,175.1452664,175.2536664,175.0716664,175.0594497,175.0616664,175.5262977,175.5876664,175.1554164,175.6734678,175.7305164,175.1521664,174.8967664,174.7814035,175.5306664,175.8716164,178.1522497,175.8599997,178.153883,175.9151164,177.1356997,175.5701664,175.5721664,175.7177997,175.562283,175.0226497,174.59405,174.906866666667,175.4645167,176.563597,176.40798,175.7138333,176.3143333,175.81867,176.2720333,175.8726833,175.4681667,175.50235,175.3914,175.95685,175.6038833,175.1463167,175.3646667,175.2408833,174.9310333,174.9133667,174.7542,174.7812,173.88959,173.99323,173.997817,173.84208,174.0322,174.058,174.03308,173.0026833,173.348293,172.9005167,173.52305,173.5189833,172.84702,172.99174,173.819332,173.5919333,173.1010333,173.8727167,173.2916667,174.27697,173.19034,172.6261833,172.88925,172.7124167,171.7868333,172.6917333,172.8112,172.633839,172.7134167,171.857586,171.902475,171.864452,171.540442,172.492347,171.3430833,171.3378833,171.7736833,172.542,172.5784833,172.5655833,171.6290667,173.8292833,173.5850667,173.7520833,173.8105333,174.005413,173.6406333,173.5683667,173.9862167,173.8597667,173.5928833,174.003611,172.8935473,172.7644167,172.8365167,173.4440351,173.5447333,173.5652667,173.7822333,173.26995,173.19925,173.4556666,173.4807833,173.6501666,174.2335167,173.2833667,173.5632667,173.4408337,174.5776833,174.7773494,174.6133333,174.59815,174.4763886,174.4759333,174.5383973,175.2536667,175.5262979,175.0716667,175.05945,175.0616666,175.5876666,174.6141667,175.0266666,175.7305167,175.7415085,174.7814038,175.8716167,176.4308375,175.5721667,173.6857666,174.4670333,174.136563,175.673468,173.798575,173.73315,174.4736805,174.4992371,174.3319701,174.7201391,172.7644164],3,null,null,{"interactive":true,"className":"","stroke":true,"color":["#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#000004","#000004","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#000004","#000004","#FCFFA4","#000004","#000004","#FCFFA4","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#000004","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#000004","#000004","#FCFFA4","#FCFFA4","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#FCFFA4","#000004","#FCFFA4","#000004","#FCFFA4","#000004","#FCFFA4","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4"],"weight":5,"opacity":0.5,"fill":true,"fillColor":["#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#000004","#000004","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#000004","#000004","#FCFFA4","#000004","#000004","#FCFFA4","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#000004","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#000004","#000004","#FCFFA4","#FCFFA4","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#FCFFA4","#000004","#FCFFA4","#000004","#FCFFA4","#000004","#FCFFA4","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4"],"fillOpacity":0.2},null,null,["acanthoxyla sp <br> acan-sp_1 <br> Waitouhue Rd, en route to Takahue","acanthoxyla sp <br> acan-sp_2 <br> Waipoua Forest, hill south of DoC Forest HQ","acanthoxyla sp <br> acan-sp_3 <br> Trounson Kauri Park","acanthoxyla sp <br> acan-sp_4 <br> Paihia","acanthoxyla sp <br> acan-sp_5 <br> Dargaville, Memorial Park","acanthoxyla sp <br> acan-sp_6 <br> Dome Forest Walkway, north of Warkworth","acanthoxyla sp <br> acan-sp_7 <br> Dome Valley Walkway","acanthoxyla sp <br> acan-sp_8 <br> Albany, Lucas Creek","acanthoxyla sp <br> acan-sp_9 <br> Huia","acanthoxyla sp <br> acan-sp_10 <br> Auckland, Tamaki, Don Merton Rd","acanthoxyla sp <br> acan-sp_11 <br> Tamaki campus","acanthoxyla sp <br> acan-sp_12 <br> Mt Albert Research Centre, Mt Albert","acanthoxyla sp <br> acan-sp_13 <br> Henderson, Sunnyvale","acanthoxyla sp <br> acan-sp_14 <br> Auckland, Oratia Forest","acanthoxyla sp <br> acan-sp_15 <br> Auckland, St Heliers Bay","acanthoxyla sp <br> acan-sp_16 <br> Auckland, Parau Trk, Lower Nihotupu Reservoir","acanthoxyla sp <br> acan-sp_17 <br> Murphys Bush, Manurewa","acanthoxyla sp <br> acan-sp_18 <br> Botanic Gardens, Manurewa","acanthoxyla sp <br> acan-sp_19 <br> Little Barrier I, Flats","acanthoxyla sp <br> acan-sp_20 <br> Little Barrier I, Awaroa Stm","acanthoxyla sp <br> acan-sp_21 <br> Great Barrier I, Little Windy Hill","acanthoxyla sp <br> acan-sp_22 <br> Nelson I. (Great Barrier I)","acanthoxyla sp <br> acan-sp_23 <br> Coromandel, Kopu-Hikuai Rd, SH25A","acanthoxyla sp <br> acan-sp_24 <br> Kopu-Hikuai, Coromandel summit carpark on East side","acanthoxyla sp <br> acan-sp_25 <br> Mt Te Aroha, bottom of road","acanthoxyla sp <br> acan-sp_26 <br> Mangaotaki Gorge, Piopio","acanthoxyla sp <br> acan-sp_27 <br> Cambridge, Maungakawa Scenic Reserve","acanthoxyla sp <br> acan-sp_28 <br> Mount Karioi, Pirongia State forest Park","acanthoxyla sp <br> acan-sp_29 <br> Bridal Veil Falls","acanthoxyla sp <br> acan-sp_30 <br> Mt Maungatautari, southern enclosure","acanthoxyla sp <br> acan-sp_31 <br> Waenga Bush, Lottin Pt Rd","acanthoxyla sp <br> acan-sp_32 <br> Te Koau, Hicks Bay","acanthoxyla sp <br> acan-sp_33 <br> Lk Okataina, Trk off Lk Okataina Rd","acanthoxyla sp <br> acan-sp_34 <br> Waiotuma Stm","acanthoxyla sp <br> acan-sp_35 <br> Te Pu, Mamaku","acanthoxyla sp <br> acan-sp_36 <br> Pureora Lodge, Loop Track, Karamarama Stream","acanthoxyla sp <br> acan-sp_37 <br> Pureora Forest, Caterpillar Tractor Track","acanthoxyla sp <br> acan-sp_38 <br> Napier-Taupo Road, rest area","acanthoxyla sp <br> acan-sp_39 <br> Tongariro Natl Pk, Tongariro, Lake Rotopounamu","acanthoxyla sp <br> acan-sp_40 <br> Ohakune Mountain Rd, Rimu Track","acanthoxyla sp <br> acan-sp_41 <br> Rangataua, Rangataua Scenic Reserve","acanthoxyla sp <br> acan-sp_42 <br> Mangaehuehu Scenic Res, SH49 roadside","acanthoxyla sp <br> acan-sp_43 <br> East Cape lighthouse Trk","acanthoxyla sp <br> acan-sp_44 <br> Huiarau Ra, Taupepe Saddle, rest area at Huiarau summit","acanthoxyla sp <br> acan-sp_45 <br> Te Urewera Nat Pk, Lake Waikaremoana, Aniwaniwa, DoC HQ","acanthoxyla sp <br> acan-sp_46 <br> Lake Waikaremoana, Te Totara track","acanthoxyla sp <br> acan-sp_47 <br> Te Urewera Nat Pk, Lake Waikaremoana, Awaawaroa Stm, Maori Track","acanthoxyla sp <br> acan-sp_48 <br> Mount Messenger","acanthoxyla sp <br> acan-sp_49 <br> Douglas Cottage, Ohura Road","acanthoxyla sp <br> acan-sp_50 <br> Stratford","acanthoxyla sp <br> acan-sp_51 <br> New Plymouth, Hine Street","acanthoxyla sp <br> acan-sp_52 <br> Mt Taranaki, Junction of Carrington and Dover Rds","acanthoxyla sp <br> acan-sp_53 <br> Pukeiti, along Carrington Road, Egmont National Park","acanthoxyla sp <br> acan-sp_54 <br> Tauwharenikau Valley","acanthoxyla sp <br> acan-sp_55 <br> Ohakune Lakes Reserve","acanthoxyla sp <br> acan-sp_56 <br> Paengaroa Scenic Reserve, Mataroa, near Taihape","acanthoxyla sp <br> acan-sp_57 <br> Taihape, Mt Stewart","acanthoxyla sp <br> acan-sp_58 <br> Rangitane, Kawhatau Base, Ruahine State Forest Pk","acanthoxyla sp <br> acan-sp_59 <br> Palmerston North, The Esplanade","acanthoxyla sp <br> acan-sp_60 <br> Dannevirke","acanthoxyla sp <br> acan-sp_61 <br> 4.7km N of Waihi Valley Rd, on road from Waipatiki to Waimiro","acanthoxyla sp <br> acan-sp_62 <br> Waewaepa Scenic Res., Puketoi Ra","acanthoxyla sp <br> acan-sp_63 <br> Puketoi Ra, Pahiatua-Pongaroa Rd, NE of Makuri, 6.7km N of road JCT in Makuri","acanthoxyla sp <br> acan-sp_64 <br> 11.4 km NW of Tinui, on road to Eketahuna","acanthoxyla sp <br> acan-sp_65 <br> Tinui, 3.0 km east of junction of Castle Point Rd and Tinui Vly Rd","acanthoxyla sp <br> acan-sp_66 <br> Donnelley's clearing Trk, Mt Holdsworth","acanthoxyla sp <br> acan-sp_67 <br> Fensham Scenic Reserve, Carterton","acanthoxyla sp <br> acan-sp_68 <br> Mt Holdsworth","acanthoxyla sp <br> acan-sp_69 <br> Ngaumu State Forest","acanthoxyla sp <br> acan-sp_70 <br> Waikuku Lodge, Haurangi Mountains","acanthoxyla sp <br> acan-sp_71 <br> Sutherland Vehicle Trk, Turanganui River East branch, Haurangi Mountains","acanthoxyla sp <br> acan-sp_72 <br> Nth end of Kapiti Is","acanthoxyla sp <br> acan-sp_73 <br> Abbotts Creek, Rimutaka Hill Rd","acanthoxyla sp <br> acan-sp_74 <br> Wellington, Northland, Creswick Tce","acanthoxyla sp <br> acan-sp_75 <br> Wellington, Otari-Wiltons Bush","acanthoxyla sp <br> acan-sp_76 <br> Wellington, Miramar, 164 Nevay Rd","acanthoxyla sp <br> acan-sp_77 <br> South Karori Rd, Bargh farm","acanthoxyla sp <br> acan-sp_78 <br> Rimutaka Forest Pk, Kaitoke, Smiths Creek Trk","acanthoxyla sp <br> acan-sp_79 <br> Totara Pk, Upper Hutt Rover Rd","acanthoxyla sp <br> acan-sp_80 <br> Orongorongo River Valley, Rimutaka State Forest Pk","acanthoxyla sp <br> acan-sp_81 <br> Catchpool Valley, Rimutaka Forest Pk","acanthoxyla sp <br> acan-sp_82 <br> Queen Charlotte Track, Kenepuru Saddle, manuka forest","acanthoxyla sp <br> acan-sp_83 <br> Top Cottage (Vallence residence), near Anakiwa","acanthoxyla sp <br> acan-sp_84 <br> Whanganui Inlet, Kaituna Track","acanthoxyla sp <br> acan-sp_85 <br> Anatori River Valley","acanthoxyla sp <br> acan-sp_86 <br> Washbourn Scenic Reserve","acanthoxyla sp <br> acan-sp_87 <br> Brightwater, Nelson","acanthoxyla sp <br> acan-sp_88 <br> Nelson, Roding","acanthoxyla sp <br> acan-sp_89 <br> Rai, Nelson","acanthoxyla sp <br> acan-sp_90 <br> Nelson City, Atawhai","acanthoxyla sp <br> acan-sp_91 <br> Pelorus Bridge","acanthoxyla sp <br> acan-sp_92 <br> Awatere Valley, Blairich Station, Black Birch Stream","acanthoxyla sp <br> acan-sp_93 <br> Halfmoon Bay Track head, along SH1","acanthoxyla sp <br> acan-sp_94 <br> Hwy 6 near Westport, turnoff for Buckland Peaks Track (KM025)","acanthoxyla sp <br> acan-sp_95 <br> Bullock Creek, Punakaiki","acanthoxyla sp <br> acan-sp_96 <br> Blackball, Blackball Rd","acanthoxyla sp <br> acan-sp_97 <br> Runanga, Coal Creek Walkway","acanthoxyla sp <br> acan-sp_98 <br> Okarito, Okarito Trig Walk","acanthoxyla sp <br> acan-sp_99 <br> Three Mile Lagoon Trk, Okarito","acanthoxyla sp <br> acan-sp_100 <br> Canavans Knob","acanthoxyla sp <br> acan-sp_101 <br> Hapuka Estuary, Okuru","acanthoxyla sp <br> acan-sp_102 <br> Roadside, 1-2 km east of track to Roaring Billy Falls, SH6","acanthoxyla sp <br> acan-sp_103 <br> Jacksons Bay, Wharekai-Tekou walk","acanthoxyla sp <br> acan-sp_104 <br> Red Hills, Jackson River Rd","acanthoxyla sp <br> acan-sp_105 <br> Dunedin, Dunedin water works","acanthoxyla sp <br> acan-sp_106 <br> Waipori Falls Rd, second picnic area","acanthoxyla sp <br> acan-sp_107 <br> Milford, Gulliver River Valley, Graves-Talbot Trk","acanthoxyla sp <br> acan-sp_108 <br> Te Anau Downs, roadside, 44 km S of Knobs Flat, SH94","acanthoxyla sp <br> acan-sp_109 <br> Te Anau Downs, Henry Creek","acanthoxyla sp <br> acan-sp_110 <br> Te Anau, Te Anau Control Gates","acanthoxyla sp <br> acan-sp_111 <br> Lake Hauroko jetty","acanthoxyla sp <br> acan-sp_112 <br> Lake George, west of Riverton","acanthoxyla sp <br> acan-sp_113 <br> Riverton, Riverton Railway Bridge","acanthoxyla sp <br> acan-sp_114 <br> Sandy Point, Daffodil Bay","acanthoxyla sp <br> acan-sp_115 <br> The Catlins, Papatowai, Old Coach Rd","acanthoxyla sp <br> acan-sp_116 <br> Bluff, Glory Trk","acanthoxyla sp <br> acan-sp_117 <br> Stewart I, Oban, Excelsior Rd","acanthoxyla sp <br> acan-sp_118 <br> Ulva Island","acanthoxyla sp <br> acan-sp_119 <br> Port Pegasus, Head of Sylvan Cove","acanthoxyla sp <br> acan-sp_120 <br> Whale Bay","acanthoxyla sp <br> acan-sp_121 <br> Waenga Bush, Lottin Pt Rd","acanthoxyla sp <br> acan-sp_122 <br> Waiaroho, East Cape","acanthoxyla sp <br> acan-sp_123 <br> Martins Bay, along track to seal colony","acanthoxyla sp <br> acan-sp_124 <br> Dusky Sound, Resolution Is","acanthoxyla sp <br> acan-sp_125 <br> Chalky Inlet, Passage Is","acanthoxyla sp <br> acan-sp_126 <br> Mohi Bush [Reserve], fork of Tk","acanthoxyla sp <br> acan-sp_127 <br> Ship Creek","acanthoxyla sp <br> acan-sp_128 <br> Puketitiri, Little Bush Res","acanthoxyla sp <br> acan-sp_129 <br> Waimata Valley","acanthoxyla sp <br> acan-sp_130 <br> Mahia Peninsula","acanthoxyla sp <br> acan-sp_131 <br> Sewell Peak","acanthoxyla sp <br> acan-sp_132 <br> Travis Wetland","acanthoxyla sp <br> acan-sp_133 <br> Rameka","acanthoxyla sp <br> NA <br> Te Paki","argosarchus horridus <br> argo-sp_1 <br> Hauturu","argosarchus horridus <br> argo-sp_2 <br> Mt Moehau, Coromandel Pen.","argosarchus horridus <br> argo-sp_3 <br> Mount Moehau","argosarchus horridus <br> argo-sp_4 <br> Mahakirau","argosarchus horridus <br> argo-sp_5 <br> Lottin Pt Rd, Waenga Bush","argosarchus horridus <br> argo-sp_6 <br> Te Koau, Hicks Bay","argosarchus horridus <br> argo-sp_7 <br> Karakatuwhero Valley, Waipiata","argosarchus horridus <br> argo-sp_8 <br> Pohueroro","argosarchus horridus <br> argo-sp_9 <br> East Cape lighthouse Trk","argosarchus horridus <br> argo-sp_10 <br> Te Pu, Mamakus","argosarchus horridus <br> argo-sp_11 <br> Caterpillar Track","argosarchus horridus <br> argo-sp_12 <br> Kakaho, Puerora","argosarchus horridus <br> argo-sp_13 <br> Huiarau Saddle","argosarchus horridus <br> argo-sp_14 <br> Gisborne","argosarchus horridus <br> argo-sp_15 <br> Maori Track","argosarchus horridus <br> argo-sp_16 <br> Rotorua","argosarchus horridus <br> argo-sp_17 <br> Napier-Taupo Road","argosarchus horridus <br> argo-sp_18 <br> Tahora","argosarchus horridus <br> argo-sp_19 <br> Boundary Stream","argosarchus horridus <br> argo-sp_20 <br> Otaraoa, Taranaki","argosarchus horridus <br> argo-sp_21 <br> Douglas","argosarchus horridus <br> argo-sp_22 <br> Puketitiri, Little Bush Res.","argosarchus horridus <br> argo-sp_23 <br> Stratford","argosarchus horridus <br> argo-sp_24 <br> Rimu Track","argosarchus horridus <br> argo-sp_25 <br> Ohakune Lakes","argosarchus horridus <br> argo-sp_26 <br> Mangaehuehue Reserve","argosarchus horridus <br> argo-sp_27 <br> Paengaroa","argosarchus horridus <br> argo-sp_28 <br> Mt Stewart","argosarchus horridus <br> argo-sp_29 <br> Atene Skyline","argosarchus horridus <br> argo-sp_30 <br> E Ruahine Forest, Swamp Tk (Sunrise)","argosarchus horridus <br> argo-sp_31 <br> Bushy Park","argosarchus horridus <br> argo-sp_32 <br> Oroua River","argosarchus horridus <br> argo-sp_33 <br> Makaretu","argosarchus horridus <br> argo-sp_34 <br> Kahikatea Walk","argosarchus horridus <br> argo-sp_35 <br> Palmerston North","argosarchus horridus <br> argo-sp_36 <br> Palmerston North","argosarchus horridus <br> argo-sp_37 <br> Waewaepa","argosarchus horridus <br> argo-sp_38 <br> Puketoi","argosarchus horridus <br> argo-sp_39 <br> Mangaore Dam","argosarchus horridus <br> argo-sp_40 <br> Mangarakau, West Haven, Nelson","argosarchus horridus <br> argo-sp_41 <br> W.A. Miller","argosarchus horridus <br> argo-sp_42 <br> Mount Bruce","argosarchus horridus <br> argo-sp_43 <br> Ruahine","argosarchus horridus <br> argo-sp_44 <br> Kapiti","argosarchus horridus <br> argo-sp_45 <br> Bideford","argosarchus horridus <br> argo-sp_46 <br> Fensham","argosarchus horridus <br> argo-sp_47 <br> Carterton Res","argosarchus horridus <br> argo-sp_48 <br> Abbots Creek","argosarchus horridus <br> argo-sp_49 <br> Kandallah","argosarchus horridus <br> argo-sp_50 <br> Wellington, Khandallah","argosarchus horridus <br> argo-sp_51 <br> Ngaio, Wellington","argosarchus horridus <br> argo-sp_52 <br> Wiltons Bush","argosarchus horridus <br> argo-sp_53 <br> Nelson","argosarchus horridus <br> argo-sp_54 <br> Butterfly Ck, Wellington","argosarchus horridus <br> argo-sp_55 <br> Orongorongo","argosarchus horridus <br> argo-sp_56 <br> Catchpool Valley","argosarchus horridus <br> argo-sp_57 <br> Brightwater, Nelson","argosarchus horridus <br> argo-sp_58 <br> Featherston","argosarchus horridus <br> argo-sp_59 <br> Murchison","argosarchus horridus <br> argo-sp_60 <br> Kekerengu Valley Rd Site 1, Kaikoura","argosarchus horridus <br> argo-sp_61 <br> Kekerengu Valley Rd Site 2, Kaikoura","argosarchus horridus <br> argo-sp_62 <br> Porirua","argosarchus horridus <br> argo-sp_63 <br> Puhipuhi","argosarchus horridus <br> argo-sp_64 <br> Kahutara River","argosarchus horridus <br> argo-sp_65 <br> Sewell Peak","argosarchus horridus <br> argo-sp_66 <br> Oaro, N.Canty.","argosarchus horridus <br> argo-sp_67 <br> Blackbirch Stream","argosarchus horridus <br> argo-sp_68 <br> Taipo River Valley","argosarchus horridus <br> argo-sp_69 <br> Kennedys Bush","argosarchus horridus <br> argo-sp_70 <br> Prices Bush","argosarchus horridus <br> argo-sp_71 <br> Peel Forest","argosarchus horridus <br> argo-sp_72 <br> Waihi Gorge","argosarchus horridus <br> argo-sp_73 <br> Brady Creek","argosarchus horridus <br> argo-sp_74 <br> Pareora Reserve","argosarchus horridus <br> argo-sp_75 <br> Kidds Bush","argosarchus horridus <br> argo-sp_76 <br> Gunns Bush","argosarchus horridus <br> argo-sp_77 <br> Cleddau Valley","argosarchus horridus <br> argo-sp_78 <br> Eglinton","argosarchus horridus <br> argo-sp_79 <br> Te Anau Control Gates","argosarchus horridus <br> argo-sp_80 <br> Twelve Mile Delta","argosarchus horridus <br> argo-sp_81 <br> Lk Monowai Rd","argosarchus horridus <br> argo-sp_82 <br> The Cove","argosarchus horridus <br> argo-sp_83 <br> Waipori Falls","argosarchus horridus <br> argo-sp_84 <br> Lake Hauroko","argosarchus horridus <br> argo-sp_85 <br> The Cone Forest","argosarchus horridus <br> argo-sp_86 <br> Riverton Bridge","argosarchus horridus <br> argo-sp_87 <br> Corromandel","argosarchus horridus <br> argo-sp_88 <br> Karangahake Gorge","argosarchus horridus <br> argo-sp_89 <br> Whangarei","argosarchus horridus <br> argo-sp_90 <br> Mangatautari","argosarchus horridus <br> argo-sp_91 <br> Tokaanu","argosarchus horridus <br> argo-sp_92 <br> New Plymouth","argosarchus horridus <br> argo-sp_93 <br> Havelock North","argosarchus horridus <br> argo-sp_94 <br> Central Hawkes Bay","argosarchus horridus <br> argo-sp_95 <br> Manawatu","argosarchus horridus <br> argo-sp_96 <br> Manawatu","argosarchus horridus <br> argo-sp_97 <br> Manawatu","argosarchus horridus <br> argo-sp_98 <br> Tararua","argosarchus horridus <br> argo-sp_99 <br> Blenheim","argosarchus horridus <br> argo-sp_100 <br> Waimakiriri","argosarchus horridus <br> argo-sp_101 <br> Lincoln","argosarchus horridus <br> argo-sp_102 <br> Kaituna Valley","argosarchus horridus <br> argo-sp_103 <br> Karitane, nr Dunedin","clitarchus tepaki <br> clit-tepa_1 <br> North Cape Scientific Reserve","clitarchus tepaki <br> clit-tepa_2 <br> Spirits Bay","clitarchus tepaki <br> clit-tepa_3 <br> Waikuku Flat, Tom Bowling Bay","clitarchus tepaki <br> clit-tepa_4 <br> Kauri Bush, Te Paki","clitarchus tepaki <br> clit-tepa_5 <br> Kauri Bush Trk, Te Paki","clitarchus tepaki <br> clit-tepa_6 <br> Trk from Papawiri to Kohuranaki, Te Paki Rec Res","clitarchus tepaki <br> clit-tepa_7 <br> Kohuranaki, Te Paki","clitarchus tepaki <br> clit-tepa_8 <br> Parengarenga, Paua","clitarchus tepaki <br> clit-tepa_9 <br> Karatia Rd","clitarchus rakauwhakanekeneke <br> clit-raka_1 <br> Aorangi","clitarchus rakauwhakanekeneke <br> clit-raka_2 <br> Tawhiti Rahi","clitarchus hookeri <br> clit-hook_1 <br> Trig Rd","clitarchus hookeri <br> clit-hook_2 <br> Heath Rd","clitarchus hookeri <br> clit-hook_3 <br> Lake Ngatu","clitarchus hookeri <br> clit-hook_4 <br> Junction of SH10 and Takou Bay Rd, 2 km N of Te Whau, Kerikeri","clitarchus hookeri <br> clit-hook_5 <br> Mangamuka Gorge Scenic Reserve, roadside","clitarchus hookeri <br> clit-hook_6 <br> Ahipara, road to Gumlands","clitarchus hookeri <br> clit-hook_7 <br> Herekino Gorge, Kaitaia Awaroa Rd","clitarchus hookeri <br> clit-hook_8 <br> Herekino Forest Track, Herekino Forest","clitarchus hookeri <br> clit-hook_9 <br> Opua Forest, Oromahoe Rd","clitarchus hookeri <br> clit-hook_10 <br> Pawarenga, Warawara Forest","clitarchus hookeri <br> clit-hook_11 <br> Warawara Forest","clitarchus hookeri <br> clit-hook_12 <br> Whakaruangangana gumland","clitarchus hookeri <br> clit-hook_13 <br> Corner Signal Station Rd & SH12, Pakia rest area, Omapere","clitarchus hookeri <br> clit-hook_14 <br> Waipoua Forest","clitarchus hookeri <br> clit-hook_15 <br> Fanal I, Mokohinau Is","clitarchus hookeri <br> clit-hook_16 <br> Roadside SH12, 2 km N of Babylon Coast Rd, Dargaville","clitarchus hookeri <br> clit-hook_17 <br> Trounson Kauri Park","clitarchus hookeri <br> clit-hook_18 <br> Roadside, Cove Rd, Robert Hastie Reserve","clitarchus hookeri <br> clit-hook_19 <br> Maitahi Wetland Scientific Reserve, Maitahi Rd","clitarchus hookeri <br> clit-hook_20 <br> Memorial Park, Dargaville","clitarchus hookeri <br> clit-hook_21 <br> Brynderwyn","clitarchus hookeri <br> clit-hook_22 <br> Coppermine I, Hen and Chicken Is, track campsite to Lighthouse","clitarchus hookeri <br> clit-hook_23 <br> NW of Mangawhai","clitarchus hookeri <br> clit-hook_24 <br> Home Bay, Motuora I","clitarchus hookeri <br> clit-hook_25 <br> Still Bay, Motuora I","clitarchus hookeri <br> clit-hook_26 <br> Tapora, West of Wellsford","clitarchus hookeri <br> clit-hook_27 <br> Wenderholm Regional Park, Waiwera","clitarchus hookeri <br> clit-hook_28 <br> Puhoi Motorway extension, Puhoi","clitarchus hookeri <br> clit-hook_29 <br> Mt Auckland","clitarchus hookeri <br> clit-hook_30 <br> Wright Rd, Redvale, Albany","clitarchus hookeri <br> clit-hook_31 <br> Bethells, Matuku Res","clitarchus hookeri <br> clit-hook_32 <br> Oratia, Auckland","clitarchus hookeri <br> clit-hook_33 <br> Massey, Auckland, off Don Bucks Rd","clitarchus hookeri <br> clit-hook_34 <br> Waiheke Is","clitarchus hookeri <br> clit-hook_35 <br> Titirangi, Auckland","clitarchus hookeri <br> clit-hook_36 <br> Noises Is, Otata I","clitarchus hookeri <br> clit-hook_37 <br> Shona restoration plot, Border Rd, Opanuku stream, Henderson","clitarchus hookeri <br> clit-hook_38 <br> Gills Reserve, Albany, North Shore","clitarchus hookeri <br> clit-hook_39 <br> Lucas Creek, Albany","clitarchus hookeri <br> clit-hook_40 <br> Muriwai Beach, Maori Bay Trk","clitarchus hookeri <br> clit-hook_41 <br> Hillsborough, Auckland","clitarchus hookeri <br> clit-hook_42 <br> Auckland, Mt Albert Res Centre","clitarchus hookeri <br> clit-hook_43 <br> Owairaka, Auckland","clitarchus hookeri <br> clit-hook_44 <br> Remuera","clitarchus hookeri <br> clit-hook_45 <br> Auckland, Meadowbank","clitarchus hookeri <br> clit-hook_46 <br> Anawhata, Auckland","clitarchus hookeri <br> clit-hook_47 <br> Parau Trk, Lower Nihoputu Reservoir, Auckland","clitarchus hookeri <br> clit-hook_48 <br> Tapapakanga Reg.Park, Orere","clitarchus hookeri <br> clit-hook_49 <br> Waharau Reg.Park, Hunua Ranges","clitarchus hookeri <br> clit-hook_50 <br> Whangapoua, 4.6 km N of SH25 turnoff and Te Rerenga, Coromandel","clitarchus hookeri <br> clit-hook_51 <br> Little Barrier I, DoC Rangers graden","clitarchus hookeri <br> clit-hook_52 <br> Valley Track, Little Barrier Island","clitarchus hookeri <br> clit-hook_53 <br> Great Barrier I, Whangaparapara, Witheys Track","clitarchus hookeri <br> clit-hook_54 <br> Great Barrier I, Kaiarara Valley","clitarchus hookeri <br> clit-hook_55 <br> Wilson Bay, SH25 roadside, 2.5 km N of Tapu, Coromandel","clitarchus hookeri <br> clit-hook_56 <br> Ruamahuaiti Is, Alderman Is","clitarchus hookeri <br> clit-hook_57 <br> Mercury Is, Korapuki","clitarchus hookeri <br> clit-hook_58 <br> Waiomu","clitarchus hookeri <br> clit-hook_59 <br> 3.7 km N of Stony Bay, on road to Stony Bay, Port Charles area","clitarchus hookeri <br> clit-hook_60 <br> Start of Piranui trk, Kopu-Hikuai Rd","clitarchus hookeri <br> clit-hook_61 <br> Coromandel summit, Kopu-Hikuai road","clitarchus hookeri <br> clit-hook_62 <br> Kuaotona (Kuaotunu), Wharekano Rd, rest area, near Whitianga","clitarchus hookeri <br> clit-hook_63 <br> 19 km N of Coromandel town, S of Colville","clitarchus hookeri <br> clit-hook_64 <br> Kauaeranga Valley, Thames","clitarchus hookeri <br> clit-hook_65 <br> Waihi","clitarchus hookeri <br> clit-hook_66 <br> Mayor Island","clitarchus hookeri <br> clit-hook_67 <br> Waitakaruru Reserve, roadside","clitarchus hookeri <br> clit-hook_68 <br> Mangakora Nature Walk, Mt Pirongia","clitarchus hookeri <br> clit-hook_69 <br> Mt Karioi, Pirongia State Forest Pk, Start of Waireke Track","clitarchus hookeri <br> clit-hook_70 <br> Bridal Veil Falls","clitarchus hookeri <br> clit-hook_71 <br> Cambridge, Maungakawa Scenic Reserve","clitarchus hookeri <br> clit-hook_72 <br> Mt Te Aroha, bottom of Summit Rd","clitarchus hookeri <br> clit-hook_73 <br> Waipapa Scenic Reserve, Lake Waipapa","clitarchus hookeri <br> clit-hook_74 <br> Hillcrest, Hamilton","clitarchus hookeri <br> clit-hook_75 <br> SH31, 3 km E of Kawhia","clitarchus hookeri <br> clit-hook_76 <br> Hakarimata","clitarchus hookeri <br> clit-hook_77 <br> Karangahake Gorge","clitarchus hookeri <br> clit-hook_78 <br> Katikati, Track at top of Lindeman Rd","clitarchus hookeri <br> clit-hook_79 <br> Waitengaue Stm, Kaimai Ra","clitarchus hookeri <br> clit-hook_80 <br> Lk Okataina, S end of Lk Okataina Rd, near lodge","clitarchus hookeri <br> clit-hook_81 <br> Te Pu, Mamaku","clitarchus hookeri <br> clit-hook_82 <br> Moutohora Island","clitarchus hookeri <br> clit-hook_83 <br> Omaruparoa","clitarchus hookeri <br> clit-hook_84 <br> Rereauira","clitarchus hookeri <br> clit-hook_85 <br> Te Koau","clitarchus hookeri <br> clit-hook_86 <br> Karakatuwhero V.","clitarchus hookeri <br> clit-hook_87 <br> Hicks Bay? East Cape","clitarchus hookeri <br> clit-hook_88 <br> Maori Track, Awaawaroa Strm, Lake Waikaremoana, Te Urewera Nat.Pak.","clitarchus hookeri <br> clit-hook_89 <br> Te Araroa Campground, East Cape","clitarchus hookeri <br> clit-hook_90 <br> East Cape Lighthouse Trk, Otiki","clitarchus hookeri <br> clit-hook_91 <br> Lake Whakamarino, Lake Waikaremoana","clitarchus hookeri <br> clit-hook_92 <br> Mohaka River, SH2 rest area","clitarchus hookeri <br> clit-hook_93 <br> Summit of Mt Messenger, SH 3","clitarchus hookeri <br> clit-hook_94 <br> Whangamomona Saddle, Awahou Ridge Track, top of saddle","clitarchus hookeri <br> clit-hook_95 <br> Gentle Annie Rd, West of Kuripapango","clitarchus hookeri <br> clit-hook_96 <br> Atene Skyline Tk, north entrance","clitarchus hookeri <br> clit-hook_97 <br> 5.7 km N of Upokongaro","clitarchus hookeri <br> clit-hook_98 <br> Kahikatea walkway, Pohangina Valley","clitarchus hookeri <br> clit-hook_99 <br> Te Uri/Dannevirke","clitarchus hookeri <br> clit-hook_100 <br> 4.7 km N of Waihi Valley Rd, on road from Waimiro to Waipatiki, Wairarapa","clitarchus hookeri <br> clit-hook_101 <br> Puketoi Ra, Pahiatua-Pongaroa Rd, NE of Makuri, 6.7km N of road JCT in Makuri","clitarchus hookeri <br> clit-hook_102 <br> 8.5 km N of Akitio Esplanade on Coast Rd","clitarchus hookeri <br> clit-hook_103 <br> Bideford, Waterfalls Rd","clitarchus hookeri <br> clit-hook_104 <br> Tinui, 3 km E of junction of Castle Point Rd and Tinui Vly Rd","clitarchus hookeri <br> clit-hook_105 <br> Donnelly's clearing, Mt Holdsworth","clitarchus hookeri <br> clit-hook_106 <br> Fensham Scenic Reserve, Carterton","clitarchus hookeri <br> clit-hook_107 <br> Ngaumu State Forest","clitarchus hookeri <br> clit-hook_108 <br> Putangirua Pinnacles, Haurangi Mountains","clitarchus hookeri <br> clit-hook_109 <br> Jacks Bush Rd, Waikanae","clitarchus hookeri <br> clit-hook_110 <br> 145 Creswick Tce, Northland, Wellington","clitarchus hookeri <br> clit-hook_111 <br> Otari-Wiltons Bush, Wellington","clitarchus hookeri <br> clit-hook_112 <br> Francis Bell Res, Pt Howard, Wellington","clitarchus hookeri <br> clit-hook_113 <br> Smiths Creek Tk, Kaitoke, Rimutaka Forest Pk","clitarchus hookeri <br> clit-hook_114 <br> Khandallah, Wellington","clitarchus hookeri <br> clit-hook_115 <br> Miramar Res.","clitarchus hookeri <br> clit-hook_116 <br> Wainui-o-mata, Wgtn","clitarchus hookeri <br> clit-hook_117 <br> Orongorongo River Valley, Rimutaka State Forest Pk","clitarchus hookeri <br> clit-hook_118 <br> Okiwi Bay","clitarchus hookeri <br> clit-hook_119 <br> Trio Is (iii)","clitarchus hookeri <br> clit-hook_120 <br> Brook Motor Camp, Nelson","clitarchus hookeri <br> clit-hook_121 <br> Brightwater, Nelson","clitarchus hookeri <br> clit-hook_122 <br> Nelson, Monaco","clitarchus hookeri <br> clit-hook_123 <br> Paremata Reserve, Delaware Bay, Waipuka Rivermouth","clitarchus hookeri <br> clit-hook_124 <br> 0.5 km S of carpark, Puhipuhi Scenic Reserve, Kaikoura","clitarchus hookeri <br> clit-hook_125 <br> Mt Fyffe, Fyffe Palmer Scenic Reserve","clitarchus hookeri <br> clit-hook_126 <br> Mt Fyffe carpark","clitarchus hookeri <br> clit-hook_127 <br> Napenape Scenic Reserve","clitarchus hookeri <br> clit-hook_128 <br> Kennedys Bush Scenic Reserve, Port Hills, Banks Peninsula","clitarchus hookeri <br> clit-hook_129 <br> Peel Forest","clitarchus hookeri <br> clit-hook_130 <br> Prices Valley, Banks Peninsula","clitarchus hookeri <br> clit-hook_131 <br> Banks Peninsula, Okuti Scenic Reserve","clitarchus hookeri <br> clit-hook_132 <br> Dunedin City Reservoir, Dunedin","clitarchus hookeri <br> clit-hook_133 <br> Waipori Falls Rd, first picnic area","clitarchus hookeri <br> clit-hook_134 <br> Herekino Nth Head, Rangikohu Rd, far end","clitarchus hookeri <br> clit-hook_135 <br> Paihia","clitarchus hookeri <br> clit-hook_136 <br> Omapere","clitarchus hookeri <br> clit-hook_137 <br> Brattys Bush Scenic Res, Tutukaka","clitarchus hookeri <br> clit-hook_138 <br> Bream Head, Peach Cove Trk, Whangarei Heads","clitarchus hookeri <br> clit-hook_139 <br> Brynderwyn Trk, East side from Waipu Cove","clitarchus hookeri <br> clit-hook_140 <br> Whale Bay","clitarchus hookeri <br> clit-hook_141 <br> Tangihua Forest lodge","clitarchus hookeri <br> clit-hook_142 <br> Mayor Island, Panui pen. On track to Western Bay","clitarchus hookeri <br> clit-hook_143 <br> Kekerenga Valley Rd Site 1, Kaikoura","clitarchus hookeri <br> clit-hook_144 <br> Dunedin","clitarchus hookeri <br> clit-hook_145 <br> Portobello","clitarchus hookeri <br> clit-hook_146 <br> Robinson Bay","clitarchus hookeri <br> clit-hook_147 <br> Hapuku hut","clitarchus hookeri <br> clit-hook_148 <br> Whanganui Inlet","clitarchus hookeri <br> clit-hook_149 <br> Maud Island","clitarchus hookeri <br> clit-hook_150 <br> Snake Point","clitarchus hookeri <br> clit-hook_151 <br> Arapawa","clitarchus hookeri <br> clit-hook_152 <br> Foxton","clitarchus hookeri <br> clit-hook_153 <br> Featherston","clitarchus hookeri <br> clit-hook_154 <br> Kidnappers","clitarchus hookeri <br> clit-hook_155 <br> Pumpkin hill","niveaphasma annulata <br> nive-annu_1 <br> Bealey Bridge, start of Waimakariri Track, east of Arthurs Pass","niveaphasma annulata <br> nive-annu_2 <br> Te Kohia I, Lake Pukaki","niveaphasma annulata <br> nive-annu_3 <br> Dart Hut","niveaphasma annulata <br> nive-annu_4 <br> Mount Iron, Wanaka","niveaphasma annulata <br> nive-annu_5 <br> Falls Dam, Home Hills","niveaphasma annulata <br> nive-annu_6 <br> Pisa Range","niveaphasma annulata <br> nive-annu_7 <br> Pisa Range","niveaphasma annulata <br> nive-annu_8 <br> Kawarau Gorge, near Cromwell","niveaphasma annulata <br> nive-annu_9 <br> Dunstan Mountains","niveaphasma annulata <br> nive-annu_10 <br> Mt Rosa, Hector Mtns","niveaphasma annulata <br> nive-annu_11 <br> Dunstan Mountains","niveaphasma annulata <br> nive-annu_12 <br> Cromwell Gorge","niveaphasma annulata <br> nive-annu_13 <br> Nicholas Saddle, Eyre Mtns","niveaphasma annulata <br> nive-annu_14 <br> Carrick Range","niveaphasma annulata <br> nive-annu_15 <br> Little Valley Road, Alexandra","niveaphasma annulata <br> nive-annu_16 <br> Old Man Range, Shingle Creek","niveaphasma annulata <br> nive-annu_17 <br> Shingle Creek, Old Man Range","niveaphasma annulata <br> nive-annu_18 <br> Lake Manapouri, West Arm, Wolfe Burn","niveaphasma annulata <br> nive-annu_19 <br> Dunedin, Leith Saddle","niveaphasma annulata <br> nive-annu_20 <br> Eastern end of Lammerlaw Ra, near Lake Mahinerangi","niveaphasma annulata <br> nive-annu_21 <br> Mt Maungatua","niveaphasma annulata <br> nive-annu_22 <br> Ridge east of Cass Field Station","niveaphasma annulata <br> nive-annu_23 <br> Cass Field Station, Arthurs Pass","niveaphasma annulata <br> nive-annu_24 <br> Start of Governors Bush Trk, Mt Cook Village","niveaphasma annulata <br> nive-annu_25 <br> Lake Ohau Ski Field Rd","niveaphasma annulata <br> nive-annu_26 <br> Lake Ohau roadside, Freehold Crk, Lake Ohau","niveaphasma annulata <br> nive-annu_27 <br> Matukituki River, West Branch, near MacPherson Crk","niveaphasma annulata <br> nive-annu_28 <br> Gunns Bush, Hunter Hills","niveaphasma annulata <br> nive-annu_29 <br> Mt Cardona, Crown Range","niveaphasma annulata <br> nive-annu_30 <br> Roadside SH94, Cascade Crk, Eglinton River Valley","niveaphasma annulata <br> nive-annu_31 <br> Cascade Creek, Eglinton Valley","niveaphasma annulata <br> nive-annu_32 <br> Mount Buster, Little Kye Burn, Ida Range","niveaphasma annulata <br> nive-annu_33 <br> Crown Range lookout","niveaphasma annulata <br> nive-annu_34 <br> Lake Monowai Road","niveaphasma annulata <br> nive-annu_35 <br> Start of track along north branch of Temple Stream, north of Lk Ohau","niveaphasma annulata <br> nive-annu_36 <br> The Remarkables, Rastus Burn Rd","niveaphasma annulata <br> nive-annu_37 <br> Carrick Ra, Nevis Rd","niveaphasma annulata <br> nive-annu_38 <br> Clyde lookout, Earnscleugh River","niveaphasma annulata <br> nive-annu_39 <br> Butchers Dam, Alexandra","niveaphasma annulata <br> nive-annu_40 <br> Taieri River, Rock and Pillar Range","niveaphasma annulata <br> nive-annu_41 <br> Emerald Creek, Macraes Flat","niveaphasma annulata <br> nive-annu_42 <br> Piano Flat, Waikaia Bush","niveaphasma annulata <br> nive-annu_43 <br> Piano Flat, Waikaia Bush","niveaphasma annulata <br> nive-annu_44 <br> Piano Flat, Waikaia Bush","niveaphasma annulata <br> nive-annu_45 <br> Five Rivers farm, Cromel Strm","niveaphasma annulata <br> nive-annu_46 <br> Princhester Hut, Takitimu Mountains","niveaphasma annulata <br> nive-annu_47 <br> Windy Creek, Takitimu Mountains","niveaphasma annulata <br> nive-annu_48 <br> Rigney, between Beaumont and Millers Flat","niveaphasma annulata <br> nive-annu_49 <br> Leaning Rock, Dunstan Mountains","niveaphasma annulata <br> nive-annu_50 <br> Dunedin Water Reservoir, Dunedin City","niveaphasma annulata <br> nive-annu_51 <br> The Cove, Dunedin City","niveaphasma annulata <br> nive-annu_52 <br> Waipori Dam","niveaphasma annulata <br> nive-annu_53 <br> Waipori Falls, second picnic area","niveaphasma annulata <br> nive-annu_54 <br> Waipori Falls, first picnic area","niveaphasma annulata <br> nive-annu_55 <br> Beaumont-Rongahere Rd, Blue Mountains","niveaphasma annulata <br> nive-annu_56 <br> Lake Hauroko jetty","niveaphasma annulata <br> nive-annu_57 <br> Hokonui Hills","niveaphasma annulata <br> nive-annu_58 <br> Kakanui Mountains","niveaphasma annulata <br> nive-annu_59 <br> Road to Lake Hauroko","niveaphasma annulata <br> nive-annu_60 <br> Lake George, Colac Bay","niveaphasma annulata <br> nive-annu_61 <br> Riverton Railway Bridge, Riverton","niveaphasma annulata <br> nive-annu_62 <br> Maclennan Range, head of Tahakopa River, The Catlins","niveaphasma annulata <br> nive-annu_63 <br> Tisbury","niveaphasma annulata <br> nive-annu_64 <br> Roaring Bay, Nugget Point","niveaphasma annulata <br> nive-annu_65 <br> Sandy Point, Daffodil Bay","niveaphasma annulata <br> nive-annu_66 <br> Dolamore Park","niveaphasma annulata <br> nive-annu_67 <br> Croydon Bush, Hokonui Hills","niveaphasma annulata <br> nive-annu_68 <br> Omaui (Tony photo)","niveaphasma annulata <br> nive-annu_69 <br> Three Sisters Hill (Tony photo)","niveaphasma annulata <br> nive-annu_70 <br> Tiwai Pt Rd, Seaward Moss Reserve","niveaphasma annulata <br> nive-annu_71 <br> Old Coach Rd, Papatowai","niveaphasma annulata <br> nive-annu_72 <br> Tautuku Bay Nature Walk, Catlins","niveaphasma annulata <br> nive-annu_73 <br> Bluff Hill (Tony photo)","niveaphasma annulata <br> nive-annu_74 <br> Dunsdale, Hokonui Hills","niveaphasma annulata <br> nive-annu_75 <br> West Te Waewae Bay","tectarchus salebrosus <br> tect-sale_1 <br> Dans Creek Lewis Pass","tectarchus salebrosus <br> tect-sale_2 <br> Lewis River","tectarchus salebrosus <br> tect-sale_3 <br> Doubtful Valley rest area, Lewis Pass","tectarchus salebrosus <br> tect-sale_4 <br> Roadside, Rough Creek, SH7","tectarchus salebrosus <br> tect-sale_5 <br> Poplars Fan, SH7","tectarchus salebrosus <br> tect-sale_6 <br> Banks Peninsula, Otepotatu Reserve, Lavericks Peak","tectarchus salebrosus <br> tect-sale_7 <br> Banks Peninsula, Coopers Knob","tectarchus salebrosus <br> tect-sale_8 <br> Banks Peninsula, Kennedys Bush","tectarchus salebrosus <br> tect-sale_9 <br> Puhipuhi","tectarchus salebrosus <br> tect-sale_10 <br> Mt Trotter","tectarchus salebrosus <br> tect-sale_11 <br> Mt Fyffe Hut geocache, Kaikoura","tectarchus salebrosus <br> tect-sale_12 <br> Tone River, Inland Kaikoura Ra","tectarchus salebrosus <br> tect-sale_13 <br> Riccarton Bush","tectarchus salebrosus <br> tect-sale_14 <br> Jacks Pass","tectarchus salebrosus <br> tect-sale_15 <br> Prices Valley","tectarchus salebrosus <br> tect-sale_16 <br> Okuti Valley","tectarchus salebrosus <br> tect-sale_17 <br> Akaroa","tectarchus salebrosus <br> tect-sale_18 <br> Lake Daniels Walkway","tectarchus ovobessus <br> tect-ovob_1 <br> Hakarimata Ra, Kauri Loop Trk","tectarchus ovobessus <br> tect-ovob_2 <br> Mt Karioi, Pirongia State Forest Pk, start of Waireke Track","tectarchus ovobessus <br> tect-ovob_3 <br> Mt Karioi, Pirongia State Forest Pk, start of Waireke Track","tectarchus ovobessus <br> tect-ovob_4 <br> Track behind Pureora Lodge, Waitaramoa Rd, Pureora Forest","tectarchus ovobessus <br> tect-ovob_5 <br> Puketukutuku Peninsula, Lk Waikaremoana","tectarchus ovobessus <br> tect-ovob_6 <br> Lk Waikareiti Tk, Lake Waikaremoana","tectarchus ovobessus <br> tect-ovob_7 <br> Maori Track, Awaawaroa Strm, Lake Waikaremoana","tectarchus ovobessus <br> tect-ovob_8 <br> Mt Messenger","tectarchus ovobessus <br> tect-ovob_9 <br> Whangamomona Saddle, Awahou Ridge Track, top of saddle","tectarchus ovobessus <br> tect-ovob_10 <br> Pukeiti Lodge Bush, Egmont Nat. Park","tectarchus ovobessus <br> tect-ovob_11 <br> Paengaroa Scenic reserve, Mataroa, near Taihape","tectarchus ovobessus <br> tect-ovob_12 <br> Ngaumu State Forest","tectarchus ovobessus <br> tect-ovob_13 <br> Mt Te Aroha summit","tectarchus ovobessus <br> tect-ovob_14 <br> Piripiri Caves","tectarchus ovobessus <br> tect-ovob_15 <br> Whareorino Forest, Mangatoa Tk","tectarchus ovobessus <br> tect-ovob_16 <br> Waharau","tectarchus ovobessus <br> tect-ovob_17 <br> Waewaepa","tectarchus ovobessus <br> tect-ovob_18 <br> Mangaore","tectarchus ovobessus <br> tect-ovob_19 <br> Ohakune","tectarchus ovobessus <br> tect-ovob_20 <br> Rangitane","tectarchus ovobessus <br> tect-ovob_21 <br> Oroua","tectarchus ovobessus <br> tect-ovob_22 <br> Blowhard","tectarchus ovobessus <br> tect-ovob_23 <br> Waitakaruru","tectarchus ovobessus <br> tect-ovob_24 <br> Atene","tectarchus ovobessus <br> tect-ovob_25 <br> Tupare","tectarchus ovobessus <br> tect-ovob_26 <br> Waihaha Trk","tectarchus ovobessus <br> tect-ovob_27 <br> Dawson Falls","tectarchus ovobessus <br> tect-ovob_28 <br> Chateau TO","tectarchus ovobessus <br> tect-ovob_29 <br> Matuku","tectarchus huttoni <br> tect-hutt_1 <br> Riwaka Scenic Res.","tectarchus huttoni <br> tect-hutt_2 <br> Paddys Trk, Lk Rotoiti","tectarchus huttoni <br> tect-hutt_3 <br> Browns hut","tectarchus huttoni <br> tect-hutt_4 <br> Bullock Crk","tectarchus huttoni <br> tect-hutt_5 <br> Burnetts","tectarchus huttoni <br> tect-hutt_6 <br> Anakiwa","tectarchus huttoni <br> tect-hutt_7 <br> Waiohine Gorge","tectarchus huttoni <br> tect-hutt_8 <br> Rimutaka Summitt","tectarchus huttoni <br> tect-hutt_9 <br> Catchpool","tectarchus huttoni <br> tect-hutt_10 <br> Waikuku","tectarchus huttoni <br> tect-hutt_11 <br> Mt Stokes","tectarchus huttoni <br> tect-hutt_12 <br> Akatarawa","tectarchus huttoni <br> tect-hutt_13 <br> Otaki","tectarchus huttoni <br> tect-hutt_14 <br> Holdsworth","tectarchus huttoni <br> tect-hutt_15 <br> Chetwood","tectarchus huttoni <br> tect-hutt_16 <br> Kapiti","tectarchus huttoni <br> tect-hutt_17 <br> Long Island","tectarchus huttoni <br> tect-hutt_18 <br> Anatori River Valley","tectarchus huttoni <br> tect-hutt_19 <br> Eastbourne","tectarchus huttoni <br> tect-hutt_20 <br> Sewell Peak","tectarchus huttoni <br> tect-hutt_21 <br> Wiltons Bush","tectarchus huttoni <br> tect-hutt_22 <br> Resolution Bay","tectarchus huttoni <br> tect-hutt_23 <br> Roseneath","tectarchus huttoni <br> tect-hutt_24 <br> Braodmeadows","tectarchus huttoni <br> tect-hutt_25 <br> Orongorongo field station","tectarchus huttoni <br> tect-hutt_26 <br> Pelorus Bridge","asteliaphasma nov. sp. <br> astel_sp_1 <br> North Cape Scientific Reserve","asteliaphasma nov. sp. <br> astel_sp_2 <br> Kauri Bush Te Paki","asteliaphasma nov. sp. <br> astel_sp_3 <br> Kohuranaki, Te Paki","asteliaphasma jucundum <br> astel_sp_4 <br> Mt Camel","asteliaphasma jucundum <br> astel_sp_5 <br> Paranui","asteliaphasma jucundum <br> astel_sp_6 <br> Whakaangi","asteliaphasma jucundum <br> astel_sp_7 <br> Fern Flat Rd, Otangaroa Forest","asteliaphasma jucundum <br> astel_sp_8 <br> East Herekino, Kaitaia Walkway","asteliaphasma jucundum <br> astel_sp_9 <br> Herekino West","asteliaphasma jucundum <br> astel_sp_10 <br> Mangamuka Gorge Walkway","asteliaphasma jucundum <br> astel_sp_11 <br> Mangamuka Gorge picnic area","asteliaphasma jucundum <br> astel_sp_12 <br> Trounson Kauri Park","asteliaphasma jucundum <br> astel_sp_13 <br> Puketi Forest, Manginangina Kauri Walk","asteliaphasma jucundum <br> astel_sp_14 <br> Puketi Forest, Onekura Tk","asteliaphasma jucundum <br> astel_sp_15 <br> Puketi Forest, Waipapa River Trk","asteliaphasma jucundum <br> astel_sp_16 <br> Puketi Forest, Forestry HQ","asteliaphasma jucundum <br> astel_sp_17 <br> Ngaiotonga Scenic Reserve, Kauri Grove","asteliaphasma jucundum <br> astel_sp_18 <br> Warawara Forest","asteliaphasma jucundum <br> astel_sp_19 <br> Waipoua Forest, Hill south of DoC Forest HQ","asteliaphasma jucundum <br> astel_sp_20 <br> Bream Head","asteliaphasma jucundum <br> astel_sp_21 <br> Dobbies Park","asteliaphasma jucundum <br> astel_sp_22 <br> Whale Bay","asteliaphasma jucundum <br> astel_sp_23 <br> Pukenui, Whangarei","asteliaphasma jucundum <br> astel_sp_24 <br> Opua Forest, Oromahoe Rd","asteliaphasma jucundum <br> astel_sp_25 <br> Dome Forest Walkway, north of Warkworth","asteliaphasma jucundum <br> astel_sp_26 <br> Dome Forest, Waiwhu Rd","asteliaphasma jucundum <br> astel_sp_27 <br> Mount Auckland","asteliaphasma jucundum <br> astel_sp_28 <br> Tangihua","asteliaphasma jucundum <br> astel_sp_29 <br> Moir Hill","asteliaphasma jucundum <br> astel_sp_30 <br> Maungaroa Lookout Tk, Piha","asteliaphasma jucundum <br> astel_sp_31 <br> Auckland, Parau Trk, Lower Nihotupu Reservoir","asteliaphasma jucundum <br> astel_sp_32 <br> Matuku","asteliaphasma jucundum <br> astel_sp_33 <br> Mt William Scenic Reserve, Kauri Track","asteliaphasma jucundum <br> astel_sp_34 <br> Hunua, Ness Valley","asteliaphasma jucundum <br> astel_sp_35 <br> Waharau Reg Park, Hunua Ranges","asteliaphasma jucundum <br> astel_sp_36 <br> Little Barrier Island, Water Bottle Track","asteliaphasma jucundum <br> astel_sp_37 <br> Little Barrier Island, Start of Valley Trk","asteliaphasma jucundum <br> astel_sp_38 <br> Little Barrier Island, Shag Track","asteliaphasma jucundum <br> astel_sp_39 <br> Great Barrier Island, Little Windy Hill","asteliaphasma jucundum <br> astel_sp_40 <br> Start of Waiomu Walk, Coroglen-Tapu Rd, 10.9km East of Tapu","asteliaphasma jucundum <br> astel_sp_41 <br> Hakarimata Ra, Kauri Loop Trk","asteliaphasma jucundum <br> astel_sp_42 <br> Summit Kopu-Hikuai, Coromandel Range","asteliaphasma jucundum <br> astel_sp_43 <br> Mt Te Aroha, Tui mine","asteliaphasma jucundum <br> astel_sp_44 <br> Mt Pirongia, Mangakara Nature Walk","asteliaphasma jucundum <br> astel_sp_45 <br> Bridal Veil Falls","asteliaphasma jucundum <br> astel_sp_46 <br> Pirongia State Forest Pk, Mt Karioi, Waireke Track","asteliaphasma jucundum <br> astel_sp_47 <br> Cambridge, Maungakawa Scenic Reserve","asteliaphasma jucundum <br> astel_sp_48 <br> Kaimai Ra, Lindemann lookout, end of Lindemann Rd","asteliaphasma jucundum <br> astel_sp_49 <br> Waenga Bush, Lottin Pt Rd","asteliaphasma jucundum <br> astel_sp_50 <br> Katikati, Springs Rd, Tuahu Trk","asteliaphasma jucundum <br> astel_sp_51 <br> Waiaroho, East Cape","asteliaphasma jucundum <br> astel_sp_52 <br> Katikati, Wrights Road, Aongatete Lodge","asteliaphasma jucundum <br> astel_sp_53 <br> Te Urewera Natl. Pk, Lake Waikaremoana, Awaawaroa Stm, Maori Track","asteliaphasma jucundum <br> astel_sp_54 <br> Pureora Forest, Caterpillar Tractor Track","asteliaphasma jucundum <br> astel_sp_55 <br> Pureora Forest, Waitaramoa Rd, Track behind Pureora Lodge","asteliaphasma jucundum <br> astel_sp_56 <br> Pureora Forest, Kakaho Stm, Rimu walk","asteliaphasma jucundum <br> astel_sp_57 <br> Maungatautari","asteliaphasma jucundum <br> astel_sp_58 <br> Waitomo","asteliaphasma jucundum <br> astel_sp_59 <br> Mt Messenger","asteliaphasma jucundum <br> astel_sp_60 <br> Auckland Botanic Gardens","micrarchus hystriculeus <br> micra_hyst_1 <br> Rangataua, Rangataua Scenic Reserve","micrarchus hystriculeus <br> micra_hyst_2 <br> Napier-Taupo Road, rest area","micrarchus hystriculeus <br> micra_hyst_3 <br> Makahu Hut, Kaweka Range, Hawkes Bay","micrarchus hystriculeus <br> micra_hyst_4 <br> Paengaroa Scenic Reserve, Mataroa, near Taihape","micrarchus hystriculeus <br> micra_hyst_5 <br> West of Kuripapango, Gentle Annie Rd","micrarchus hystriculeus <br> micra_hyst_6 <br> Te Parae Rd, nr Masterton","micrarchus hystriculeus <br> micra_hyst_7 <br> Te Uri/Dannevirke","micrarchus hystriculeus <br> micra_hyst_8 <br> Bideford, Waterfalls Rd","micrarchus hystriculeus <br> micra_hyst_9 <br> Donnelleys Clearing Trk, Mt Holdsworth","micrarchus hystriculeus <br> micra_hyst_10 <br> Fensham Res., Carterton","micrarchus hystriculeus <br> micra_hyst_11 <br> Waiohine Gorge abseil site","micrarchus hystriculeus <br> micra_hyst_12 <br> Ngaumu State Forest","micrarchus hystriculeus <br> micra_hyst_13 <br> Carterton Scenic Res","micrarchus hystriculeus <br> micra_hyst_14 <br> Wairongomai Station, Rimutaka Ra.","micrarchus hystriculeus <br> micra_hyst_15 <br> Waikuku Lodge, Haurangi Mountains","micrarchus hystriculeus <br> micra_hyst_16 <br> Putangirua Pinnacles, Haurangi Mountains","micrarchus hystriculeus <br> micra_hyst_17 <br> Catchpool Valley, Rimutaka Forest Pk","micrarchus hystriculeus <br> micra_hyst_18 <br> Turakirae Heads","micrarchus hystriculeus <br> micra_hyst_19 <br> 145 Creswick Tce, Northland, Wellington","micrarchus hystriculeus <br> micra_hyst_20 <br> Mana Island","micrarchus hystriculeus <br> micra_hyst_21 <br> Maud Island","micrarchus hystriculeus <br> micra_hyst_22 <br> Trio Is","micrarchus hystriculeus <br> micra_hyst_23 <br> Stephens Island","micrarchus hystriculeus <br> micra_hyst_24 <br> French Pass","micrarchus hystriculeus <br> micra_hyst_25 <br> Cowshed Bay Camp and Picnic Area","micrarchus hystriculeus <br> micra_hyst_26 <br> Whites Bay Recreation Reserve campground, Puketea Track","micrarchus hystriculeus <br> micra_hyst_27 <br> Manaroa/Clova Bay","micrarchus hystriculeus <br> micra_hyst_28 <br> Golden Bay Campground, Totranui","micrarchus hystriculeus <br> micra_hyst_29 <br> Dun Mtn, Mineral Belt, Coads Creek","micrarchus hystriculeus <br> micra_hyst_30 <br> Riwaka Resurgence, Abel Tasman National Park","micrarchus hystriculeus <br> micra_hyst_31 <br> Whangamoa Rd, 1.4km S of Hori Bay","micrarchus hystriculeus <br> micra_hyst_32 <br> Hori Bay, 13.7km N of SH6 on Whangamoa Rd","micrarchus hystriculeus <br> micra_hyst_33 <br> L. Rotoiti, Nelson","micrarchus hystriculeus <br> micra_hyst_34 <br> Red Hills Hut, Mt Chrome","micrarchus hystriculeus <br> micra_hyst_35 <br> Black Birch Ridge, Marlborough","micrarchus hystriculeus <br> micra_hyst_36 <br> Carluke Scenic Reserve, near Rai Valley","micrarchus hystriculeus <br> micra_hyst_37 <br> Kowhai Point Res.","micrarchus hystriculeus <br> micra_hyst_38 <br> Awatere Valley, Blairich Station, Black Birch Stream","micrarchus hystriculeus <br> micra_hyst_39 <br> Nelson, The Brook","micrarchus hystriculeus <br> micra_hyst_40 <br> Long Island","micrarchus hystriculeus <br> micra_hyst_41 <br> Rhoding, Nelson (Roding ?)","micrarchus nov-sp-2 <br> micra_sp2_1 <br> Kahurangi Nat Pk, in basin at head of Lk Lockett Ra","micrarchus nov-sp-2 <br> micra_sp2_2 <br> Takaka, Harwoods Hole Rd","micrarchus nov-sp-2 <br> micra_sp2_3 <br> Mt Arthur Trk, ridge above Mt Arthur hut","micrarchus nov-sp-2 <br> micra_sp2_4 <br> Whareatea Mine, Denniston Hill","micrarchus nov-sp-2 <br> micra_sp2_5 <br> Top of Cobb Dam Rd, Kahurangi Nat Park","micrarchus nov-sp-2 <br> micra_sp2_6 <br> Mt Robert","micrarchus nov-sp-2 <br> micra_sp2_7 <br> Lake Sylvester, Nelson","micrarchus nov-sp-2 <br> micra_sp2_8 <br> Ridge behind Mt Arthur Hut, Mt Arthur Tableland, Arthur Ridge","micrarchus nov-sp-2 <br> micra_sp2_9 <br> Mt Augustus, Granity","micrarchus nov-sp-2 <br> micra_sp2_10 <br> Stockton Plateau, north of Rudolf Stm","micrarchus nov-sp-2 <br> micra_sp2_11 <br> Upper Waimangaroa Valley, north of Webb Stm","micrarchus nov-sp-2 <br> micra_sp2_12 <br> Mt Dewar, Paparoa Range","micrarchus nov-sp-2 <br> micra_sp2_13 <br> Mt Murchison, Buller Vly","micrarchus nov-sp-2 <br> micra_sp2_14 <br> Paparoa Ra, Sewell Peak, site # 2","micrarchus nov-sp-2 <br> micra_sp2_15 <br> Paparoa Ra, Sewell Peak, site # 3","micrarchus nov-sp-2 <br> micra_sp2_16 <br> Denniston Plateau","micrarchus nov-sp-2 <br> micra_sp2_17 <br> Lead Hill eastern slope","micrarchus nov-sp-2 <br> micra_sp2_18 <br> Boulder Lake","micrarchus nov-sp-2 <br> micra_sp2_19 <br> Granity Pass, Mt Owen","micrarchus nov-sp-2 <br> micra_sp2_20 <br> Bucklands Peak Hut","micrarchus nov-sp-1 <br> micra_sp1_1 <br> Ohau Scenic Reserve, N of Kaikoura","micrarchus nov-sp-1 <br> micra_sp1_2 <br> Road to Mt Fyffe, Kaikoura","micrarchus nov-sp-1 <br> micra_sp1_3 <br> Puhipuhi Scenic Reserve, Kaikoura","micrarchus nov-sp-1 <br> micra_sp1_4 <br> Halfmoon Bay Track head, along SH1","micrarchus nov-sp-1 <br> micra_sp1_5 <br> Waima River Valley, 2.7km E of Sawcut Gorge Trailhead(end of road) on Ure Rd 10.5km W of SH1","micrarchus nov-sp-1 <br> micra_sp1_6 <br> Mt Fyffe, Fyffe Palmer Scenic Reserve","micrarchus nov-sp-1 <br> micra_sp1_7 <br> Mt Fyffe track car park, Kaikoura","micrarchus nov-sp-1 <br> micra_sp1_8 <br> Kekerengu Valley Rd Site 2, Kaikoura","micrarchus nov-sp-1 <br> micra_sp1_9 <br> Okiwi Bay track, Kaikoura","micrarchus nov-sp-1 <br> micra_sp1_10 <br> Kaikoura, Mt Fyffe Hut geocache","micrarchus nov-sp-3 <br> micra_sp3_1 <br> Stephens Is, Cook Strait","spinotectarchus acornutus <br> spino_sp_1 <br> Unuwhao","spinotectarchus acornutus <br> spino_sp_2 <br> Kauri Bush Te Paki","spinotectarchus acornutus <br> spino_sp_3 <br> Kohuranaki, Te Paki","spinotectarchus acornutus <br> spino_sp_4 <br> Paranui","spinotectarchus acornutus <br> spino_sp_5 <br> Whakaangi","spinotectarchus acornutus <br> spino_sp_6 <br> Fern Flat Rd, Otangaroa Forest","spinotectarchus acornutus <br> spino_sp_7 <br> Puketi Forest, Manginangina Kauri Walk","spinotectarchus acornutus <br> spino_sp_8 <br> East Herekino, Kaitaia Walkway","spinotectarchus acornutus <br> spino_sp_9 <br> Herekino West","spinotectarchus acornutus <br> spino_sp_10 <br> Mangamuka Gorge Walkway","spinotectarchus acornutus <br> spino_sp_11 <br> Mangamuka Gorge picnic area","spinotectarchus acornutus <br> spino_sp_12 <br> Trounson Kauri Park","spinotectarchus acornutus <br> spino_sp_13 <br> Ngaiotonga Scenic Reserve, Kauri Grove","spinotectarchus acornutus <br> spino_sp_14 <br> Warawara Forest","spinotectarchus acornutus <br> spino_sp_15 <br> Waipoua Forest, Hill south of DoC Forest HQ","spinotectarchus acornutus <br> spino_sp_16 <br> Waima Forest","spinotectarchus acornutus <br> spino_sp_17 <br> Bream Head","spinotectarchus acornutus <br> spino_sp_18 <br> Coppermine Isl, Hen and Chickens","spinotectarchus acornutus <br> spino_sp_19 <br> Dome Forest Walkway, north of Warkworth","spinotectarchus acornutus <br> spino_sp_20 <br> Moir Hill","spinotectarchus acornutus <br> spino_sp_21 <br> Omeru, Kaipara","spinotectarchus acornutus <br> spino_sp_22 <br> Maungaroa Lookout Tk, Piha","spinotectarchus acornutus <br> spino_sp_23 <br> Don MacLean Trk","spinotectarchus acornutus <br> spino_sp_24 <br> Waharau Reg Park, Hunua Ranges","spinotectarchus acornutus <br> spino_sp_25 <br> Great Barrier Island, Little Windy Hill","spinotectarchus acornutus <br> spino_sp_26 <br> Little Barrier Island, Water Bottle Track","spinotectarchus acornutus <br> spino_sp_27 <br> Little Barrier Island, Start of Valley Trk","spinotectarchus acornutus <br> spino_sp_28 <br> Little Barrier Island, Shag Track","spinotectarchus acornutus <br> spino_sp_29 <br> Start of Waiomu Walk, Coroglen-Tapu Rd, 10.9km East of Tapu","spinotectarchus acornutus <br> spino_sp_30 <br> Dome Forest, Waiwhu Rd","spinotectarchus acornutus <br> spino_sp_31 <br> Mt William Scenic Reserve, Kauri Track","spinotectarchus acornutus <br> spino_sp_32 <br> Mt Te Aroha, Tui mine","spinotectarchus acornutus <br> spino_sp_33 <br> Mt Te Aroha, summitt","spinotectarchus acornutus <br> spino_sp_34 <br> Pirongia State Forest Pk, Mt Karioi, Waireke Track","spinotectarchus acornutus <br> spino_sp_35 <br> Kaimai Ra, Lindemann lookout, end of Lindemann Rd","spinotectarchus acornutus <br> spino_sp_36 <br> Lake Okataina","spinotectarchus acornutus <br> spino_sp_37 <br> Pureora Forest, Waitaramoa Rd, Track behind Pureora Lodge","spinotectarchus acornutus <br> spino_sp_38 <br> Puketi Forest, Waipapa River Trk","spinotectarchus acornutus <br> spino_sp_39 <br> Mount Auckland","spinotectarchus acornutus <br> spino_sp_40 <br> Tangihua","spinotectarchus acornutus <br> spino_sp_41 <br> Summit Kopu-Hikuai, Coromandel Range","spinotectarchus acornutus <br> spino_sp_42 <br> Omahuta (SM15)","spinotectarchus acornutus <br> spino_sp_43 <br> Puketi Forest, Onekura Tk","spinotectarchus acornutus <br> spino_sp_44 <br> Matuku","spinotectarchus acornutus <br> spino_sp_45 <br> Whale Bay","spinotectarchus acornutus <br> spino_sp_46 <br> Dobbies Park","spinotectarchus acornutus <br> spino_sp_47 <br> Okura Walkway","Tepakiphasma ngatikuri <br> NA <br> Radar Bush"],null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addLegend","args":[{"colors":["#000004","#FCFFA4"],"labels":["asexual","sexual"],"na_color":null,"na_label":"NA","opacity":0.9,"position":"bottomright","type":"factor","title":"reproductive_mode","extra":null,"layerId":null,"className":"info legend","group":null}]}],"fitBounds":[-48,166,-34,179,[]],"limits":{"lat":[-47.229667,-34.407783],"lng":[166.539067,178.547267]}},"evals":[],"jsHooks":[]}</script>
-<script type="application/htmlwidget-sizing" data-for="htmlwidget-c9e35721706b2936fb75">{"viewer":{"width":"100%","height":400,"padding":0,"fill":true},"browser":{"width":"100%","height":400,"padding":0,"fill":true}}</script>
+<script type="application/json" data-for="htmlwidget-106e35044a53da723e26">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addCircleMarkers","args":[[-36.21805,-36.53451667,-36.5434,-36.87255,-37.56513333,-37.59993333,-37.64496667,-37.68333333,-37.68985,-37.98693333,-38.5169,-38.56645,-38.63285,-38.65233333,-38.78296667,-38.11666667,-39.00311667,-39.0203,-39.104305,-39.02926667,-39.29725,-39.318833,-39.32553333,-39.3946,-39.43375,-39.43841667,-39.64491667,-39.67198333,-39.72693333,-39.796611,-39.79608333,-39.961,-40.00783333,-40.0828,-40.37091667,-40.37173333,-40.42016667,-40.56205,-40.61816667,-40.6414,-40.70548333,-40.7744,-40.09168333,-40.85201667,-40.86075,-40.99323333,-41.06081667,-41.10565,-41.24568333,-41.24596667,-41.25116667,-41.26715,-41.26863333,-41.30678333,-41.34708333,-41.34795,-41.37463333,-41.0817,-41.7999,-41.96811667,-41.96981667,-41.13903333,-42.28621667,-42.38351667,-42.4297,-42.51403333,-41.7032,-42.763,-43.63211667,-43.76636667,-43.8897,-44.0012,-44.1844,-44.34408333,-44.44105,-44.66473333,-44.6796,-44.92313333,-45.43998333,-45.06666667,-45.80799,-45.88163333,-45.92663333,-45.99021667,-46.0065,-46.35366667,-37.14344645,-37.42871268,-35.614445,-38.00246,-38.937498,-39.088058,-39.687322,-40.00796,-40.091785,-40.182692,-40.173898,-40.542235,-41.527433,-43.438163,-43.640955,-43.714741,-45.635641,-34.79785,-34.943,-35.027033,-35.13685,-35.1581,-35.184483,-35.205,-35.209783,-35.32085,-35.358283,-35.369317,-35.4445,-35.53775,-35.652183,-35.939817,-35.895967,-35.720467,-36.060267,-35.866833,-35.922667,-36.06728283,-35.8866,-36.11354,-36.505067,-36.504717,-36.351667,-36.537517,-36.5118,-36.447183,-36.695,-36.893717,-36.925583,-36.840233,-36.782183,-36.93555,-36.696733,-36.888233,-36.7266,-36.72345,-36.831817,-36.929333,-36.889583,-36.8978,-36.876417,-36.866583,-36.916667,-36.9661,-36.9767,-37.04155,-36.726617,-36.2196,-36.215667,-36.241583,-36.18335,-36.8804,-36.974767,-36.658383,-37.026667,-36.51195,-37.143183,-37.147633,-36.755367,-36.669733,-37.121317,-37.393267,-37.305217,-37.279433,-37.967533,-37.88,-37.907333,-37.859867,-37.520267,-38.283333,-37.811283,-38.052533,-37.61051986,-37.42871268,-37.544367,-37.5048,-38.100033,-37.986717,-37.855267,-37.546717,-37.565583,-37.595233,-37.654033,-37.591117,-38.8163,-37.6064,-37.6898,-38.808,-39.074283,-38.8959,-39.155183,-39.396167,-39.726933,-39.8495,-40.0828,-40.22435,-40.396317,-40.559583,-40.55995,-40.86075,-40.865817,-40.900483,-40.993233,-41.028217,-41.4497,-40.86,-41.274617,-41.26715,-41.251233,-41.0701,-41.24735,-41.297833,-41.25615,-41.3394,-41.111817,-40.838067,-41.311667,-41.3762,-41.304717,-41.1569,-42.286217,-42.336033,-42.35145,-42.9428,-43.63155,-43.8992,-43.766367,-43.783233,-45.891683,-45.9298,-35.2708,-35.288533,-35.538583,-35.612317,-35.8493,-36.038317,-35.5625,-35.885193,-37.29505,-41.968117,-45.773017,-45.84685,-43.756417,-42.272517,-40.553333,-41.026517,-41.16095,-41.177133,-40.4691,-41.082317,-39.673233,-36.9751,-43.021529,-44.160288,-44.5215,-44.689708,-44.875031,-44.975789,-45.004141,-45.05572,-45.059628,-45.059909,-45.082329,-45.11052,-45.1575,-45.171536,-45.258113,-45.40852,-45.42839,-45.536896,-45.80152,-45.812051,-45.873995,-43.0336,-43.03388333,-43.73765,-44.249,-44.25595,-44.4908,-44.66473333,-44.86666667,-44.8947,-44.89576667,-44.945,-44.99221667,-44.99236667,-44.1071,-45.02958333,-45.15561,-45.18775,-45.29183333,-45.43391667,-45.45715,-45.55356667,-45.5542,-45.55436667,-45.58423333,-45.59436667,-45.72035,-45.72166667,-45.08828333,-45.8451,-45.88233333,-45.90458333,-45.92628333,-45.92915,-45.95793333,-45.99021667,-45.99701667,-45.11666667,-46.00406667,-46.3519,-46.35366667,-46.41171667,-46.43033333,-46.44538333,-46.4732,-46.06133333,-46.06565,-46.51893333,-46.53523333,-46.54189,-46.55251667,-46.57763333,-46.61196667,-46.13393333,-46.221747,-37.61175,-37.86666667,-37.90781667,-38.47083333,-38.73333333,-38.7405,-38.78296667,-38.90345,-39.15518333,-39.19928333,-39.64478333,-41.02821667,-37.53358333,-38.2549,-38.41641667,-37.049,-40.42016667,-40.574267,-39.39898333,-39.79283333,-39.961,-39.41295,-37.27515,-39.72693333,-39.08865,-38.69681667,-39.32401667,-39.20095,-36.86438,-41.03306667,-41.822,-40.84788333,-42.1018,-41.7551,-41.2719,-40.99598333,-41.11495,-41.34795,-41.41026667,-41.08691667,-40.94833333,-40.86678333,-40.9068,-40.89538333,-40.849,-41.11449167,-40.7097,-41.28058333,-42.4297,-41.26745,-41.11088333,-41.29511667,-41.23533333,-41.3693,-41.30118333,-34.79416659,-35.06913423,-34.9477164,-35.12214973,-35.16338307,-35.20879973,-35.18999974,-35.19368307,-35.7211664,-35.18589974,-35.19223307,-35.27558307,-35.2086664,-35.30194974,-35.3693164,-35.65654974,-35.85433307,-35.70926885,-35.56227997,-35.70268668,-35.32084974,-36.36083307,-36.34516641,-36.45841641,-35.89374861,-36.46988307,-36.94264975,-36.96609974,-36.86355808,-37.21833307,-37.01734141,-37.04899974,-36.20833307,-36.21816641,-36.22083308,-36.29679503,-36.98941641,-37.61174974,-37.14856546,-37.52141641,-37.96798308,-37.90781641,-37.85078332,-37.85983308,-37.54364974,-37.56284975,-37.59666641,-37.60636642,-37.67496641,-38.78296641,-38.51449974,-38.47083308,-38.56644975,-38.05048307,-38.25898308,-38.90345,-37.0063],[175.0546333,175.3995667,175.4093667,175.53975,178.1517333,178.29955,178.3043,177.8833333,178.5472167,176.189,175.5817667,175.7178,177.0321167,178.0331,177.1357,176.2166667,176.5538,174.7994667,176.80325,174.25535,174.4792833,176.538167,174.2966333,175.4271333,175.3764667,175.4539667,175.7138333,175.7949667,175.1386333,176.194611,174.9269167,176.0140167,176.1778667,175.9066667,175.6329167,175.61485,176.03155,176.0560667,175.4818833,172.4818833,175.6552667,175.6173167,175.8295167,174.9284167,175.8726833,175.50235,175.6038833,175.2914667,174.7945667,174.7968333,174.7808667,174.7574833,173.29205,174.8993,174.9694333,174.9315167,173.1032333,175.3552167,172.3284,173.9835833,173.9862167,174.82755,173.7304,173.44845,171.2958833,173.5024,173.8703,171.4333833,172.62575,172.7146,171.26045,171.1505333,169.2662167,170.8413167,169.2712,170.9727333,167.96325,168.0406167,167.68555,168.5454167,167.52545,170.5508667,170.0296833,167.3832167,168.4326,168.0074333,175.6596612,175.7283339,174.21666,175.575633,175.748709,174.060139,176.896318,176.177788,175.829401,175.824048,175.883189,176.194537,173.971375,172.576278,172.477023,172.749573,170.653796,173.0648,173.195183,173.198917,173.879583,173.42535,173.1219,173.183583,173.194167,174.0656,173.250733,173.283367,173.755167,173.382517,173.557083,175.146367,173.806117,173.649333,174.572633,173.735833,173.854383,174.5756056,174.7783,174.55425,174.793523,174.789933,174.302,174.705283,174.662433,174.4419,174.696667,174.450967,174.603083,174.612183,174.993417,174.635317,174.9738,174.6169,174.6917,174.691967,174.426317,174.751133,174.726667,174.709317,174.795617,174.8284,174.45,174.611717,175.256317,175.290367,175.614583,175.056817,175.057933,175.399533,175.37695,175.428117,176.081283,175.84875,175.525,175.419183,175.65905,175.670767,175.726733,175.454267,175.62925,175.835917,176.256017,175.324033,175.154283,174.792333,174.898667,175.53075,175.727317,175.666667,175.293733,174.863933,175.1545609,175.7283339,175.873283,175.869533,176.429267,176.18795,176.974117,178.105867,178.040217,178.320183,178.29685,178.292333,177.1357,178.313933,178.547267,177.153833,177.128433,174.599167,174.699767,176.314333,175.08318,175.123283,175.906667,176.272033,176.237633,176.054583,176.405033,175.872683,176.145333,175.468167,175.50235,175.95685,175.240883,175.05,174.752133,174.757483,174.9088,175.233617,174.794483,174.825533,174.95395,174.978883,173.66375,174.001,173.292333,173.09905,173.223017,173.418883,173.7304,173.640633,173.567233,173.247017,172.624767,171.234033,172.7146,172.834283,170.451967,170.0559,173.184167,174.087,173.383117,174.4851,174.53385,174.50765,174.49945,174.12625,176.260567,173.983583,170.574467,170.657417,172.9718,173.651433,172.603033,173.886667,174.235317,174.311083,175.24745,175.355833,177.038317,175.843383,171.595373,170.226288,168.55447,169.16791,169.903908,169.05744,169.048173,169.13619,169.213405,168.948768,169.321441,169.3089,168.3994,169.019904,169.420161,169.256388,169.26278,167.305727,170.502748,169.819794,170.143676,171.7610667,171.7621,170.0965,169.79665,169.8280333,168.77835,170.9727333,168.95,168.084,168.0838667,170.2366667,168.93945,168.9396333,169.8167,168.7858,169.12819,169.29855,169.3446667,169.9404,170.4173,169.02035,169.0189667,169.0186333,168.37365,167.9515,167.73575,169.47,169.33765,170.5026833,170.5501833,169.9850333,170.0301333,170.0551,169.4712833,167.3832167,168.59185,170.05,167.4068833,167.8651,168.0074333,169.2442667,168.4215333,169.8014833,168.2946167,168.82805,168.8806667,168.2523833,168.2539667,168.4672333,169.4732333,169.4442,168.3499167,168.6027833,167.361603,175.1554167,174.7833333,174.8967667,175.5721667,177.0333333,177.1638333,177.1357,174.59405,174.6997667,175.9745667,175.7101,175.95685,175.7435167,174.8633833,174.7218667,175.2536667,176.03155,175.44935,175.4141167,176.0458333,176.0140167,176.4160667,175.3272833,175.1386333,174.1088667,175.6752667,174.10375,175.5419167,174.472683333333,172.9077667,172.81185,172.4490833,171.40155,171.8104833,173.9058667,175.3886,175.2283333,174.9315167,175.3646667,174.1355,175.1096167,175.2345667,175.4738667,174.0855333,174.9236333,174.2791333,172.3644833,174.9131,171.2958833,174.75675,174.2255667,174.7989333,174.7922833,174.9427333,173.5715,173.1419439,173.4440349,173.544733,173.5652664,173.2699497,173.1992497,173.4556664,173.480783,173.6501664,173.782233,173.7331497,173.6857664,173.7971331,174.2335164,173.2833664,173.5632664,174.577683,174.3319699,174.4992368,174.2647129,174.0655997,174.613333,174.6141664,174.467033,174.1365627,174.5981497,174.475933,174.6117164,174.4736803,175.0266664,175.1452664,175.2536664,175.0716664,175.0594497,175.0616664,175.5262977,175.5876664,175.1554164,175.6734678,175.7305164,175.1521664,174.8967664,174.7814035,175.5306664,175.8716164,178.1522497,175.8599997,178.153883,175.9151164,177.1356997,175.5701664,175.5721664,175.7177997,175.562283,175.0226497,174.59405,174.906866666667],3,null,null,{"interactive":true,"className":"","stroke":true,"color":["#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#000004","#000004","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#000004","#000004","#FCFFA4","#000004","#000004","#FCFFA4","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#000004","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#000004","#000004","#FCFFA4","#FCFFA4","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#FCFFA4","#000004","#FCFFA4","#000004","#FCFFA4","#000004","#FCFFA4","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#000004","#FCFFA4"],"weight":5,"opacity":0.5,"fill":true,"fillColor":["#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#000004","#000004","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#000004","#000004","#FCFFA4","#000004","#000004","#FCFFA4","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#000004","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#000004","#000004","#FCFFA4","#FCFFA4","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#000004","#FCFFA4","#000004","#FCFFA4","#000004","#FCFFA4","#000004","#FCFFA4","#000004","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#FCFFA4","#000004","#FCFFA4","#000004","#FCFFA4","#000004","#000004","#000004","#000004","#FCFFA4","#FCFFA4","#000004","#FCFFA4"],"fillOpacity":0.2},null,null,["argosarchus horridus <br> argo-sp_1 <br> Hauturu","argosarchus horridus <br> argo-sp_2 <br> Mt Moehau, Coromandel Pen.","argosarchus horridus <br> argo-sp_3 <br> Mount Moehau","argosarchus horridus <br> argo-sp_4 <br> Mahakirau","argosarchus horridus <br> argo-sp_5 <br> Lottin Pt Rd, Waenga Bush","argosarchus horridus <br> argo-sp_6 <br> Te Koau, Hicks Bay","argosarchus horridus <br> argo-sp_7 <br> Karakatuwhero Valley, Waipiata","argosarchus horridus <br> argo-sp_8 <br> Pohueroro","argosarchus horridus <br> argo-sp_9 <br> East Cape lighthouse Trk","argosarchus horridus <br> argo-sp_10 <br> Te Pu, Mamakus","argosarchus horridus <br> argo-sp_11 <br> Caterpillar Track","argosarchus horridus <br> argo-sp_12 <br> Kakaho, Puerora","argosarchus horridus <br> argo-sp_13 <br> Huiarau Saddle","argosarchus horridus <br> argo-sp_14 <br> Gisborne","argosarchus horridus <br> argo-sp_15 <br> Maori Track","argosarchus horridus <br> argo-sp_16 <br> Rotorua","argosarchus horridus <br> argo-sp_17 <br> Napier-Taupo Road","argosarchus horridus <br> argo-sp_18 <br> Tahora","argosarchus horridus <br> argo-sp_19 <br> Boundary Stream","argosarchus horridus <br> argo-sp_20 <br> Otaraoa, Taranaki","argosarchus horridus <br> argo-sp_21 <br> Douglas","argosarchus horridus <br> argo-sp_22 <br> Puketitiri, Little Bush Res.","argosarchus horridus <br> argo-sp_23 <br> Stratford","argosarchus horridus <br> argo-sp_24 <br> Rimu Track","argosarchus horridus <br> argo-sp_25 <br> Ohakune Lakes","argosarchus horridus <br> argo-sp_26 <br> Mangaehuehue Reserve","argosarchus horridus <br> argo-sp_27 <br> Paengaroa","argosarchus horridus <br> argo-sp_28 <br> Mt Stewart","argosarchus horridus <br> argo-sp_29 <br> Atene Skyline","argosarchus horridus <br> argo-sp_30 <br> E Ruahine Forest, Swamp Tk (Sunrise)","argosarchus horridus <br> argo-sp_31 <br> Bushy Park","argosarchus horridus <br> argo-sp_32 <br> Oroua River","argosarchus horridus <br> argo-sp_33 <br> Makaretu","argosarchus horridus <br> argo-sp_34 <br> Kahikatea Walk","argosarchus horridus <br> argo-sp_35 <br> Palmerston North","argosarchus horridus <br> argo-sp_36 <br> Palmerston North","argosarchus horridus <br> argo-sp_37 <br> Waewaepa","argosarchus horridus <br> argo-sp_38 <br> Puketoi","argosarchus horridus <br> argo-sp_39 <br> Mangaore Dam","argosarchus horridus <br> argo-sp_40 <br> Mangarakau, West Haven, Nelson","argosarchus horridus <br> argo-sp_41 <br> W.A. Miller","argosarchus horridus <br> argo-sp_42 <br> Mount Bruce","argosarchus horridus <br> argo-sp_43 <br> Ruahine","argosarchus horridus <br> argo-sp_44 <br> Kapiti","argosarchus horridus <br> argo-sp_45 <br> Bideford","argosarchus horridus <br> argo-sp_46 <br> Fensham","argosarchus horridus <br> argo-sp_47 <br> Carterton Res","argosarchus horridus <br> argo-sp_48 <br> Abbots Creek","argosarchus horridus <br> argo-sp_49 <br> Kandallah","argosarchus horridus <br> argo-sp_50 <br> Wellington, Khandallah","argosarchus horridus <br> argo-sp_51 <br> Ngaio, Wellington","argosarchus horridus <br> argo-sp_52 <br> Wiltons Bush","argosarchus horridus <br> argo-sp_53 <br> Nelson","argosarchus horridus <br> argo-sp_54 <br> Butterfly Ck, Wellington","argosarchus horridus <br> argo-sp_55 <br> Orongorongo","argosarchus horridus <br> argo-sp_56 <br> Catchpool Valley","argosarchus horridus <br> argo-sp_57 <br> Brightwater, Nelson","argosarchus horridus <br> argo-sp_58 <br> Featherston","argosarchus horridus <br> argo-sp_59 <br> Murchison","argosarchus horridus <br> argo-sp_60 <br> Kekerengu Valley Rd Site 1, Kaikoura","argosarchus horridus <br> argo-sp_61 <br> Kekerengu Valley Rd Site 2, Kaikoura","argosarchus horridus <br> argo-sp_62 <br> Porirua","argosarchus horridus <br> argo-sp_63 <br> Puhipuhi","argosarchus horridus <br> argo-sp_64 <br> Kahutara River","argosarchus horridus <br> argo-sp_65 <br> Sewell Peak","argosarchus horridus <br> argo-sp_66 <br> Oaro, N.Canty.","argosarchus horridus <br> argo-sp_67 <br> Blackbirch Stream","argosarchus horridus <br> argo-sp_68 <br> Taipo River Valley","argosarchus horridus <br> argo-sp_69 <br> Kennedys Bush","argosarchus horridus <br> argo-sp_70 <br> Prices Bush","argosarchus horridus <br> argo-sp_71 <br> Peel Forest","argosarchus horridus <br> argo-sp_72 <br> Waihi Gorge","argosarchus horridus <br> argo-sp_73 <br> Brady Creek","argosarchus horridus <br> argo-sp_74 <br> Pareora Reserve","argosarchus horridus <br> argo-sp_75 <br> Kidds Bush","argosarchus horridus <br> argo-sp_76 <br> Gunns Bush","argosarchus horridus <br> argo-sp_77 <br> Cleddau Valley","argosarchus horridus <br> argo-sp_78 <br> Eglinton","argosarchus horridus <br> argo-sp_79 <br> Te Anau Control Gates","argosarchus horridus <br> argo-sp_80 <br> Twelve Mile Delta","argosarchus horridus <br> argo-sp_81 <br> Lk Monowai Rd","argosarchus horridus <br> argo-sp_82 <br> The Cove","argosarchus horridus <br> argo-sp_83 <br> Waipori Falls","argosarchus horridus <br> argo-sp_84 <br> Lake Hauroko","argosarchus horridus <br> argo-sp_85 <br> The Cone Forest","argosarchus horridus <br> argo-sp_86 <br> Riverton Bridge","argosarchus horridus <br> argo-sp_87 <br> Corromandel","argosarchus horridus <br> argo-sp_88 <br> Karangahake Gorge","argosarchus horridus <br> argo-sp_89 <br> Whangarei","argosarchus horridus <br> argo-sp_90 <br> Mangatautari","argosarchus horridus <br> argo-sp_91 <br> Tokaanu","argosarchus horridus <br> argo-sp_92 <br> New Plymouth","argosarchus horridus <br> argo-sp_93 <br> Havelock North","argosarchus horridus <br> argo-sp_94 <br> Central Hawkes Bay","argosarchus horridus <br> argo-sp_95 <br> Manawatu","argosarchus horridus <br> argo-sp_96 <br> Manawatu","argosarchus horridus <br> argo-sp_97 <br> Manawatu","argosarchus horridus <br> argo-sp_98 <br> Tararua","argosarchus horridus <br> argo-sp_99 <br> Blenheim","argosarchus horridus <br> argo-sp_100 <br> Waimakiriri","argosarchus horridus <br> argo-sp_101 <br> Lincoln","argosarchus horridus <br> argo-sp_102 <br> Kaituna Valley","argosarchus horridus <br> argo-sp_103 <br> Karitane, nr Dunedin","clitarchus hookeri <br> clit-hook_1 <br> Trig Rd","clitarchus hookeri <br> clit-hook_2 <br> Heath Rd","clitarchus hookeri <br> clit-hook_3 <br> Lake Ngatu","clitarchus hookeri <br> clit-hook_4 <br> Junction of SH10 and Takou Bay Rd, 2 km N of Te Whau, Kerikeri","clitarchus hookeri <br> clit-hook_5 <br> Mangamuka Gorge Scenic Reserve, roadside","clitarchus hookeri <br> clit-hook_6 <br> Ahipara, road to Gumlands","clitarchus hookeri <br> clit-hook_7 <br> Herekino Gorge, Kaitaia Awaroa Rd","clitarchus hookeri <br> clit-hook_8 <br> Herekino Forest Track, Herekino Forest","clitarchus hookeri <br> clit-hook_9 <br> Opua Forest, Oromahoe Rd","clitarchus hookeri <br> clit-hook_10 <br> Pawarenga, Warawara Forest","clitarchus hookeri <br> clit-hook_11 <br> Warawara Forest","clitarchus hookeri <br> clit-hook_12 <br> Whakaruangangana gumland","clitarchus hookeri <br> clit-hook_13 <br> Corner Signal Station Rd & SH12, Pakia rest area, Omapere","clitarchus hookeri <br> clit-hook_14 <br> Waipoua Forest","clitarchus hookeri <br> clit-hook_15 <br> Fanal I, Mokohinau Is","clitarchus hookeri <br> clit-hook_16 <br> Roadside SH12, 2 km N of Babylon Coast Rd, Dargaville","clitarchus hookeri <br> clit-hook_17 <br> Trounson Kauri Park","clitarchus hookeri <br> clit-hook_18 <br> Roadside, Cove Rd, Robert Hastie Reserve","clitarchus hookeri <br> clit-hook_19 <br> Maitahi Wetland Scientific Reserve, Maitahi Rd","clitarchus hookeri <br> clit-hook_20 <br> Memorial Park, Dargaville","clitarchus hookeri <br> clit-hook_21 <br> Brynderwyn","clitarchus hookeri <br> clit-hook_22 <br> Coppermine I, Hen and Chicken Is, track campsite to Lighthouse","clitarchus hookeri <br> clit-hook_23 <br> NW of Mangawhai","clitarchus hookeri <br> clit-hook_24 <br> Home Bay, Motuora I","clitarchus hookeri <br> clit-hook_25 <br> Still Bay, Motuora I","clitarchus hookeri <br> clit-hook_26 <br> Tapora, West of Wellsford","clitarchus hookeri <br> clit-hook_27 <br> Wenderholm Regional Park, Waiwera","clitarchus hookeri <br> clit-hook_28 <br> Puhoi Motorway extension, Puhoi","clitarchus hookeri <br> clit-hook_29 <br> Mt Auckland","clitarchus hookeri <br> clit-hook_30 <br> Wright Rd, Redvale, Albany","clitarchus hookeri <br> clit-hook_31 <br> Bethells, Matuku Res","clitarchus hookeri <br> clit-hook_32 <br> Oratia, Auckland","clitarchus hookeri <br> clit-hook_33 <br> Massey, Auckland, off Don Bucks Rd","clitarchus hookeri <br> clit-hook_34 <br> Waiheke Is","clitarchus hookeri <br> clit-hook_35 <br> Titirangi, Auckland","clitarchus hookeri <br> clit-hook_36 <br> Noises Is, Otata I","clitarchus hookeri <br> clit-hook_37 <br> Shona restoration plot, Border Rd, Opanuku stream, Henderson","clitarchus hookeri <br> clit-hook_38 <br> Gills Reserve, Albany, North Shore","clitarchus hookeri <br> clit-hook_39 <br> Lucas Creek, Albany","clitarchus hookeri <br> clit-hook_40 <br> Muriwai Beach, Maori Bay Trk","clitarchus hookeri <br> clit-hook_41 <br> Hillsborough, Auckland","clitarchus hookeri <br> clit-hook_42 <br> Auckland, Mt Albert Res Centre","clitarchus hookeri <br> clit-hook_43 <br> Owairaka, Auckland","clitarchus hookeri <br> clit-hook_44 <br> Remuera","clitarchus hookeri <br> clit-hook_45 <br> Auckland, Meadowbank","clitarchus hookeri <br> clit-hook_46 <br> Anawhata, Auckland","clitarchus hookeri <br> clit-hook_47 <br> Parau Trk, Lower Nihoputu Reservoir, Auckland","clitarchus hookeri <br> clit-hook_48 <br> Tapapakanga Reg.Park, Orere","clitarchus hookeri <br> clit-hook_49 <br> Waharau Reg.Park, Hunua Ranges","clitarchus hookeri <br> clit-hook_50 <br> Whangapoua, 4.6 km N of SH25 turnoff and Te Rerenga, Coromandel","clitarchus hookeri <br> clit-hook_51 <br> Little Barrier I, DoC Rangers graden","clitarchus hookeri <br> clit-hook_52 <br> Valley Track, Little Barrier Island","clitarchus hookeri <br> clit-hook_53 <br> Great Barrier I, Whangaparapara, Witheys Track","clitarchus hookeri <br> clit-hook_54 <br> Great Barrier I, Kaiarara Valley","clitarchus hookeri <br> clit-hook_55 <br> Wilson Bay, SH25 roadside, 2.5 km N of Tapu, Coromandel","clitarchus hookeri <br> clit-hook_56 <br> Ruamahuaiti Is, Alderman Is","clitarchus hookeri <br> clit-hook_57 <br> Mercury Is, Korapuki","clitarchus hookeri <br> clit-hook_58 <br> Waiomu","clitarchus hookeri <br> clit-hook_59 <br> 3.7 km N of Stony Bay, on road to Stony Bay, Port Charles area","clitarchus hookeri <br> clit-hook_60 <br> Start of Piranui trk, Kopu-Hikuai Rd","clitarchus hookeri <br> clit-hook_61 <br> Coromandel summit, Kopu-Hikuai road","clitarchus hookeri <br> clit-hook_62 <br> Kuaotona (Kuaotunu), Wharekano Rd, rest area, near Whitianga","clitarchus hookeri <br> clit-hook_63 <br> 19 km N of Coromandel town, S of Colville","clitarchus hookeri <br> clit-hook_64 <br> Kauaeranga Valley, Thames","clitarchus hookeri <br> clit-hook_65 <br> Waihi","clitarchus hookeri <br> clit-hook_66 <br> Mayor Island","clitarchus hookeri <br> clit-hook_67 <br> Waitakaruru Reserve, roadside","clitarchus hookeri <br> clit-hook_68 <br> Mangakora Nature Walk, Mt Pirongia","clitarchus hookeri <br> clit-hook_69 <br> Mt Karioi, Pirongia State Forest Pk, Start of Waireke Track","clitarchus hookeri <br> clit-hook_70 <br> Bridal Veil Falls","clitarchus hookeri <br> clit-hook_71 <br> Cambridge, Maungakawa Scenic Reserve","clitarchus hookeri <br> clit-hook_72 <br> Mt Te Aroha, bottom of Summit Rd","clitarchus hookeri <br> clit-hook_73 <br> Waipapa Scenic Reserve, Lake Waipapa","clitarchus hookeri <br> clit-hook_74 <br> Hillcrest, Hamilton","clitarchus hookeri <br> clit-hook_75 <br> SH31, 3 km E of Kawhia","clitarchus hookeri <br> clit-hook_76 <br> Hakarimata","clitarchus hookeri <br> clit-hook_77 <br> Karangahake Gorge","clitarchus hookeri <br> clit-hook_78 <br> Katikati, Track at top of Lindeman Rd","clitarchus hookeri <br> clit-hook_79 <br> Waitengaue Stm, Kaimai Ra","clitarchus hookeri <br> clit-hook_80 <br> Lk Okataina, S end of Lk Okataina Rd, near lodge","clitarchus hookeri <br> clit-hook_81 <br> Te Pu, Mamaku","clitarchus hookeri <br> clit-hook_82 <br> Moutohora Island","clitarchus hookeri <br> clit-hook_83 <br> Omaruparoa","clitarchus hookeri <br> clit-hook_84 <br> Rereauira","clitarchus hookeri <br> clit-hook_85 <br> Te Koau","clitarchus hookeri <br> clit-hook_86 <br> Karakatuwhero V.","clitarchus hookeri <br> clit-hook_87 <br> Hicks Bay? East Cape","clitarchus hookeri <br> clit-hook_88 <br> Maori Track, Awaawaroa Strm, Lake Waikaremoana, Te Urewera Nat.Pak.","clitarchus hookeri <br> clit-hook_89 <br> Te Araroa Campground, East Cape","clitarchus hookeri <br> clit-hook_90 <br> East Cape Lighthouse Trk, Otiki","clitarchus hookeri <br> clit-hook_91 <br> Lake Whakamarino, Lake Waikaremoana","clitarchus hookeri <br> clit-hook_92 <br> Mohaka River, SH2 rest area","clitarchus hookeri <br> clit-hook_93 <br> Summit of Mt Messenger, SH 3","clitarchus hookeri <br> clit-hook_94 <br> Whangamomona Saddle, Awahou Ridge Track, top of saddle","clitarchus hookeri <br> clit-hook_95 <br> Gentle Annie Rd, West of Kuripapango","clitarchus hookeri <br> clit-hook_96 <br> Atene Skyline Tk, north entrance","clitarchus hookeri <br> clit-hook_97 <br> 5.7 km N of Upokongaro","clitarchus hookeri <br> clit-hook_98 <br> Kahikatea walkway, Pohangina Valley","clitarchus hookeri <br> clit-hook_99 <br> Te Uri/Dannevirke","clitarchus hookeri <br> clit-hook_100 <br> 4.7 km N of Waihi Valley Rd, on road from Waimiro to Waipatiki, Wairarapa","clitarchus hookeri <br> clit-hook_101 <br> Puketoi Ra, Pahiatua-Pongaroa Rd, NE of Makuri, 6.7km N of road JCT in Makuri","clitarchus hookeri <br> clit-hook_102 <br> 8.5 km N of Akitio Esplanade on Coast Rd","clitarchus hookeri <br> clit-hook_103 <br> Bideford, Waterfalls Rd","clitarchus hookeri <br> clit-hook_104 <br> Tinui, 3 km E of junction of Castle Point Rd and Tinui Vly Rd","clitarchus hookeri <br> clit-hook_105 <br> Donnelly's clearing, Mt Holdsworth","clitarchus hookeri <br> clit-hook_106 <br> Fensham Scenic Reserve, Carterton","clitarchus hookeri <br> clit-hook_107 <br> Ngaumu State Forest","clitarchus hookeri <br> clit-hook_108 <br> Putangirua Pinnacles, Haurangi Mountains","clitarchus hookeri <br> clit-hook_109 <br> Jacks Bush Rd, Waikanae","clitarchus hookeri <br> clit-hook_110 <br> 145 Creswick Tce, Northland, Wellington","clitarchus hookeri <br> clit-hook_111 <br> Otari-Wiltons Bush, Wellington","clitarchus hookeri <br> clit-hook_112 <br> Francis Bell Res, Pt Howard, Wellington","clitarchus hookeri <br> clit-hook_113 <br> Smiths Creek Tk, Kaitoke, Rimutaka Forest Pk","clitarchus hookeri <br> clit-hook_114 <br> Khandallah, Wellington","clitarchus hookeri <br> clit-hook_115 <br> Miramar Res.","clitarchus hookeri <br> clit-hook_116 <br> Wainui-o-mata, Wgtn","clitarchus hookeri <br> clit-hook_117 <br> Orongorongo River Valley, Rimutaka State Forest Pk","clitarchus hookeri <br> clit-hook_118 <br> Okiwi Bay","clitarchus hookeri <br> clit-hook_119 <br> Trio Is (iii)","clitarchus hookeri <br> clit-hook_120 <br> Brook Motor Camp, Nelson","clitarchus hookeri <br> clit-hook_121 <br> Brightwater, Nelson","clitarchus hookeri <br> clit-hook_122 <br> Nelson, Monaco","clitarchus hookeri <br> clit-hook_123 <br> Paremata Reserve, Delaware Bay, Waipuka Rivermouth","clitarchus hookeri <br> clit-hook_124 <br> 0.5 km S of carpark, Puhipuhi Scenic Reserve, Kaikoura","clitarchus hookeri <br> clit-hook_125 <br> Mt Fyffe, Fyffe Palmer Scenic Reserve","clitarchus hookeri <br> clit-hook_126 <br> Mt Fyffe carpark","clitarchus hookeri <br> clit-hook_127 <br> Napenape Scenic Reserve","clitarchus hookeri <br> clit-hook_128 <br> Kennedys Bush Scenic Reserve, Port Hills, Banks Peninsula","clitarchus hookeri <br> clit-hook_129 <br> Peel Forest","clitarchus hookeri <br> clit-hook_130 <br> Prices Valley, Banks Peninsula","clitarchus hookeri <br> clit-hook_131 <br> Banks Peninsula, Okuti Scenic Reserve","clitarchus hookeri <br> clit-hook_132 <br> Dunedin City Reservoir, Dunedin","clitarchus hookeri <br> clit-hook_133 <br> Waipori Falls Rd, first picnic area","clitarchus hookeri <br> clit-hook_134 <br> Herekino Nth Head, Rangikohu Rd, far end","clitarchus hookeri <br> clit-hook_135 <br> Paihia","clitarchus hookeri <br> clit-hook_136 <br> Omapere","clitarchus hookeri <br> clit-hook_137 <br> Brattys Bush Scenic Res, Tutukaka","clitarchus hookeri <br> clit-hook_138 <br> Bream Head, Peach Cove Trk, Whangarei Heads","clitarchus hookeri <br> clit-hook_139 <br> Brynderwyn Trk, East side from Waipu Cove","clitarchus hookeri <br> clit-hook_140 <br> Whale Bay","clitarchus hookeri <br> clit-hook_141 <br> Tangihua Forest lodge","clitarchus hookeri <br> clit-hook_142 <br> Mayor Island, Panui pen. On track to Western Bay","clitarchus hookeri <br> clit-hook_143 <br> Kekerenga Valley Rd Site 1, Kaikoura","clitarchus hookeri <br> clit-hook_144 <br> Dunedin","clitarchus hookeri <br> clit-hook_145 <br> Portobello","clitarchus hookeri <br> clit-hook_146 <br> Robinson Bay","clitarchus hookeri <br> clit-hook_147 <br> Hapuku hut","clitarchus hookeri <br> clit-hook_148 <br> Whanganui Inlet","clitarchus hookeri <br> clit-hook_149 <br> Maud Island","clitarchus hookeri <br> clit-hook_150 <br> Snake Point","clitarchus hookeri <br> clit-hook_151 <br> Arapawa","clitarchus hookeri <br> clit-hook_152 <br> Foxton","clitarchus hookeri <br> clit-hook_153 <br> Featherston","clitarchus hookeri <br> clit-hook_154 <br> Kidnappers","clitarchus hookeri <br> clit-hook_155 <br> Pumpkin hill","niveaphasma annulata <br> nive-annu_1 <br> Bealey Bridge, start of Waimakariri Track, east of Arthurs Pass","niveaphasma annulata <br> nive-annu_2 <br> Te Kohia I, Lake Pukaki","niveaphasma annulata <br> nive-annu_3 <br> Dart Hut","niveaphasma annulata <br> nive-annu_4 <br> Mount Iron, Wanaka","niveaphasma annulata <br> nive-annu_5 <br> Falls Dam, Home Hills","niveaphasma annulata <br> nive-annu_6 <br> Pisa Range","niveaphasma annulata <br> nive-annu_7 <br> Pisa Range","niveaphasma annulata <br> nive-annu_8 <br> Kawarau Gorge, near Cromwell","niveaphasma annulata <br> nive-annu_9 <br> Dunstan Mountains","niveaphasma annulata <br> nive-annu_10 <br> Mt Rosa, Hector Mtns","niveaphasma annulata <br> nive-annu_11 <br> Dunstan Mountains","niveaphasma annulata <br> nive-annu_12 <br> Cromwell Gorge","niveaphasma annulata <br> nive-annu_13 <br> Nicholas Saddle, Eyre Mtns","niveaphasma annulata <br> nive-annu_14 <br> Carrick Range","niveaphasma annulata <br> nive-annu_15 <br> Little Valley Road, Alexandra","niveaphasma annulata <br> nive-annu_16 <br> Old Man Range, Shingle Creek","niveaphasma annulata <br> nive-annu_17 <br> Shingle Creek, Old Man Range","niveaphasma annulata <br> nive-annu_18 <br> Lake Manapouri, West Arm, Wolfe Burn","niveaphasma annulata <br> nive-annu_19 <br> Dunedin, Leith Saddle","niveaphasma annulata <br> nive-annu_20 <br> Eastern end of Lammerlaw Ra, near Lake Mahinerangi","niveaphasma annulata <br> nive-annu_21 <br> Mt Maungatua","niveaphasma annulata <br> nive-annu_22 <br> Ridge east of Cass Field Station","niveaphasma annulata <br> nive-annu_23 <br> Cass Field Station, Arthurs Pass","niveaphasma annulata <br> nive-annu_24 <br> Start of Governors Bush Trk, Mt Cook Village","niveaphasma annulata <br> nive-annu_25 <br> Lake Ohau Ski Field Rd","niveaphasma annulata <br> nive-annu_26 <br> Lake Ohau roadside, Freehold Crk, Lake Ohau","niveaphasma annulata <br> nive-annu_27 <br> Matukituki River, West Branch, near MacPherson Crk","niveaphasma annulata <br> nive-annu_28 <br> Gunns Bush, Hunter Hills","niveaphasma annulata <br> nive-annu_29 <br> Mt Cardona, Crown Range","niveaphasma annulata <br> nive-annu_30 <br> Roadside SH94, Cascade Crk, Eglinton River Valley","niveaphasma annulata <br> nive-annu_31 <br> Cascade Creek, Eglinton Valley","niveaphasma annulata <br> nive-annu_32 <br> Mount Buster, Little Kye Burn, Ida Range","niveaphasma annulata <br> nive-annu_33 <br> Crown Range lookout","niveaphasma annulata <br> nive-annu_34 <br> Lake Monowai Road","niveaphasma annulata <br> nive-annu_35 <br> Start of track along north branch of Temple Stream, north of Lk Ohau","niveaphasma annulata <br> nive-annu_36 <br> The Remarkables, Rastus Burn Rd","niveaphasma annulata <br> nive-annu_37 <br> Carrick Ra, Nevis Rd","niveaphasma annulata <br> nive-annu_38 <br> Clyde lookout, Earnscleugh River","niveaphasma annulata <br> nive-annu_39 <br> Butchers Dam, Alexandra","niveaphasma annulata <br> nive-annu_40 <br> Taieri River, Rock and Pillar Range","niveaphasma annulata <br> nive-annu_41 <br> Emerald Creek, Macraes Flat","niveaphasma annulata <br> nive-annu_42 <br> Piano Flat, Waikaia Bush","niveaphasma annulata <br> nive-annu_43 <br> Piano Flat, Waikaia Bush","niveaphasma annulata <br> nive-annu_44 <br> Piano Flat, Waikaia Bush","niveaphasma annulata <br> nive-annu_45 <br> Five Rivers farm, Cromel Strm","niveaphasma annulata <br> nive-annu_46 <br> Princhester Hut, Takitimu Mountains","niveaphasma annulata <br> nive-annu_47 <br> Windy Creek, Takitimu Mountains","niveaphasma annulata <br> nive-annu_48 <br> Rigney, between Beaumont and Millers Flat","niveaphasma annulata <br> nive-annu_49 <br> Leaning Rock, Dunstan Mountains","niveaphasma annulata <br> nive-annu_50 <br> Dunedin Water Reservoir, Dunedin City","niveaphasma annulata <br> nive-annu_51 <br> The Cove, Dunedin City","niveaphasma annulata <br> nive-annu_52 <br> Waipori Dam","niveaphasma annulata <br> nive-annu_53 <br> Waipori Falls, second picnic area","niveaphasma annulata <br> nive-annu_54 <br> Waipori Falls, first picnic area","niveaphasma annulata <br> nive-annu_55 <br> Beaumont-Rongahere Rd, Blue Mountains","niveaphasma annulata <br> nive-annu_56 <br> Lake Hauroko jetty","niveaphasma annulata <br> nive-annu_57 <br> Hokonui Hills","niveaphasma annulata <br> nive-annu_58 <br> Kakanui Mountains","niveaphasma annulata <br> nive-annu_59 <br> Road to Lake Hauroko","niveaphasma annulata <br> nive-annu_60 <br> Lake George, Colac Bay","niveaphasma annulata <br> nive-annu_61 <br> Riverton Railway Bridge, Riverton","niveaphasma annulata <br> nive-annu_62 <br> Maclennan Range, head of Tahakopa River, The Catlins","niveaphasma annulata <br> nive-annu_63 <br> Tisbury","niveaphasma annulata <br> nive-annu_64 <br> Roaring Bay, Nugget Point","niveaphasma annulata <br> nive-annu_65 <br> Sandy Point, Daffodil Bay","niveaphasma annulata <br> nive-annu_66 <br> Dolamore Park","niveaphasma annulata <br> nive-annu_67 <br> Croydon Bush, Hokonui Hills","niveaphasma annulata <br> nive-annu_68 <br> Omaui (Tony photo)","niveaphasma annulata <br> nive-annu_69 <br> Three Sisters Hill (Tony photo)","niveaphasma annulata <br> nive-annu_70 <br> Tiwai Pt Rd, Seaward Moss Reserve","niveaphasma annulata <br> nive-annu_71 <br> Old Coach Rd, Papatowai","niveaphasma annulata <br> nive-annu_72 <br> Tautuku Bay Nature Walk, Catlins","niveaphasma annulata <br> nive-annu_73 <br> Bluff Hill (Tony photo)","niveaphasma annulata <br> nive-annu_74 <br> Dunsdale, Hokonui Hills","niveaphasma annulata <br> nive-annu_75 <br> West Te Waewae Bay","tectarchus ovobessus <br> tect-ovob_1 <br> Hakarimata Ra, Kauri Loop Trk","tectarchus ovobessus <br> tect-ovob_2 <br> Mt Karioi, Pirongia State Forest Pk, start of Waireke Track","tectarchus ovobessus <br> tect-ovob_3 <br> Mt Karioi, Pirongia State Forest Pk, start of Waireke Track","tectarchus ovobessus <br> tect-ovob_4 <br> Track behind Pureora Lodge, Waitaramoa Rd, Pureora Forest","tectarchus ovobessus <br> tect-ovob_5 <br> Puketukutuku Peninsula, Lk Waikaremoana","tectarchus ovobessus <br> tect-ovob_6 <br> Lk Waikareiti Tk, Lake Waikaremoana","tectarchus ovobessus <br> tect-ovob_7 <br> Maori Track, Awaawaroa Strm, Lake Waikaremoana","tectarchus ovobessus <br> tect-ovob_8 <br> Mt Messenger","tectarchus ovobessus <br> tect-ovob_9 <br> Whangamomona Saddle, Awahou Ridge Track, top of saddle","tectarchus ovobessus <br> tect-ovob_10 <br> Pukeiti Lodge Bush, Egmont Nat. Park","tectarchus ovobessus <br> tect-ovob_11 <br> Paengaroa Scenic reserve, Mataroa, near Taihape","tectarchus ovobessus <br> tect-ovob_12 <br> Ngaumu State Forest","tectarchus ovobessus <br> tect-ovob_13 <br> Mt Te Aroha summit","tectarchus ovobessus <br> tect-ovob_14 <br> Piripiri Caves","tectarchus ovobessus <br> tect-ovob_15 <br> Whareorino Forest, Mangatoa Tk","tectarchus ovobessus <br> tect-ovob_16 <br> Waharau","tectarchus ovobessus <br> tect-ovob_17 <br> Waewaepa","tectarchus ovobessus <br> tect-ovob_18 <br> Mangaore","tectarchus ovobessus <br> tect-ovob_19 <br> Ohakune","tectarchus ovobessus <br> tect-ovob_20 <br> Rangitane","tectarchus ovobessus <br> tect-ovob_21 <br> Oroua","tectarchus ovobessus <br> tect-ovob_22 <br> Blowhard","tectarchus ovobessus <br> tect-ovob_23 <br> Waitakaruru","tectarchus ovobessus <br> tect-ovob_24 <br> Atene","tectarchus ovobessus <br> tect-ovob_25 <br> Tupare","tectarchus ovobessus <br> tect-ovob_26 <br> Waihaha Trk","tectarchus ovobessus <br> tect-ovob_27 <br> Dawson Falls","tectarchus ovobessus <br> tect-ovob_28 <br> Chateau TO","tectarchus ovobessus <br> tect-ovob_29 <br> Matuku","tectarchus huttoni <br> tect-hutt_1 <br> Riwaka Scenic Res.","tectarchus huttoni <br> tect-hutt_2 <br> Paddys Trk, Lk Rotoiti","tectarchus huttoni <br> tect-hutt_3 <br> Browns hut","tectarchus huttoni <br> tect-hutt_4 <br> Bullock Crk","tectarchus huttoni <br> tect-hutt_5 <br> Burnetts","tectarchus huttoni <br> tect-hutt_6 <br> Anakiwa","tectarchus huttoni <br> tect-hutt_7 <br> Waiohine Gorge","tectarchus huttoni <br> tect-hutt_8 <br> Rimutaka Summitt","tectarchus huttoni <br> tect-hutt_9 <br> Catchpool","tectarchus huttoni <br> tect-hutt_10 <br> Waikuku","tectarchus huttoni <br> tect-hutt_11 <br> Mt Stokes","tectarchus huttoni <br> tect-hutt_12 <br> Akatarawa","tectarchus huttoni <br> tect-hutt_13 <br> Otaki","tectarchus huttoni <br> tect-hutt_14 <br> Holdsworth","tectarchus huttoni <br> tect-hutt_15 <br> Chetwood","tectarchus huttoni <br> tect-hutt_16 <br> Kapiti","tectarchus huttoni <br> tect-hutt_17 <br> Long Island","tectarchus huttoni <br> tect-hutt_18 <br> Anatori River Valley","tectarchus huttoni <br> tect-hutt_19 <br> Eastbourne","tectarchus huttoni <br> tect-hutt_20 <br> Sewell Peak","tectarchus huttoni <br> tect-hutt_21 <br> Wiltons Bush","tectarchus huttoni <br> tect-hutt_22 <br> Resolution Bay","tectarchus huttoni <br> tect-hutt_23 <br> Roseneath","tectarchus huttoni <br> tect-hutt_24 <br> Braodmeadows","tectarchus huttoni <br> tect-hutt_25 <br> Orongorongo field station","tectarchus huttoni <br> tect-hutt_26 <br> Pelorus Bridge","asteliaphasma jucundum <br> astel_sp_4 <br> Mt Camel","asteliaphasma jucundum <br> astel_sp_5 <br> Paranui","asteliaphasma jucundum <br> astel_sp_6 <br> Whakaangi","asteliaphasma jucundum <br> astel_sp_7 <br> Fern Flat Rd, Otangaroa Forest","asteliaphasma jucundum <br> astel_sp_8 <br> East Herekino, Kaitaia Walkway","asteliaphasma jucundum <br> astel_sp_9 <br> Herekino West","asteliaphasma jucundum <br> astel_sp_10 <br> Mangamuka Gorge Walkway","asteliaphasma jucundum <br> astel_sp_11 <br> Mangamuka Gorge picnic area","asteliaphasma jucundum <br> astel_sp_12 <br> Trounson Kauri Park","asteliaphasma jucundum <br> astel_sp_13 <br> Puketi Forest, Manginangina Kauri Walk","asteliaphasma jucundum <br> astel_sp_14 <br> Puketi Forest, Onekura Tk","asteliaphasma jucundum <br> astel_sp_15 <br> Puketi Forest, Waipapa River Trk","asteliaphasma jucundum <br> astel_sp_16 <br> Puketi Forest, Forestry HQ","asteliaphasma jucundum <br> astel_sp_17 <br> Ngaiotonga Scenic Reserve, Kauri Grove","asteliaphasma jucundum <br> astel_sp_18 <br> Warawara Forest","asteliaphasma jucundum <br> astel_sp_19 <br> Waipoua Forest, Hill south of DoC Forest HQ","asteliaphasma jucundum <br> astel_sp_20 <br> Bream Head","asteliaphasma jucundum <br> astel_sp_21 <br> Dobbies Park","asteliaphasma jucundum <br> astel_sp_22 <br> Whale Bay","asteliaphasma jucundum <br> astel_sp_23 <br> Pukenui, Whangarei","asteliaphasma jucundum <br> astel_sp_24 <br> Opua Forest, Oromahoe Rd","asteliaphasma jucundum <br> astel_sp_25 <br> Dome Forest Walkway, north of Warkworth","asteliaphasma jucundum <br> astel_sp_26 <br> Dome Forest, Waiwhu Rd","asteliaphasma jucundum <br> astel_sp_27 <br> Mount Auckland","asteliaphasma jucundum <br> astel_sp_28 <br> Tangihua","asteliaphasma jucundum <br> astel_sp_29 <br> Moir Hill","asteliaphasma jucundum <br> astel_sp_30 <br> Maungaroa Lookout Tk, Piha","asteliaphasma jucundum <br> astel_sp_31 <br> Auckland, Parau Trk, Lower Nihotupu Reservoir","asteliaphasma jucundum <br> astel_sp_32 <br> Matuku","asteliaphasma jucundum <br> astel_sp_33 <br> Mt William Scenic Reserve, Kauri Track","asteliaphasma jucundum <br> astel_sp_34 <br> Hunua, Ness Valley","asteliaphasma jucundum <br> astel_sp_35 <br> Waharau Reg Park, Hunua Ranges","asteliaphasma jucundum <br> astel_sp_36 <br> Little Barrier Island, Water Bottle Track","asteliaphasma jucundum <br> astel_sp_37 <br> Little Barrier Island, Start of Valley Trk","asteliaphasma jucundum <br> astel_sp_38 <br> Little Barrier Island, Shag Track","asteliaphasma jucundum <br> astel_sp_39 <br> Great Barrier Island, Little Windy Hill","asteliaphasma jucundum <br> astel_sp_40 <br> Start of Waiomu Walk, Coroglen-Tapu Rd, 10.9km East of Tapu","asteliaphasma jucundum <br> astel_sp_41 <br> Hakarimata Ra, Kauri Loop Trk","asteliaphasma jucundum <br> astel_sp_42 <br> Summit Kopu-Hikuai, Coromandel Range","asteliaphasma jucundum <br> astel_sp_43 <br> Mt Te Aroha, Tui mine","asteliaphasma jucundum <br> astel_sp_44 <br> Mt Pirongia, Mangakara Nature Walk","asteliaphasma jucundum <br> astel_sp_45 <br> Bridal Veil Falls","asteliaphasma jucundum <br> astel_sp_46 <br> Pirongia State Forest Pk, Mt Karioi, Waireke Track","asteliaphasma jucundum <br> astel_sp_47 <br> Cambridge, Maungakawa Scenic Reserve","asteliaphasma jucundum <br> astel_sp_48 <br> Kaimai Ra, Lindemann lookout, end of Lindemann Rd","asteliaphasma jucundum <br> astel_sp_49 <br> Waenga Bush, Lottin Pt Rd","asteliaphasma jucundum <br> astel_sp_50 <br> Katikati, Springs Rd, Tuahu Trk","asteliaphasma jucundum <br> astel_sp_51 <br> Waiaroho, East Cape","asteliaphasma jucundum <br> astel_sp_52 <br> Katikati, Wrights Road, Aongatete Lodge","asteliaphasma jucundum <br> astel_sp_53 <br> Te Urewera Natl. Pk, Lake Waikaremoana, Awaawaroa Stm, Maori Track","asteliaphasma jucundum <br> astel_sp_54 <br> Pureora Forest, Caterpillar Tractor Track","asteliaphasma jucundum <br> astel_sp_55 <br> Pureora Forest, Waitaramoa Rd, Track behind Pureora Lodge","asteliaphasma jucundum <br> astel_sp_56 <br> Pureora Forest, Kakaho Stm, Rimu walk","asteliaphasma jucundum <br> astel_sp_57 <br> Maungatautari","asteliaphasma jucundum <br> astel_sp_58 <br> Waitomo","asteliaphasma jucundum <br> astel_sp_59 <br> Mt Messenger","asteliaphasma jucundum <br> astel_sp_60 <br> Auckland Botanic Gardens"],null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addLegend","args":[{"colors":["#000004","#FCFFA4"],"labels":["asexual","sexual"],"na_color":null,"na_label":"NA","opacity":0.9,"position":"bottomright","type":"factor","title":"reproductive_mode","extra":null,"layerId":null,"className":"info legend","group":null}]}],"fitBounds":[-47,167,-34,179,[]],"limits":{"lat":[-46.61196667,-34.79416659],"lng":[167.305727,178.547267]}},"evals":[],"jsHooks":[]}</script>
+<script type="application/htmlwidget-sizing" data-for="htmlwidget-106e35044a53da723e26">{"viewer":{"width":"100%","height":400,"padding":0,"fill":true},"browser":{"width":"100%","height":400,"padding":0,"fill":true}}</script>
 </body>
 </html>

@@ -1,6 +1,6 @@
-require(ggplot2)
-require(dplyr)
-require(ggnewscale)
+library(ggplot2)
+library(dplyr)
+library(ggnewscale)
 
 total_climate_pca_plot <- function(bg_env, locs, genus, species) {
   env_df <- raster::sampleRandom(bg_env, size = 10000) %>% 

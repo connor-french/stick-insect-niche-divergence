@@ -1,7 +1,7 @@
-require(ggplot2)
-require(plyr)
-require(dplyr)
-require(plotly)
+library(ggplot2)
+library(plyr)
+library(dplyr)
+library(plotly)
 
 
 plot_clim_pca <- function(data, pca, factor = "species"){

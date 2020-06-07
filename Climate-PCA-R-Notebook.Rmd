@@ -6,6 +6,8 @@ output:
     highlight: tango
 ---
 
+## Data
+
 Sorry for all of the packages. They grew and grew and grew, and I don't want to refactor everything to reduce the dependencies.
 
 ```{r message=FALSE}
@@ -31,20 +33,29 @@ library(here)
 library(mapview)
 library(fs)
 
-r_path <- here::here("R")
-source(file.path(r_path, "plot_leaflet_function.R")) #source locality plotting function
-source(file.path(r_path, "plot_climate_pca_function.R")) #source pca plotting function
-source(file.path(r_path, "species_pca_function.R")) #source function that computes climate pca per species
-source(file.path(r_path, "min_convex_poly.R")) #source function that creates a minimum convex polygon around points
-source(file.path(r_path, "enfa_calc_function.R"))
-source(file.path(r_path, "marginality_lollipop_plot.R"))
-source(file.path(r_path, "presence_absence_raster_function.R"))
-source(file.path(r_path, "crop_background_env_function.R"))
-source(file.path(r_path, "enfa_hex_plot.R"))
-source(file.path(r_path, "total_climate_pca_plot.R"))
-source(file.path(r_path, "raster_correlation_function.R"))
-source(file.path(r_path, "move_to_species.R"))
+# source locality plotting function
+source(here::here("R", "plot_leaflet_function.R")) 
+
+# source climate pca plotting function
+source(here::here("R", "plot_climate_pca_function.R")) 
+
+# source species pca plotting function
+source(here::here("R", "species_pca_function.R")) 
+
+# source function that creates a minimum convex polygon around points
+source(here::here("R", "min_convex_poly.R")) 
+
+
+source(here::here("R", "enfa_calc_function.R"))
+source(here::here("R", "marginality_lollipop_plot.R"))
+source(here::here("R", "presence_absence_raster_function.R"))
+source(here::here("R", "crop_background_env_function.R"))
+source(here::here("R", "enfa_hex_plot.R"))
+source(here::here("R", "total_climate_pca_plot.R"))
+source(here::here("R", "raster_correlation_function.R"))
+source(here::here("R", "move_to_species.R"))
 ```
+
 
 Create subdirectories (if needed) and establish paths.
 ```{r}
@@ -59,7 +70,14 @@ create_dir <- function(out_path) {
 # path for interactive plots, maps, etc. output
 interactive_path <- here::here("output", "interactive_plots")
 
-create_dir(precip_path)
+create_dir(interactive_path)
+
+# climate data
+climate_path <- 
+  here::here("data",
+             "climate")
+
+create_dir(climate_path)
 
 # temperature climate data
 temp_path <-
@@ -116,10 +134,19 @@ Read in the spreadsheet and take a look at the data.
 # data path
 loc_path <- here::here("data", "all species New_6-14-19.xlsx")
 
+# species list 
+species_list <- c("horridus", 
+                  "hookeri",
+                  "annulata",
+                  "ovobessus",
+                  "huttoni",
+                  "jucundum")
+
 ### read in spreadsheet
 loc <- read_xlsx(loc_path) %>%
   janitor::clean_names() %>% 
-  mutate(reproductive_mode = as.factor(reproductive_mode)) 
+  mutate(reproductive_mode = as.factor(reproductive_mode)) %>% 
+  filter(species %in% species_list)
 
 #get the number of individuals, and the sexuality counts per species
 count_repro_mode <- loc %>% 
@@ -195,8 +222,9 @@ Run the pca and check out variable loadings and proportion of variance explained
 #extract data from worldclim for each locality.
 coords <- data.frame(latitude = loc$longitude, longitude = loc$latitude)
 
-loc_clim <- dplyr::bind_cols(loc, raster::extract(w, coords, method = "simple", df = TRUE)) %>% 
-  drop_na(bio1) %>% 
+loc_clim <-
+  dplyr::bind_cols(loc, raster::extract(w, coords, method = "simple", df = TRUE)) %>%
+  drop_na(bio1) %>%
   dplyr::select(-ID)
 
 #make a matrix of only bioclim values
@@ -243,6 +271,8 @@ htmlwidgets::saveWidget(
 
 ```
 
+### Stability
+
 Examining whether asexual populations occupy more unstable climates than sexual populations. Only using species with multiple sexual and asexual populations. Asexual pops tend to occupy more stable temperature environments, but less stable precipitation environments. We're estimating stability using the method presented by Owens and Guralnick 2019- climateStability: AN R PACKAGE TO ESTIMATE CLIMATE STABILITY FROM TIME-SLICE CLIMATOLOGIES.
 
 ```{r cache=TRUE, warning=FALSE, message=FALSE}
@@ -251,8 +281,32 @@ Examining whether asexual populations occupy more unstable climates than sexual 
 ### 2.5 arcmin resolution, already cropped to NZ to speed up computation time
 
 
-#time slices are calculated as the difference between the midpoints of the two time periods the climate layers were calculated for (e.g. midpoint of LH = (4.2 ka - 0.3 ka) / 2 + 0.3 ka = 2.25, midpoint of MH = (8.326 ka - 4.2 ka) / 2 + 4.2 = 6.263. time_slice = 6.263 - 2.25 = 4.013)
-time_slices <- c(2550, 4013, 6037, 1500, 2050, 5150)
+# time slices are calculated as the difference between the midpoints of the two time periods the climate layers were calculated for (e.g. midpoint of LH = (4.2 ka - 0.3 ka) / 2 + 0.3 ka = 2.25, midpoint of MH = (8.326 ka - 4.2 ka) / 2 + 4.2 = 6.263. time_slice = 6.263 - 2.25 = 4.013)
+
+# c = current
+# t_lh = midpoint time for late holocene
+# t_mh = mid-Holocene
+# t_eh = early-Holocene
+# t_yds = Younger Dryas Stadial
+# t_ba = Bølling-Allerød
+# t_hs = Heinrich Stadial 1
+# t_lgm = Last Glacial Maximum
+c <- (2013 - 1979) / 2
+t_lh <- ((4.2 - 0.3) / 2 + 0.3) * 1000
+t_mh <- ((8.326 - 4.2) / 2 + 4.2) * 1000
+t_eh <- ((11.7 - 8.326) / 2 + 8.326) * 1000
+t_yds <- ((12.9 - 11.7) / 2 + 11.7) * 1000
+t_ba <- ((14.7 - 12.9) / 2 + 12.9) * 1000
+t_hs <- ((17 - 14.7) / 2 + 14.7) * 1000
+t_lgm <- 21000
+
+time_slices <- c(t_lh - c, 
+                 t_mh - t_lh, 
+                 t_eh - t_mh, 
+                 t_yds - t_eh, 
+                 t_ba - t_yds, 
+                 t_hs - t_ba,
+                 t_lgm - t_hs)
 
 
 precip_deviation <-
@@ -265,7 +319,8 @@ precip_stability_scaled <- climateStability::rescale0to1(precip_stability)
 writeRaster(
   precip_stability_scaled,
   filename = file.path(raster_path, "precip_stability_scaled.tif"),
-  format = "GTiff"
+  format = "GTiff",
+  overwrite = TRUE
 )
 
 
@@ -279,7 +334,8 @@ temp_stability_scaled <- climateStability::rescale0to1(temp_stability)
 writeRaster(
   temp_stability_scaled,
   filename = file.path(raster_path, "temp_stability_scaled.tif"),
-  format = "GTiff"
+  format = "GTiff",
+  overwrite = TRUE
 )
 
 overall_stability_scaled <- precip_stability_scaled * temp_stability_scaled
@@ -288,7 +344,8 @@ overall_stability_scaled <- precip_stability_scaled * temp_stability_scaled
 writeRaster(
   overall_stability_scaled,
   filename = file.path(raster_path, "overall_stability_scaled.tif"),
-  format = "GTiff"
+  format = "GTiff",
+  overwrite = TRUE
 )
 
 temp_stability_map <- ggplot() +
@@ -473,66 +530,33 @@ These are PCAs of environmental space for species within genera. Each climate PC
 
 I'm also conducting Enviromental Niche Factor Analysis to investigate the influence of reproductive mode on niche marginality.
 
-### Acanthoxyla
-```{r, message=FALSE, warning=FALSE}
-#source function to conduct a PCA on individual species
-summary_list_acan <- species_pca_fun(loc_clim, "acanthoxyla")
-#plot
-acan_plot <- plot_clim_pca(summary_list_acan$loc_clim, summary_list_acan$summary_pca, "reproductive_mode")
-
-acan_plot
-
-# save pca plot
-htmlwidgets::saveWidget(acan_plot, file.path(interactive_path, "acanthoxyla_pca.html"), selfcontained = TRUE)
-
-#filter localities for the focal genus
-acan_loc <- loc %>% 
-  filter(genus == "acanthoxyla")
-  
-#use sourced plot_locs_leaflet script to plot localities
-acan_map <- plot_locs_leaflet(acan_loc, "reproductive_mode")
-
-acan_map
-
-# save the map
-mapview::mapshot(acan_map, url = file.path(interactive_path, "acan_map.html"), file = file.path(interactive_path,"acan_map.pdf"))
-```
-
-
-```{r}
-summary_list_acan$summary_pca
-loadings_acan <- summary_list_acan$summary_pca$rotation
-knitr::kable(round(loadings_acan[,1:3],3)) #Table of loading scores for the first 3 PCs. 
-```
-
-
-### Argosarchus
+### Argosarchus horridus
 ```{r message=FALSE, warning=FALSE}
 # conduct pca
-summary_list_argo <- species_pca_fun(loc_clim, "argosarchus")
+summary_list_ahor <- species_pca_fun(data = loc_clim, genus = "argosarchus", species = "horridus")
 
 # plot
-argo_plot <-
-  plot_clim_pca(summary_list_argo$loc_clim,
-                summary_list_argo$summary_pca,
+ahor_plot <-
+  plot_clim_pca(summary_list_ahor$loc_clim,
+                summary_list_ahor$summary_pca,
                 factor = "reproductive_mode")
-argo_plot
+ahor_plot
 
-htmlwidgets::saveWidget(argo_plot,
+htmlwidgets::saveWidget(ahor_plot,
                         file.path(interactive_path, "ahor_pca.html"),
                         selfcontained = TRUE)
 
-#filter localities for the focal genus
-argo_loc <- loc %>%
-  filter(genus == "argosarchus")
+#filter localities for the focal species
+ahor_loc <- loc %>%
+  filter(genus == "argosarchus", species == "horridus")
 
 #use sourced plot_locs_leaflet script to plot localities
-argo_map <- plot_locs_leaflet(argo_loc, "reproductive_mode")
+ahor_map <- plot_locs_leaflet(ahor_loc, "reproductive_mode")
 
-argo_map
+ahor_map
 
 mapview::mapshot(
-  argo_map,
+  ahor_map,
   url = file.path(interactive_path, "ahor_map.html"),
   file = file.path(interactive_path, "ahor_map.pdf")
 )
@@ -541,27 +565,28 @@ mapview::mapshot(
 ```
 
 ```{r}
-summary_list_argo$summary_pca
-loadings_argo <- summary_list_argo$summary_pca$rotation
-knitr::kable(round(loadings_argo[, 1:3], 3)) #Table of loading scores for the first 3 PCs. 
+summary_list_ahor$summary_pca
+loadings_ahor <- summary_list_ahor$summary_pca$rotation
+knitr::kable(round(loadings_ahor[, 1:3], 3)) #Table of loading scores for the first 3 PCs. 
 ```
 
+#### ENFA
 Now I'm going to to environmental niche factor analysis between sexual and asexual populations within the species.
 ```{r warning=FALSE, message=FALSE}
 #get background env't for the species
-ahor_bg_env <- bg_env_crop(argo_loc, 
+ahor_bg_env <- bg_env_crop(ahor_loc, 
                            species = "horridus",
                            environment = w, 
                            buffer = 0.5)
 
 #enfa for the sexual species
-ahor_sexual_enfa <- enfa_calc_fun(locs = argo_loc, 
+ahor_sexual_enfa <- enfa_calc_fun(locs = ahor_loc, 
                                   species = "horridus", 
                                   reproductive_mode = "sexual", 
                                   mask_raster = ahor_bg_env)
 
 #enfa for the asexual species
-ahor_asexual_enfa <- enfa_calc_fun(locs = argo_loc, 
+ahor_asexual_enfa <- enfa_calc_fun(locs = ahor_loc, 
                                    species = "horridus", 
                                    reproductive_mode = "asexual", 
                                    mask_raster = ahor_bg_env)
@@ -654,7 +679,7 @@ title(main = "Sexual", adj = 0.7, line = -12)
 dev.off()
 
 ### 3) PCA of total e-space
-ahor_total_pca <- total_climate_pca_plot(bg_env = ahor_bg_env, locs = argo_loc, genus = "Argosarchus", species = "horridus")
+ahor_total_pca <- total_climate_pca_plot(bg_env = ahor_bg_env, locs = ahor_loc, genus = "Argosarchus", species = "horridus")
 
 ahor_total_pca
 
@@ -665,7 +690,7 @@ ggsave("ahor_total_pca.png",
        dpi = "retina")
 ```
 
-
+##### ENFA Reduced
 Trying out a repeat of the analyses with reduced environmental space.
 Prioritizing variables that will limit their distribution (i.e. variables that represent the extremes). After correlation analysis, we're left with BIO6, BIO13, BIO14, BIO16
 ```{r cache=TRUE}
@@ -690,19 +715,19 @@ Repeat the analysis with the reduced data set. The background environment is 0.5
 w_ahor <- raster::subset(w, c("bio6", "bio13", "bio14", "bio16"))
 
 #get background env't for the species
-ahor_bg_env_subset <- bg_env_crop(argo_loc, 
+ahor_bg_env_subset <- bg_env_crop(ahor_loc, 
                            species = "horridus",
                            environment = w_ahor, 
                            buffer = 0.5)
 
 #enfa for the sexual species
-ahor_sexual_enfa_subset <- enfa_calc_fun(locs = argo_loc, 
+ahor_sexual_enfa_subset <- enfa_calc_fun(locs = ahor_loc, 
                                   species = "horridus", 
                                   reproductive_mode = "sexual", 
                                   mask_raster = ahor_bg_env_subset)
 
 #enfa for the asexual species
-ahor_asexual_enfa_subset <- enfa_calc_fun(locs = argo_loc, 
+ahor_asexual_enfa_subset <- enfa_calc_fun(locs = ahor_loc, 
                                    species = "horridus", 
                                    reproductive_mode = "asexual", 
                                    mask_raster = ahor_bg_env_subset)
@@ -819,7 +844,7 @@ dev.off()
 ahor_subset_total_pca <-
   total_climate_pca_plot(
     bg_env = ahor_bg_env_subset,
-    locs = argo_loc,
+    locs = ahor_loc,
     genus = "Argosarchus",
     species = "horridus"
   )
@@ -850,26 +875,26 @@ saveRDS(ahor_asexual_enfa_subset,
 rm(ahor_asexual_enfa_subset)
 ```
 
-
+#### Stability
 We're also interested in seeing if asexual populations live in more unstable climatic areas relative to sexual populations. 
 ```{r}
-argo_locs_asexual <- argo_loc %>% 
+ahor_locs_asexual <- ahor_loc %>% 
   mutate(lat_long = str_c(latitude, longitude, sep = "_")) %>% 
   filter(reproductive_mode == "asexual",
          !duplicated(lat_long)) %>% 
   dplyr::select(longitude, latitude)
 
-argo_locs_sexual <- argo_loc %>% 
+ahor_locs_sexual <- ahor_loc %>% 
   mutate(lat_long = str_c(latitude, longitude, sep = "_")) %>% 
   filter(reproductive_mode == "sexual",
          !duplicated(lat_long)) %>% 
   dplyr::select(longitude, latitude)
 
-precip_asexual_ahor <- raster::extract(precip_stability_scaled, argo_locs_asexual) %>% 
+precip_asexual_ahor <- raster::extract(precip_stability_scaled, ahor_locs_asexual) %>% 
   enframe(name = NULL, value = "precip_stability_scaled") %>% 
   mutate(reproductive_mode = "asexual")
 
-precip_sexual_ahor <- raster::extract(precip_stability_scaled, argo_locs_sexual) %>% 
+precip_sexual_ahor <- raster::extract(precip_stability_scaled, ahor_locs_sexual) %>% 
   enframe(name = NULL, value = "precip_stability_scaled") %>% 
   mutate(reproductive_mode = "sexual")
 
@@ -894,11 +919,11 @@ ggsave(
   dpi = "retina"
 )
 
-temp_asexual_ahor <- raster::extract(temp_stability_scaled, argo_locs_asexual) %>% 
+temp_asexual_ahor <- raster::extract(temp_stability_scaled, ahor_locs_asexual) %>% 
   enframe(name = NULL, value = "temp_stability_scaled") %>% 
   mutate(reproductive_mode = "asexual")
 
-temp_sexual_ahor <- raster::extract(temp_stability_scaled, argo_locs_sexual) %>% 
+temp_sexual_ahor <- raster::extract(temp_stability_scaled, ahor_locs_sexual) %>% 
   enframe(name = NULL, value = "temp_stability_scaled") %>% 
   mutate(reproductive_mode = "sexual")
 
@@ -923,11 +948,11 @@ ggsave(
   dpi = "retina"
 )
 
-overall_asexual_ahor <- raster::extract(overall_stability_scaled, argo_locs_asexual) %>% 
+overall_asexual_ahor <- raster::extract(overall_stability_scaled, ahor_locs_asexual) %>% 
   enframe(name = NULL, value = "overall_stability_scaled") %>% 
   mutate(reproductive_mode = "asexual")
 
-overall_sexual_ahor <- raster::extract(overall_stability_scaled, argo_locs_sexual) %>% 
+overall_sexual_ahor <- raster::extract(overall_stability_scaled, ahor_locs_sexual) %>% 
   enframe(name = NULL, value = "overall_stability_scaled") %>% 
   mutate(reproductive_mode = "sexual")
 
@@ -955,7 +980,73 @@ ggsave(
 
 ```
 
+#### Seasonality
+```{r}
+seas_precip_asexual_ahor <- raster::extract(w$bio15, ahor_locs_asexual) %>% 
+  enframe(name = NULL, value = "precip_seasonality") %>% 
+  mutate(reproductive_mode = "asexual")
 
+seas_precip_sexual_ahor <- raster::extract(w$bio15, ahor_locs_sexual) %>% 
+  enframe(name = NULL, value = "precip_seasonality") %>% 
+  mutate(reproductive_mode = "sexual")
+
+seas_precip_df_ahor <- bind_rows(seas_precip_asexual_ahor, seas_precip_sexual_ahor)
+
+readr::write_csv(seas_precip_df_ahor, 
+                 file.path(spread_path, "ahor_precip_seasonality_df.csv"))
+
+ahor_precip_seasonality_plot <- ggplot(data = seas_precip_df_ahor, aes(x = reproductive_mode, y = precip_seasonality, color = reproductive_mode)) +
+  geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  scale_color_viridis_d(option = "magma") +
+  theme_dark()
+
+ahor_precip_seasonality_plot
+
+ggsave(
+  "ahor_precip_seasonality.png",
+  plot = ahor_precip_seasonality_plot,
+  device = "png",
+  path = plot_path,
+  dpi = "retina"
+)
+
+seas_temp_asexual_ahor <- raster::extract(w$bio4, ahor_locs_asexual) %>% 
+  enframe(name = NULL, value = "temp_seasonality") %>% 
+  mutate(reproductive_mode = "asexual")
+
+seas_temp_sexual_ahor <- raster::extract(w$bio4, ahor_locs_sexual) %>% 
+  enframe(name = NULL, value = "temp_seasonality") %>% 
+  mutate(reproductive_mode = "sexual")
+
+seas_temp_df_ahor <- bind_rows(seas_temp_asexual_ahor, seas_temp_sexual_ahor)
+
+readr::write_csv(seas_temp_df_ahor, 
+                 file.path(spread_path, "ahor_temp_seasonality_df.csv"))
+
+ahor_temp_seasonality_plot <- ggplot(data = seas_temp_df_ahor, aes(x = reproductive_mode, y = temp_seasonality, color = reproductive_mode)) +
+  geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  scale_color_viridis_d(option = "magma") +
+  theme_dark()
+
+ahor_temp_seasonality_plot
+
+ggsave(
+  "ahor_temp_seasonality.png",
+  plot = ahor_temp_seasonality_plot,
+  device = "png",
+  path = plot_path,
+  dpi = "retina"
+)
+
+```
+
+
+
+
+
+#### Move output
 Put all output into species-specific subfolders.
 ```{r results="hide"}
 ahor_out_int_path <- file.path(interactive_path, "argosarchus_horridus")
@@ -985,28 +1076,32 @@ move_to_species(in_path = obj_path,
 
 
 
-### Asteliaphasma
+### Asteliaphasma jucundum
 ```{r message=FALSE, warning=FALSE}
 #pca
-summary_list_aste <- species_pca_fun(loc_clim, "asteliaphasma")
+summary_list_ajuc <- species_pca_fun(loc_clim, 
+                                     genus ="asteliaphasma", 
+                                     species = "jucundum")
 #plot
-aste_plot <- plot_clim_pca(summary_list_aste$loc_clim, summary_list_aste$summary_pca, factor = "reproductive_mode")
-aste_plot
+ajuc_plot <- plot_clim_pca(summary_list_ajuc$loc_clim, 
+                           summary_list_ajuc$summary_pca, 
+                           factor = "reproductive_mode")
+ajuc_plot
 
 #if selfcontained = TRUE, you can remove the folder that gets added alongside the plot. 
-htmlwidgets::saveWidget(aste_plot, file.path(interactive_path, "asteliaphasma_pca.html"), selfcontained = TRUE)
+htmlwidgets::saveWidget(ajuc_plot, file.path(interactive_path, "ajuc_pca.html"), selfcontained = TRUE)
 
-#filter localities for the focal genus
-aste_loc <- loc %>% 
-  filter(genus == "asteliaphasma")
+#filter localities for the focal species
+ajuc_loc <- loc %>% 
+  filter(genus == "asteliaphasma", species == "jucundum")
   
 #use sourced plot_locs_leaflet script to plot localities
-aste_map <- plot_locs_leaflet(aste_loc, "reproductive_mode")
+ajuc_map <- plot_locs_leaflet(ajuc_loc, "reproductive_mode")
 
-aste_map
+ajuc_map
 
 # save the map
-mapview::mapshot(aste_map, url = file.path(interactive_path, "aste_map.html"), file = file.path(interactive_path, "aste_map.pdf"))
+mapview::mapshot(ajuc_map, url = file.path(interactive_path, "ajuc_map.html"), file = file.path(interactive_path, "ajuc_map.pdf"))
 
 ```
 
@@ -1018,7 +1113,7 @@ loadings_aste <- summary_list_aste$summary_pca$rotation
 knitr::kable(round(loadings_aste[,1:3],3)) #Table of loading scores for the first 3 PCs. 
 ```
 
-
+#### ENFA
 
 Now I'm going to to environmental niche factor analysis between sexual and asexual populations within the species.
 ```{r warning = FALSE, message=FALSE}
@@ -1134,6 +1229,7 @@ ggsave("ajuc_total_pca.png",
        dpi = "retina")
 ```
 
+##### ENFA Reduced
 
 Trying out a repeat of the analyses with reduced environmental space.
 Prioritizing variables that will limit their distribution (i.e. variables that represent the extremes). After correlation analysis, we're left with BIO5, BIO6, BIO14, BIO17.
@@ -1295,18 +1391,17 @@ saveRDS(ajuc_asexual_enfa_subset,
 rm(ajuc_asexual_enfa_subset)
 ```
 
-
-
+#### Stability
 
 We're also interested in seeing if asexual populations live in more unstable climatic areas relative to sexual populations. 
 ```{r}
-aste_locs_asexual <- aste_loc %>% 
+ajuc_locs_asexual <- ajuc_loc %>% 
   mutate(lat_long = str_c(latitude, longitude, sep = "_")) %>% 
   filter(reproductive_mode == "asexual",
          !duplicated(lat_long)) %>% 
   dplyr::select(longitude, latitude)
 
-aste_locs_sexual <- aste_loc %>% 
+ajuc_locs_sexual <- ajuc_loc %>% 
   mutate(lat_long = str_c(latitude, longitude, sep = "_")) %>% 
   filter(reproductive_mode == "sexual",
          !duplicated(lat_long)) %>% 
@@ -1395,6 +1490,68 @@ ggsave("ajuc_overall_stability.png",
 
 ```
 
+#### Seasonality
+```{r}
+seas_precip_asexual_ajuc <- raster::extract(w$bio15, ajuc_locs_asexual) %>% 
+  enframe(name = NULL, value = "precip_seasonality") %>% 
+  mutate(reproductive_mode = "asexual")
+
+seas_precip_sexual_ajuc <- raster::extract(w$bio15, ajuc_locs_sexual) %>% 
+  enframe(name = NULL, value = "precip_seasonality") %>% 
+  mutate(reproductive_mode = "sexual")
+
+seas_precip_df_ajuc <- bind_rows(seas_precip_asexual_ajuc, seas_precip_sexual_ajuc)
+
+readr::write_csv(seas_precip_df_ajuc, 
+                 file.path(spread_path, "ajuc_precip_seasonality_df.csv"))
+
+ajuc_precip_seasonality_plot <- ggplot(data = seas_precip_df_ajuc, aes(x = reproductive_mode, y = precip_seasonality, color = reproductive_mode)) +
+  geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  scale_color_viridis_d(option = "magma") +
+  theme_dark()
+
+ajuc_precip_seasonality_plot
+
+ggsave(
+  "ajuc_precip_seasonality.png",
+  plot = ajuc_precip_seasonality_plot,
+  device = "png",
+  path = plot_path,
+  dpi = "retina"
+)
+
+seas_temp_asexual_ajuc <- raster::extract(w$bio4, ajuc_locs_asexual) %>% 
+  enframe(name = NULL, value = "temp_seasonality") %>% 
+  mutate(reproductive_mode = "asexual")
+
+seas_temp_sexual_ajuc <- raster::extract(w$bio4, ajuc_locs_sexual) %>% 
+  enframe(name = NULL, value = "temp_seasonality") %>% 
+  mutate(reproductive_mode = "sexual")
+
+seas_temp_df_ajuc <- bind_rows(seas_temp_asexual_ajuc, seas_temp_sexual_ajuc)
+
+readr::write_csv(seas_temp_df_ajuc, 
+                 file.path(spread_path, "ajuc_temp_seasonality_df.csv"))
+
+ajuc_temp_seasonality_plot <- ggplot(data = seas_temp_df_ajuc, aes(x = reproductive_mode, y = temp_seasonality, color = reproductive_mode)) +
+  geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  scale_color_viridis_d(option = "magma") +
+  theme_dark()
+
+ajuc_temp_seasonality_plot
+
+ggsave(
+  "ajuc_temp_seasonality.png",
+  plot = ajuc_temp_seasonality_plot,
+  device = "png",
+  path = plot_path,
+  dpi = "retina"
+)
+```
+
+#### Move output
 Put all output into species-specific subfolders.
 ```{r results="hide"}
 ajuc_out_int_path <- file.path(interactive_path, "asteliaphasma_jucundum")
@@ -1406,7 +1563,7 @@ ajuc_out_obj_path <- file.path(obj_path, "asteliaphasma_jucundum")
 move_to_species(in_path = interactive_path,
                 out_path = ajuc_out_int_path,
                 pattern = "ajuc")
-# move plots
+
 move_to_species(in_path = plot_path,
                 out_path = ajuc_out_plot_path,
                 pattern = "ajuc")
@@ -1422,49 +1579,50 @@ move_to_species(in_path = obj_path,
                 pattern = "ajuc")
 ```
 
-### Clitarchus
+### Clitarchus hookeri
 
 ```{r warning=FALSE, message=FALSE}
-summary_list_clita <- species_pca_fun(loc_clim, "Clitarchus")
-clita_plot <- plot_clim_pca(summary_list_clita$loc_clim, summary_list_clita$summary_pca, factor = "reproductive_mode")
-clita_plot
+summary_list_choo <- species_pca_fun(loc_clim, genus = "clitarchus", species = "hookeri")
+choo_plot <- plot_clim_pca(summary_list_choo$loc_clim, summary_list_choo$summary_pca, factor = "reproductive_mode")
+choo_plot
 
 
-htmlwidgets::saveWidget(clita_plot, file.path(interactive_path, "Clitarchus_pca.html"), selfcontained = TRUE)
+htmlwidgets::saveWidget(choo_plot, file.path(interactive_path, "choo_pca.html"), selfcontained = TRUE)
 
 #filter localities for the focal genus
-clita_loc <- loc %>% 
-  filter(genus == "Clitarchus")
+choo_loc <- loc %>% 
+  filter(genus == "clitarchus")
   
 #use sourced plot_locs_leaflet script to plot localities
-clita_map <- plot_locs_leaflet(clita_loc, "reproductive_mode")
+choo_map <- plot_locs_leaflet(choo_loc, "reproductive_mode")
 
-clita_map
+choo_map
 
 # save the map
 
 mapview::mapshot(
-  clita_map,
-  url = file.path(interactive_path, "clita_map.html"),
-  file = paste0(file.path(interactive_path, "clita_map.pdf"))
+  choo_map,
+  url = file.path(interactive_path, "choo_map.html"),
+  file = paste0(file.path(interactive_path, "choo_map.pdf"))
 )
 
 ```
 
 
 ```{r}
-summary_list_clita$summary_pca
-loadings_clita <- summary_list_clita$summary_pca$rotation
-knitr::kable(round(loadings_clita[,1:3],3)) #Table of loading scores for the first 3 PCs. 
+summary_list_choo$summary_pca
+loadings_choo <- summary_list_choo$summary_pca$rotation
+knitr::kable(round(loadings_choo[,1:3],3)) #Table of loading scores for the first 3 PCs. 
 ```
 
+#### ENFA
 
 Now I'm going to perform environmental niche factor analysis with sexual and asexual populations within the species.
 ```{r cache=TRUE, warning=FALSE, message=FALSE}
 
 #get background env't for the species
 choo_bg_env <- bg_env_crop(
-  clita_loc,
+  choo_loc,
   species = "hookeri",
   environment = w,
   buffer = 0.5
@@ -1472,7 +1630,7 @@ choo_bg_env <- bg_env_crop(
 
 #enfa for the sexual species
 choo_sexual_enfa <- enfa_calc_fun(
-  locs = clita_loc,
+  locs = choo_loc,
   species = "hookeri",
   reproductive_mode = "sexual",
   mask_raster = choo_bg_env
@@ -1480,7 +1638,7 @@ choo_sexual_enfa <- enfa_calc_fun(
 
 #enfa for the asexual species
 choo_asexual_enfa <- enfa_calc_fun(
-  locs = clita_loc,
+  locs = choo_loc,
   species = "hookeri",
   reproductive_mode = "asexual",
   mask_raster = choo_bg_env
@@ -1572,7 +1730,7 @@ title(main = "Sexual", adj = 0.7, line = -12)
 dev.off()
 
 ### 3) PCA of total e-space
-choo_total_pca <- total_climate_pca_plot(bg_env = choo_bg_env, locs = clita_loc, genus = "Clitarchus", species = "hookeri")
+choo_total_pca <- total_climate_pca_plot(bg_env = choo_bg_env, locs = choo_loc, genus = "Clitarchus", species = "hookeri")
 
 choo_total_pca
 
@@ -1583,6 +1741,8 @@ ggsave("choo_total_pca.png",
        dpi = "retina")
 
 ```
+
+##### ENFA Reduced
 
 Trying out a repeat of the analyses with reduced environmental space.
 Prioritizing variables that will limit their distribution (i.e. variables that represent the extremes). After correlation analysis, we're left with BIO8, BIO11, BIO15, BIO17. 
@@ -1608,19 +1768,19 @@ Repeat the analysis with the reduced data set.
 w_choo <- raster::subset(w, c("bio8", "bio11", "bio15", "bio17"))
 
 #get background env't for the species
-choo_bg_env_subset <- bg_env_crop(clita_loc, 
+choo_bg_env_subset <- bg_env_crop(choo_loc, 
                            species = "hookeri",
                            environment = w_choo, 
                            buffer = 0.5)
 
 #enfa for the sexual species
-choo_sexual_enfa_subset <- enfa_calc_fun(locs = clita_loc, 
+choo_sexual_enfa_subset <- enfa_calc_fun(locs = choo_loc, 
                                   species = "hookeri", 
                                   reproductive_mode = "sexual", 
                                   mask_raster = choo_bg_env_subset)
 
 #enfa for the asexual species
-choo_asexual_enfa_subset <- enfa_calc_fun(locs = clita_loc, 
+choo_asexual_enfa_subset <- enfa_calc_fun(locs = choo_loc, 
                                    species = "hookeri", 
                                    reproductive_mode = "asexual", 
                                    mask_raster = choo_bg_env_subset)
@@ -1717,7 +1877,7 @@ title(main = "Sexual", adj = 0.7, line = -12)
 dev.off()
 
 ### 3) PCA of total e-space
-choo_subset_total_pca <- total_climate_pca_plot(bg_env = choo_bg_env_subset, locs = clita_loc, genus = "Clitarchus", species = "hookeri")
+choo_subset_total_pca <- total_climate_pca_plot(bg_env = choo_bg_env_subset, locs = choo_loc, genus = "Clitarchus", species = "hookeri")
 
 choo_subset_total_pca
 
@@ -1743,26 +1903,27 @@ saveRDS(choo_asexual_enfa_subset,
 rm(choo_asexual_enfa_subset)
 ```
 
+#### Stability
 
 We're also interested in seeing if asexual populations live in more unstable climatic areas relative to sexual populations. 
 ```{r warning=FALSE, message=FALSE}
-clita_locs_asexual <- clita_loc %>% 
+choo_locs_asexual <- choo_loc %>% 
   mutate(lat_long = str_c(latitude, longitude, sep = "_")) %>% 
   filter(reproductive_mode == "asexual",
          !duplicated(lat_long)) %>% 
   dplyr::select(longitude, latitude)
 
-clita_locs_sexual <- clita_loc %>% 
+choo_locs_sexual <- choo_loc %>% 
   mutate(lat_long = str_c(latitude, longitude, sep = "_")) %>% 
   filter(reproductive_mode == "sexual",
          !duplicated(lat_long)) %>% 
   dplyr::select(longitude, latitude)
 
-precip_asexual_choo <- raster::extract(precip_stability_scaled, clita_locs_asexual) %>% 
+precip_asexual_choo <- raster::extract(precip_stability_scaled, choo_locs_asexual) %>% 
   enframe(name = NULL, value = "precip_stability_scaled") %>% 
   mutate(reproductive_mode = "asexual")
 
-precip_sexual_choo <- raster::extract(precip_stability_scaled, clita_locs_sexual) %>% 
+precip_sexual_choo <- raster::extract(precip_stability_scaled, choo_locs_sexual) %>% 
   enframe(name = NULL, value = "precip_stability_scaled") %>% 
   mutate(reproductive_mode = "sexual")
 
@@ -1785,11 +1946,11 @@ ggsave("choo_precip_stability.png",
        path = plot_path,
        dpi = "retina")
 
-temp_asexual_choo <- raster::extract(temp_stability_scaled, clita_locs_asexual) %>% 
+temp_asexual_choo <- raster::extract(temp_stability_scaled, choo_locs_asexual) %>% 
   enframe(name = NULL, value = "temp_stability_scaled") %>% 
   mutate(reproductive_mode = "asexual")
 
-temp_sexual_choo <- raster::extract(temp_stability_scaled, clita_locs_sexual) %>% 
+temp_sexual_choo <- raster::extract(temp_stability_scaled, choo_locs_sexual) %>% 
   enframe(name = NULL, value = "temp_stability_scaled") %>% 
   mutate(reproductive_mode = "sexual")
 
@@ -1812,11 +1973,11 @@ ggsave("choo_precip_stability.png",
        path = plot_path,
        dpi = "retina")
 
-overall_asexual_choo <- raster::extract(overall_stability_scaled, clita_locs_asexual) %>% 
+overall_asexual_choo <- raster::extract(overall_stability_scaled, choo_locs_asexual) %>% 
   enframe(name = NULL, value = "overall_stability_scaled") %>% 
   mutate(reproductive_mode = "asexual")
 
-overall_sexual_choo <- raster::extract(overall_stability_scaled, clita_locs_sexual) %>% 
+overall_sexual_choo <- raster::extract(overall_stability_scaled, choo_locs_sexual) %>% 
   enframe(name = NULL, value = "overall_stability_scaled") %>% 
   mutate(reproductive_mode = "sexual")
 
@@ -1839,6 +2000,69 @@ ggsave("choo_overall_stability.png",
        path = plot_path,
        dpi = "retina")
 ```
+
+#### Seasonality
+```{r}
+seas_precip_asexual_choo <- raster::extract(w$bio15, choo_locs_asexual) %>% 
+  enframe(name = NULL, value = "precip_seasonality") %>% 
+  mutate(reproductive_mode = "asexual")
+
+seas_precip_sexual_choo <- raster::extract(w$bio15, choo_locs_sexual) %>% 
+  enframe(name = NULL, value = "precip_seasonality") %>% 
+  mutate(reproductive_mode = "sexual")
+
+seas_precip_df_choo <- bind_rows(seas_precip_asexual_choo, seas_precip_sexual_choo)
+
+readr::write_csv(seas_precip_df_choo, 
+                 file.path(spread_path, "choo_precip_seasonality_df.csv"))
+
+choo_precip_seasonality_plot <- ggplot(data = seas_precip_df_choo, aes(x = reproductive_mode, y = precip_seasonality, color = reproductive_mode)) +
+  geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  scale_color_viridis_d(option = "magma") +
+  theme_dark()
+
+choo_precip_seasonality_plot
+
+ggsave(
+  "choo_precip_seasonality.png",
+  plot = choo_precip_seasonality_plot,
+  device = "png",
+  path = plot_path,
+  dpi = "retina"
+)
+
+seas_temp_asexual_choo <- raster::extract(w$bio4, choo_locs_asexual) %>% 
+  enframe(name = NULL, value = "temp_seasonality") %>% 
+  mutate(reproductive_mode = "asexual")
+
+seas_temp_sexual_choo <- raster::extract(w$bio4, choo_locs_sexual) %>% 
+  enframe(name = NULL, value = "temp_seasonality") %>% 
+  mutate(reproductive_mode = "sexual")
+
+seas_temp_df_choo <- bind_rows(seas_temp_asexual_choo, seas_temp_sexual_choo)
+
+readr::write_csv(seas_temp_df_choo, 
+                 file.path(spread_path, "choo_temp_seasonality_df.csv"))
+
+choo_temp_seasonality_plot <- ggplot(data = seas_temp_df_choo, aes(x = reproductive_mode, y = temp_seasonality, color = reproductive_mode)) +
+  geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  scale_color_viridis_d(option = "magma") +
+  theme_dark()
+
+choo_temp_seasonality_plot
+
+ggsave(
+  "choo_temp_seasonality.png",
+  plot = choo_temp_seasonality_plot,
+  device = "png",
+  path = plot_path,
+  dpi = "retina"
+)
+```
+
+#### Move output
 
 Put all output into species-specific subfolders.
 ```{r results="hide"}
@@ -1867,119 +2091,91 @@ move_to_species(in_path = obj_path,
                 pattern = "choo")
 ```
 
-### Micrarchus
-```{r warning=FALSE, message=FALSE}
-summary_list_micra <- species_pca_fun(loc_clim, "micrarchus")
-micra_plot <- plot_clim_pca(summary_list_micra$loc_clim, summary_list_micra$summary_pca, factor = "reproductive_mode")
-micra_plot
 
-# if selfcontained = TRUE, you can remove the folder that gets added alongside the plot.
-htmlwidgets::saveWidget(micra_plot,
-                        file.path(interactive_path, "micrarchus_pca.html"),
-                        selfcontained = TRUE)
-
-#filter localities for the focal genus
-micra_loc <- loc %>% 
-  filter(genus == "micrarchus")
-  
-#use sourced plot_locs_leaflet script to plot localities
-micra_map <- plot_locs_leaflet(micra_loc, "reproductive_mode")
-
-micra_map
-
-# save the map
-mapview::mapshot(micra_map, url = file.path(interactive_path, "micra_map.html"), file = file.path(interactive_path, "micra_map.pdf"))
-```
-
-
-```{r}
-summary_list_micra$summary_pca
-loadings_micra <- summary_list_micra$summary_pca$rotation
-knitr::kable(round(loadings_micra[,1:3],3)) #Table of loading scores for the first 3 PCs. 
-```
-
-### Niveaphasma
+### Niveaphasma annulata
 
 ```{r, warning=FALSE, message=TRUE}
-summary_list_nive <- species_pca_fun(loc_clim, "niveaphasma")
-nive_plot <- plot_clim_pca(summary_list_nive$loc_clim, summary_list_nive$summary_pca, factor = "reproductive_mode")
+summary_list_nann <- species_pca_fun(loc_clim, genus = "niveaphasma",
+                                     species = "annulata")
+nann_plot <- plot_clim_pca(summary_list_nann$loc_clim, summary_list_nann$summary_pca, factor = "reproductive_mode")
 
-nive_plot
+nann_plot
 
 # save the plot 
-htmlwidgets::saveWidget(nive_plot, file.path(interactive_path, "niveaphasma_pca.html"), selfcontained = TRUE)
+htmlwidgets::saveWidget(nann_plot, file.path(interactive_path, "nann_pca.html"), selfcontained = TRUE)
 
 #filter localities for the focal genus
-nive_loc <- loc %>% 
+nann_loc <- loc %>% 
   filter(genus == "niveaphasma")
   
 #use sourced plot_locs_leaflet script to plot localities
-nive_map <- plot_locs_leaflet(nive_loc, "reproductive_mode")
+nann_map <- plot_locs_leaflet(nann_loc, "reproductive_mode")
 
-nive_map
+nann_map
 
 # save the map
-mapview::mapshot(nive_map, url = file.path(interactive_path, "nive_map.html"), file = file.path(interactive_path, "nive_map.pdf"))
+mapview::mapshot(nann_map, url = file.path(interactive_path, "nann_map.html"), file = file.path(interactive_path, "nann_map.pdf"))
 
 ```
 
 ```{r}
-summary_list_nive$summary_pca
-loadings_nive <- summary_list_nive$summary_pca$rotation
-knitr::kable(round(loadings_nive[,1:3],3)) #Table of loading scores for the first 3 PCs. 
+summary_list_nann$summary_pca
+loadings_nann <- summary_list_nann$summary_pca$rotation
+knitr::kable(round(loadings_nann[,1:3],3)) #Table of loading scores for the first 3 PCs. 
 ```
 
+#### ENFA
 
 Now I'm going to perform environmental niche factor analysis with sexual and asexual populations within the species.
 ```{r cache=TRUE, warning=FALSE, message=FALSE}
 # get background env't for the species
-nive_bg_env <- bg_env_crop(
-  nive_loc,
+nann_bg_env <- bg_env_crop(
+  nann_loc,
   species = "annulata",
   environment = w,
   buffer = 0.5
 )
 
 #enfa for the sexual species
-nive_sexual_enfa <- enfa_calc_fun(
-  locs = nive_loc,
+nann_sexual_enfa <- enfa_calc_fun(
+  locs = nann_loc,
   species = "annulata",
   reproductive_mode = "sexual",
-  mask_raster = nive_bg_env
+  mask_raster = nann_bg_env
 )
 
 #enfa for the asexual species
-nive_asexual_enfa <- enfa_calc_fun(
-  locs = nive_loc,
+nann_asexual_enfa <- enfa_calc_fun(
+  locs = nann_loc,
   species = "annulata",
   reproductive_mode = "asexual",
-  mask_raster = nive_bg_env
+  mask_raster = nann_bg_env
 )
 
 # write scores to csvs
 readr::write_csv(
-  nive_asexual_enfa$m %>% enframe(name = NULL, value = "marginality"),
-  file.path(spread_path, "nive_asexual_marginality_score.csv")
+  nann_asexual_enfa$m %>% enframe(name = NULL, value = "marginality"),
+  file.path(spread_path, "nann_asexual_marginality_score.csv")
 )
 
 readr::write_csv(
-  nive_sexual_enfa$m %>% enframe(name = NULL, value = "marginality"),
-  file.path(spread_path, "nive_sexual_marginality_score.csv")
+  nann_sexual_enfa$m %>% enframe(name = NULL, value = "marginality"),
+  file.path(spread_path, "nann_sexual_marginality_score.csv")
 )
 
 #plot the marginality scores
-nive_marginality <-
+nann_marginality <-
   marginality_lollipop(
-    sex_marg = nive_sexual_enfa$m,
-    asex_marg = nive_asexual_enfa$m,
+    sex_marg = nann_sexual_enfa$m,
+    asex_marg = nann_asexual_enfa$m,
     full_species_name = "Niveaphasma annulata"
   )
 
-nive_marginality
+nann_marginality
 
 ggsave(
-  "nive_marginality_lollipop.png",
-  plot = nive_marginality,
+  "nann_marginality_lollipop.png",
+  plot = nann_marginality,
   device = "png",
   path = plot_path,
   dpi = "retina"
@@ -1992,135 +2188,136 @@ A couple different ways to visualize the environmental variation. 1) Scatterplot
 ```{r, message=FALSE, warning=FALSE}
 ### 1) ENFA scatterplot
 #access the relevant values for plotting
-nive_asexual_df <- nive_asexual_enfa$li %>% 
+nann_asexual_df <- nann_asexual_enfa$li %>% 
   as_tibble() %>% 
-  bind_cols(pr = nive_asexual_enfa$pr)
+  bind_cols(pr = nann_asexual_enfa$pr)
 
-readr::write_csv(nive_asexual_df, 
-                 file.path(spread_path, "nive_asexual_marginality_df.csv"))
+readr::write_csv(nann_asexual_df, 
+                 file.path(spread_path, "nann_asexual_marginality_df.csv"))
 
-nive_sexual_df <- nive_sexual_enfa$li %>% 
+nann_sexual_df <- nann_sexual_enfa$li %>% 
   as_tibble() %>% 
-  bind_cols(pr = nive_sexual_enfa$pr)
+  bind_cols(pr = nann_sexual_enfa$pr)
 
-readr::write_csv(nive_sexual_df, 
-                 file.path(spread_path, "nive_sexual_marginality_df.csv"))
+readr::write_csv(nann_sexual_df, 
+                 file.path(spread_path, "nann_sexual_marginality_df.csv"))
 
 # asexual
-nive_enfa_spec_asexual <- enfa_hex_plot(nive_asexual_df, marg = Mar, spec = Spe1, repro_mode = "Asexual")
+nann_enfa_spec_asexual <- enfa_hex_plot(nann_asexual_df, marg = Mar, spec = Spe1, repro_mode = "Asexual")
 
-ggsave("nive_enfa_spec_asexual.png",
-       plot = nive_enfa_spec_asexual,
+ggsave("nann_enfa_spec_asexual.png",
+       plot = nann_enfa_spec_asexual,
        device = "png",
        path = plot_path,
        dpi = "retina")
 
 #sexual
-nive_enfa_spec_sexual <- enfa_hex_plot(nive_sexual_df, marg = Mar, spec = Spe1, repro_mode = "Sexual")
+nann_enfa_spec_sexual <- enfa_hex_plot(nann_sexual_df, marg = Mar, spec = Spe1, repro_mode = "Sexual")
 
-ggsave("nive_enfa_spec_sexual.png",
-       plot = nive_enfa_spec_sexual,
+ggsave("nann_enfa_spec_sexual.png",
+       plot = nann_enfa_spec_sexual,
        device = "png",
        path = plot_path,
        dpi = "retina")
 
 ### 2) ENFA histogram
 #asexual
-hist(nive_asexual_enfa)
+hist(nann_asexual_enfa)
 title(main = "Asexual", adj = 0.7, line = -12)
 
-png(filename = file.path(plot_path, "nive_asexual_enfa_hist.png"))
-hist(nive_asexual_enfa)
+png(filename = file.path(plot_path, "nann_asexual_enfa_hist.png"))
+hist(nann_asexual_enfa)
 title(main = "Asexual", adj = 0.7, line = -12)
 dev.off()
 
 #sexual
-hist(nive_sexual_enfa)
+hist(nann_sexual_enfa)
 title(main = "Sexual", adj = 0.7, line = -12)
 
-png(filename = file.path(plot_path, "nive_sexual_enfa_hist.png"))
-hist(nive_sexual_enfa)
+png(filename = file.path(plot_path, "nann_sexual_enfa_hist.png"))
+hist(nann_sexual_enfa)
 title(main = "Sexual", adj = 0.7, line = -12)
 dev.off()
 
 ### 3) PCA of total e-space
-nive_total_pca <- total_climate_pca_plot(bg_env = nive_bg_env, locs = nive_loc, genus = "Niveaphasma", species = "annulata")
+nann_total_pca <- total_climate_pca_plot(bg_env = nann_bg_env, locs = nann_loc, genus = "Niveaphasma", species = "annulata")
 
-nive_total_pca
+nann_total_pca
 
-ggsave("nive_total_pca.png",
-       plot = nive_total_pca,
+ggsave("nann_total_pca.png",
+       plot = nann_total_pca,
        device = "png",
        path = plot_path,
        dpi = "retina")
 
 ```
 
+#### ENFA Reduced
 
 Trying out a repeat of the analyses with reduced environmental space.
 Prioritizing variables that will limit their distribution (i.e. variables that represent the extremes). After correlation analysis, we're left with BIO4, BIO8, BIO9, BIO11, BIO15, BIO17
 ```{r message=FALSE, warning=FALSE}
 # PCA of background e-space. Resulting list is a correlation heatmap (cor_heatmap), a tibble of the rasters with correlation > the cutoff (default is 0.75), and a tibble of all pairwise correlations
-nive_pca <- raster_correlation(raster_stack = nive_bg_env)
-nive_pca$cor_heatmap
-nive_pca$top_cor %>% knitr::kable()
+nann_pca <- raster_correlation(raster_stack = nann_bg_env)
+nann_pca$cor_heatmap
+nann_pca$top_cor %>% knitr::kable()
 
-ggsave("nive_pca_corr.png",
-       plot = nive_pca$cor_heatmap,
+ggsave("nann_pca_corr.png",
+       plot = nann_pca$cor_heatmap,
        device = "png",
        path = plot_path,
        dpi = "retina")
 
 # write correlation data frame to file
-readr::write_csv(nive_pca$top_cor, file.path(spread_path, "nive_top_cor.csv"))
+readr::write_csv(nann_pca$top_cor, file.path(spread_path, "nann_top_cor.csv"))
 
 ```
 
 Repeat the analysis with the reduced data set.
 ```{r message=FALSE, warning=FALSE}
-w_nive <- raster::subset(w, c("bio4", "bio8", "bio9", "bio11", "bio15", "bio17"))
+w_nann <- raster::subset(w, c("bio4", "bio8", "bio9", "bio11", "bio15", "bio17"))
 
 #get background env't for the species
-nive_bg_env_subset <- bg_env_crop(nive_loc, 
+nann_bg_env_subset <- bg_env_crop(nann_loc, 
                            species = "annulata",
-                           environment = w_nive, 
+                           environment = w_nann, 
                            buffer = 0.5)
 
 #enfa for the sexual species
-nive_sexual_enfa_subset <- enfa_calc_fun(locs = nive_loc, 
+nann_sexual_enfa_subset <- enfa_calc_fun(locs = nann_loc, 
                                   species = "annulata", 
                                   reproductive_mode = "sexual", 
-                                  mask_raster = nive_bg_env_subset)
+                                  mask_raster = nann_bg_env_subset)
 
 #enfa for the asexual species
-nive_asexual_enfa_subset <- enfa_calc_fun(locs = nive_loc, 
+nann_asexual_enfa_subset <- enfa_calc_fun(locs = nann_loc, 
                                    species = "annulata", 
                                    reproductive_mode = "asexual", 
-                                   mask_raster = nive_bg_env_subset)
+                                   mask_raster = nann_bg_env_subset)
 
 # write marginality scores to csv
 readr::write_csv(
-  nive_asexual_enfa_subset$m %>% enframe(name = NULL, value = "marginality"),
-  file.path(spread_path, "nive_subset_asexual_marginality_score.csv")
+  nann_asexual_enfa_subset$m %>% enframe(name = NULL, value = "marginality"),
+  file.path(spread_path, "nann_subset_asexual_marginality_score.csv")
 )
 
 readr::write_csv(
-  nive_sexual_enfa_subset$m %>% enframe(name = NULL, value = "marginality"),
-  file.path(spread_path, "nive_subset_sexual_marginality_score.csv")
+  nann_sexual_enfa_subset$m %>% enframe(name = NULL, value = "marginality"),
+  file.path(spread_path, "nann_subset_sexual_marginality_score.csv")
 )
 
 # plot the marginality scores
-nive_subset_marginality <-
+nann_subset_marginality <-
   marginality_lollipop(
-    sex_marg = nive_sexual_enfa_subset$m,
-    asex_marg = nive_asexual_enfa_subset$m,
+    sex_marg = nann_sexual_enfa_subset$m,
+    asex_marg = nann_asexual_enfa_subset$m,
     full_species_name = "Niveaphasma annulata"
   )
 
-nive_subset_marginality
+nann_subset_marginality
 
-ggsave("nive_subset_marginality.png",
-       plot = nive_subset_marginality,
+ggsave("nann_subset_marginality.png",
+       plot = nann_subset_marginality,
        device = "png",
        path = plot_path,
        dpi = "retina")
@@ -2131,269 +2328,277 @@ Visualize with the reduced data set.
 ```{r warning=FALSE, message=FALSE}
 ### 1) ENFA scatterplot
 # access the relevant values for plotting
-nive_asexual_df_subset <- nive_asexual_enfa_subset$li %>% 
+nann_asexual_df_subset <- nann_asexual_enfa_subset$li %>% 
   as_tibble() %>% 
-  bind_cols(pr = nive_asexual_enfa_subset$pr)
+  bind_cols(pr = nann_asexual_enfa_subset$pr)
 
 readr::write_csv(
-  nive_asexual_df_subset,
-  file.path(spread_path, "nive_asexual_df_subset.csv")
+  nann_asexual_df_subset,
+  file.path(spread_path, "nann_asexual_df_subset.csv")
 )
 
 
-nive_sexual_df_subset <- nive_sexual_enfa_subset$li %>% 
+nann_sexual_df_subset <- nann_sexual_enfa_subset$li %>% 
   as_tibble() %>% 
-  bind_cols(pr = nive_sexual_enfa_subset$pr)
+  bind_cols(pr = nann_sexual_enfa_subset$pr)
 
 readr::write_csv(
-  nive_sexual_df_subset,
-  file.path(spread_path, "nive_sexual_df_subset.csv")
+  nann_sexual_df_subset,
+  file.path(spread_path, "nann_sexual_df_subset.csv")
 )
 
 # asexual
-nive_subset_enfa_spec_asexual <- enfa_hex_plot(nive_asexual_df_subset, marg = Mar, spec = Spe1, repro_mode = "Asexual")
+nann_subset_enfa_spec_asexual <- enfa_hex_plot(nann_asexual_df_subset, marg = Mar, spec = Spe1, repro_mode = "Asexual")
 
-ggsave("nive_subset_enfa_spec_asexual.png",
-       plot = nive_subset_enfa_spec_asexual,
+ggsave("nann_subset_enfa_spec_asexual.png",
+       plot = nann_subset_enfa_spec_asexual,
        device = "png",
        path = plot_path,
        dpi = "retina")
 
 # sexual
-nive_subset_enfa_spec_sexual <- enfa_hex_plot(nive_sexual_df_subset, marg = Mar, spec = Spe1, repro_mode = "Sexual")
+nann_subset_enfa_spec_sexual <- enfa_hex_plot(nann_sexual_df_subset, marg = Mar, spec = Spe1, repro_mode = "Sexual")
 
-ggsave("nive_subset_enfa_spec_sexual.png",
-       plot = nive_subset_enfa_spec_sexual,
+ggsave("nann_subset_enfa_spec_sexual.png",
+       plot = nann_subset_enfa_spec_sexual,
        device = "png",
        path = plot_path,
        dpi = "retina")
 
 ### 2) ENFA histogram
 # asexual
-hist(nive_asexual_enfa_subset)
+hist(nann_asexual_enfa_subset)
 title(main = "Asexual", adj = 0.7, line = -12)
 
-png(filename = file.path(plot_path, "nive_subset_asexual_enfa_hist.png"))
-hist(nive_asexual_enfa_subset)
+png(filename = file.path(plot_path, "nann_subset_asexual_enfa_hist.png"))
+hist(nann_asexual_enfa_subset)
 title(main = "Asexual", adj = 0.7, line = -12)
 dev.off()
 
 
 # sexual
-hist(nive_sexual_enfa_subset)
+hist(nann_sexual_enfa_subset)
 title(main = "Sexual", adj = 0.7, line = -12)
 
-png(filename = file.path(plot_path, "nive_subset_sexual_enfa_hist.png"))
-hist(nive_sexual_enfa_subset)
+png(filename = file.path(plot_path, "nann_subset_sexual_enfa_hist.png"))
+hist(nann_sexual_enfa_subset)
 title(main = "Sexual", adj = 0.7, line = -12)
 dev.off()
 
 ### 3) PCA of total e-space
-nive_subset_total_pca <- total_climate_pca_plot(bg_env = nive_bg_env_subset, locs = nive_loc, genus = "Niveaphasma", species = "annulata")
+nann_subset_total_pca <- total_climate_pca_plot(bg_env = nann_bg_env_subset, locs = nann_loc, genus = "Niveaphasma", species = "annulata")
 
-nive_subset_total_pca
+nann_subset_total_pca
 
-ggsave("nive_subset_total_pca.png",
-       plot = nive_subset_total_pca,
+ggsave("nann_subset_total_pca.png",
+       plot = nann_subset_total_pca,
        device = "png",
        path = plot_path,
        dpi = "retina")
 
 # save enfa objects and remove them from the environment. They take up a lot of memory.
-saveRDS(nive_sexual_enfa, file = file.path(obj_path, "nive_sexual_enfa.RDS"))
-rm(nive_sexual_enfa)
+saveRDS(nann_sexual_enfa, file = file.path(obj_path, "nann_sexual_enfa.RDS"))
+rm(nann_sexual_enfa)
 
-saveRDS(nive_asexual_enfa, file = file.path(obj_path, "nive_asexual_enfa.RDS"))
-rm(nive_asexual_enfa)
+saveRDS(nann_asexual_enfa, file = file.path(obj_path, "nann_asexual_enfa.RDS"))
+rm(nann_asexual_enfa)
 
-saveRDS(nive_sexual_enfa_subset,
-        file = file.path(obj_path, "nive_subset_sexual_enfa.RDS"))
-rm(nive_sexual_enfa_subset)
+saveRDS(nann_sexual_enfa_subset,
+        file = file.path(obj_path, "nann_subset_sexual_enfa.RDS"))
+rm(nann_sexual_enfa_subset)
 
-saveRDS(nive_asexual_enfa_subset,
-        file = file.path(obj_path, "nive_subset_asexual_enfa.RDS"))
-rm(nive_asexual_enfa_subset)
+saveRDS(nann_asexual_enfa_subset,
+        file = file.path(obj_path, "nann_subset_asexual_enfa.RDS"))
+rm(nann_asexual_enfa_subset)
 ```
+
+#### Stability
 
 We're also interested in seeing if asexual populations live in more unstable climatic areas relative to sexual populations. 
 ```{r warning=FALSE, message=FALSE}
-nive_locs_asexual <- nive_loc %>% 
+nann_locs_asexual <- nann_loc %>% 
   mutate(lat_long = str_c(latitude, longitude, sep = "_")) %>% 
   filter(reproductive_mode == "asexual",
          !duplicated(lat_long)) %>% 
   dplyr::select(longitude, latitude)
 
-nive_locs_sexual <- nive_loc %>% 
+nann_locs_sexual <- nann_loc %>% 
   mutate(lat_long = str_c(latitude, longitude, sep = "_")) %>% 
   filter(reproductive_mode == "sexual",
          !duplicated(lat_long)) %>% 
   dplyr::select(longitude, latitude)
 
-precip_asexual_nive <- raster::extract(precip_stability_scaled, nive_locs_asexual) %>% 
+precip_asexual_nann <- raster::extract(precip_stability_scaled, nann_locs_asexual) %>% 
   enframe(name = NULL, value = "precip_stability_scaled") %>% 
   mutate(reproductive_mode = "asexual")
 
-precip_sexual_nive <- raster::extract(precip_stability_scaled, nive_locs_sexual) %>% 
+precip_sexual_nann <- raster::extract(precip_stability_scaled, nann_locs_sexual) %>% 
   enframe(name = NULL, value = "precip_stability_scaled") %>% 
   mutate(reproductive_mode = "sexual")
 
-precip_df_nive <- bind_rows(precip_asexual_nive, precip_sexual_nive)
+precip_df_nann <- bind_rows(precip_asexual_nann, precip_sexual_nann)
 
-readr::write_csv(precip_df_nive, 
-                 file.path(spread_path, "nive_precip_stability_df.csv"))
+readr::write_csv(precip_df_nann, 
+                 file.path(spread_path, "nann_precip_stability_df.csv"))
 
-nive_precip_stability_plot <- ggplot(data = precip_df_nive, aes(x = reproductive_mode, y = precip_stability_scaled, color = reproductive_mode)) +
+nann_precip_stability_plot <- ggplot(data = precip_df_nann, aes(x = reproductive_mode, y = precip_stability_scaled, color = reproductive_mode)) +
   geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
   geom_jitter(width = 0.2, alpha = 0.6) +
   scale_color_viridis_d(option = "magma") +
   theme_dark()
 
-nive_precip_stability_plot
+nann_precip_stability_plot
 
-ggsave("nive_precip_stability.png",
-       plot = nive_precip_stability_plot,
+ggsave("nann_precip_stability.png",
+       plot = nann_precip_stability_plot,
        device = "png",
        path = plot_path,
        dpi = "retina")
 
-temp_asexual_nive <- raster::extract(temp_stability_scaled, nive_locs_asexual) %>% 
+temp_asexual_nann <- raster::extract(temp_stability_scaled, nann_locs_asexual) %>% 
   enframe(name = NULL, value = "temp_stability_scaled") %>% 
   mutate(reproductive_mode = "asexual")
 
-temp_sexual_nive <- raster::extract(temp_stability_scaled, nive_locs_sexual) %>% 
+temp_sexual_nann <- raster::extract(temp_stability_scaled, nann_locs_sexual) %>% 
   enframe(name = NULL, value = "temp_stability_scaled") %>% 
   mutate(reproductive_mode = "sexual")
 
-temp_df_nive <- bind_rows(temp_asexual_nive, temp_sexual_nive)
+temp_df_nann <- bind_rows(temp_asexual_nann, temp_sexual_nann)
 
-readr::write_csv(temp_df_nive, 
-                 file.path(spread_path, "nive_temp_stability_df.csv"))
+readr::write_csv(temp_df_nann, 
+                 file.path(spread_path, "nann_temp_stability_df.csv"))
 
-nive_temp_stability_plot <- ggplot(data = temp_df_nive, aes(x = reproductive_mode, y = temp_stability_scaled, color = reproductive_mode)) +
+nann_temp_stability_plot <- ggplot(data = temp_df_nann, aes(x = reproductive_mode, y = temp_stability_scaled, color = reproductive_mode)) +
   geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
   geom_jitter(width = 0.2, alpha = 0.6) +
   scale_color_viridis_d(option = "magma") +
   theme_dark()
 
-nive_temp_stability_plot
+nann_temp_stability_plot
 
-ggsave("nive_precip_stability.png",
-       plot = nive_temp_stability_plot,
+ggsave("nann_precip_stability.png",
+       plot = nann_temp_stability_plot,
        device = "png",
        path = plot_path,
        dpi = "retina")
 
-overall_asexual_nive <- raster::extract(overall_stability_scaled, nive_locs_asexual) %>% 
+overall_asexual_nann <- raster::extract(overall_stability_scaled, nann_locs_asexual) %>% 
   enframe(name = NULL, value = "overall_stability_scaled") %>% 
   mutate(reproductive_mode = "asexual")
 
-overall_sexual_nive <- raster::extract(overall_stability_scaled, nive_locs_sexual) %>% 
+overall_sexual_nann <- raster::extract(overall_stability_scaled, nann_locs_sexual) %>% 
   enframe(name = NULL, value = "overall_stability_scaled") %>% 
   mutate(reproductive_mode = "sexual")
 
-overall_df_nive <- bind_rows(overall_asexual_nive, overall_sexual_nive)
+overall_df_nann <- bind_rows(overall_asexual_nann, overall_sexual_nann)
 
-readr::write_csv(overall_df_nive, 
-                 file.path(spread_path, "nive_overall_stability_df.csv"))
+readr::write_csv(overall_df_nann, 
+                 file.path(spread_path, "nann_overall_stability_df.csv"))
 
-nive_overall_stability_plot <- ggplot(data = overall_df_nive, aes(x = reproductive_mode, y = overall_stability_scaled, color = reproductive_mode)) +
+nann_overall_stability_plot <- ggplot(data = overall_df_nann, aes(x = reproductive_mode, y = overall_stability_scaled, color = reproductive_mode)) +
   geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
   geom_jitter(width = 0.2, alpha = 0.6) +
   scale_color_viridis_d(option = "magma") +
   theme_dark()
 
-nive_overall_stability_plot
+nann_overall_stability_plot
 
-ggsave("nive_overall_stability.png",
-       plot = nive_overall_stability_plot,
+ggsave("nann_overall_stability.png",
+       plot = nann_overall_stability_plot,
        device = "png",
        path = plot_path,
        dpi = "retina")
 ```
+
+#### Seasonality
+```{r}
+seas_precip_asexual_nann <- raster::extract(w$bio15, nann_locs_asexual) %>% 
+  enframe(name = NULL, value = "precip_seasonality") %>% 
+  mutate(reproductive_mode = "asexual")
+
+seas_precip_sexual_nann <- raster::extract(w$bio15, nann_locs_sexual) %>% 
+  enframe(name = NULL, value = "precip_seasonality") %>% 
+  mutate(reproductive_mode = "sexual")
+
+seas_precip_df_nann <- bind_rows(seas_precip_asexual_nann, seas_precip_sexual_nann)
+
+readr::write_csv(seas_precip_df_nann, 
+                 file.path(spread_path, "nann_precip_seasonality_df.csv"))
+
+nann_precip_seasonality_plot <- ggplot(data = seas_precip_df_nann, aes(x = reproductive_mode, y = precip_seasonality, color = reproductive_mode)) +
+  geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  scale_color_viridis_d(option = "magma") +
+  theme_dark()
+
+nann_precip_seasonality_plot
+
+ggsave(
+  "nann_precip_seasonality.png",
+  plot = nann_precip_seasonality_plot,
+  device = "png",
+  path = plot_path,
+  dpi = "retina"
+)
+
+seas_temp_asexual_nann <- raster::extract(w$bio4, nann_locs_asexual) %>% 
+  enframe(name = NULL, value = "temp_seasonality") %>% 
+  mutate(reproductive_mode = "asexual")
+
+seas_temp_sexual_nann <- raster::extract(w$bio4, nann_locs_sexual) %>% 
+  enframe(name = NULL, value = "temp_seasonality") %>% 
+  mutate(reproductive_mode = "sexual")
+
+seas_temp_df_nann <- bind_rows(seas_temp_asexual_nann, seas_temp_sexual_nann)
+
+readr::write_csv(seas_temp_df_nann, 
+                 file.path(spread_path, "nann_temp_seasonality_df.csv"))
+
+nann_temp_seasonality_plot <- ggplot(data = seas_temp_df_nann, aes(x = reproductive_mode, y = temp_seasonality, color = reproductive_mode)) +
+  geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  scale_color_viridis_d(option = "magma") +
+  theme_dark()
+
+nann_temp_seasonality_plot
+
+ggsave(
+  "nann_temp_seasonality.png",
+  plot = nann_temp_seasonality_plot,
+  device = "png",
+  path = plot_path,
+  dpi = "retina"
+)
+```
+#### Move output
 
 Put all output into species-specific subfolders.
 ```{r results="hide"}
-nive_out_int_path <- file.path(interactive_path, "niveaphasma_annulata")
-nive_out_plot_path <- file.path(plot_path, "niveaphasma_annulata")
-nive_out_spread_path <- file.path(spread_path, "niveaphasma_annulata")
-nive_out_obj_path <- file.path(obj_path, "niveaphasma_annulata")
+nann_out_int_path <- file.path(interactive_path, "niveaphasma_annulata")
+nann_out_plot_path <- file.path(plot_path, "niveaphasma_annulata")
+nann_out_spread_path <- file.path(spread_path, "niveaphasma_annulata")
+nann_out_obj_path <- file.path(obj_path, "niveaphasma_annulata")
 
 # move interactive
 move_to_species(in_path = interactive_path,
-                out_path = nive_out_int_path,
-                pattern = "nive")
+                out_path = nann_out_int_path,
+                pattern = "nann")
 # move plots
 move_to_species(in_path = plot_path,
-                out_path = nive_out_plot_path,
-                pattern = "nive")
+                out_path = nann_out_plot_path,
+                pattern = "nann")
 
 # move spreadsheets
 move_to_species(in_path = spread_path,
-                out_path = nive_out_spread_path,
-                pattern = "nive")
+                out_path = nann_out_spread_path,
+                pattern = "nann")
 
 # move objects
 move_to_species(in_path = obj_path,
-                out_path = nive_out_obj_path,
-                pattern = "nive")
+                out_path = nann_out_obj_path,
+                pattern = "nann")
 ```
 
-
-### Spinotectarchus
-
-```{r, warning=FALSE, message=TRUE}
-summary_list_spin <- species_pca_fun(loc_clim, "spinotectarchus")
-spin_plot <- plot_clim_pca(summary_list_spin$loc_clim, summary_list_spin$summary_pca, factor = "reproductive_mode")
-
-spin_plot
-
-# save the plot 
-htmlwidgets::saveWidget(spin_plot, file.path(interactive_path, "spinotectarchus_pca.html"), selfcontained = TRUE)
-
-#filter localities for the focal genus
-spin_loc <- loc %>% 
-  filter(genus == "spinotectarchus")
-  
-#use sourced plot_locs_leaflet script to plot localities
-spin_map <- plot_locs_leaflet(spin_loc, "reproductive_mode")
-
-spin_map
-
-# save the map
-mapview::mapshot(spin_map, url = file.path(interactive_path, "spin_map.html"), file = file.path(interactive_path, "spin_map.pdf"))
-
-```
-
-```{r}
-summary_list_spin$summary_pca
-loadings_spin <- summary_list_spin$summary_pca$rotation
-knitr::kable(round(loadings_spin[,1:3],3)) #Table of loading scores for the first 3 PCs. 
-```
-
-
-### Tectarchus
-```{r, warning=FALSE, message=TRUE}
-summary_list_tect <- species_pca_fun(loc_clim, "tectarchus")
-tect_plot <- plot_clim_pca(summary_list_tect$loc_clim, summary_list_tect$summary_pca, factor = "reproductive_mode")
-
-tect_plot
-
-# save the plot 
-htmlwidgets::saveWidget(tect_plot, file.path(interactive_path, "tectarchus_pca.html"), selfcontained = TRUE)
-
-#filter localities for the focal genus
-tect_loc <- loc %>% 
-  filter(genus == "tectarchus")
-  
-#use sourced plot_locs_leaflet script to plot localities
-tect_map <- plot_locs_leaflet(tect_loc, "reproductive_mode")
-
-tect_map
-
-# save the map
-mapview::mapshot(tect_map, url = file.path(interactive_path, "tect_map.html"), file = file.path(interactive_path, "tect_map.pdf"))
-
-```
 
 ```{r}
 summary_list_tect$summary_pca
@@ -2401,7 +2606,45 @@ loadings_tect <- summary_list_tect$summary_pca$rotation
 knitr::kable(round(loadings_tect[,1:3],3)) #Table of loading scores for the first 3 PCs. 
 ```
 
-#### Tectarchus ovobessus
+### Tectarchus ovobessus
+
+```{r, warning=FALSE, message=TRUE}
+summary_list_tect_ovo <-
+  species_pca_fun(loc_clim,
+                  genus = "tectarchus",
+                  species = "ovobessus")
+
+tect_ovo_plot <-
+  plot_clim_pca(summary_list_tect_ovo$loc_clim,
+                summary_list_tect_ovo$summary_pca,
+                factor = "reproductive_mode")
+
+tect_ovo_plot
+
+# save the plot
+htmlwidgets::saveWidget(tect_ovo_plot,
+                        file.path(interactive_path, "tect_ovo_pca.html"),
+                        selfcontained = TRUE)
+
+#filter localities for the focal species
+tect_ovo_loc <- loc %>%
+  filter(genus == "tectarchus", species == "ovobessus")
+
+#use sourced plot_locs_leaflet script to plot localities
+tect_ovo_map <- plot_locs_leaflet(tect_ovo_loc, "reproductive_mode")
+
+tect_ovo_map
+# save the map
+mapview::mapshot(
+  tect_ovo_map,
+  url = file.path(interactive_path, "tect_ovo_map.html"),
+  file = file.path(interactive_path, "tect_ovo_map.pdf")
+)
+```
+
+
+##### ENFA
+
 Now I'm going to perform environmental niche factor analysis with sexual and asexual populations within the species.
 ```{r cache=TRUE, warning=FALSE, message=FALSE}
 # get background env't for the species
@@ -2546,6 +2789,8 @@ readr::write_csv(tect_ovo_pca$top_cor, file.path(spread_path, "tect_ovo_top_cor.
 
 ```
 
+###### ENFA Reduced
+
 Repeat the analysis with the reduced data set.
 ```{r message=FALSE, warning=FALSE}
 w_tect_ovo <- raster::subset(w, c("bio4", "bio8", "bio11", "bio15", "bio17"))
@@ -2685,16 +2930,18 @@ saveRDS(tect_ovo_asexual_enfa_subset,
 rm(tect_ovo_asexual_enfa_subset)
 ```
 
+##### Stability
+
 We're also interested in seeing if asexual populations live in more unstable climatic areas relative to sexual populations. 
 ```{r warning=FALSE, message=FALSE}
-tect_ovo_locs_asexual <- tect_loc %>% 
+tect_ovo_locs_asexual <- tect_ovo_loc %>% 
   mutate(lat_long = str_c(latitude, longitude, sep = "_")) %>% 
   filter(reproductive_mode == "asexual",
          species == "ovobessus",
          !duplicated(lat_long)) %>% 
   dplyr::select(longitude, latitude)
 
-tect_ovo_locs_sexual <- tect_loc %>% 
+tect_ovo_locs_sexual <- tect_ovo_loc %>% 
   mutate(lat_long = str_c(latitude, longitude, sep = "_")) %>% 
   filter(reproductive_mode == "sexual",
          species == "ovobessus",
@@ -2783,6 +3030,67 @@ ggsave("tect_ovo_overall_stability.png",
        dpi = "retina")
 ```
 
+##### Seasonality
+```{r}
+seas_precip_asexual_tect_ovo <- raster::extract(w$bio15, tect_ovo_locs_asexual) %>% 
+  enframe(name = NULL, value = "precip_seasonality") %>% 
+  mutate(reproductive_mode = "asexual")
+
+seas_precip_sexual_tect_ovo <- raster::extract(w$bio15, tect_ovo_locs_sexual) %>% 
+  enframe(name = NULL, value = "precip_seasonality") %>% 
+  mutate(reproductive_mode = "sexual")
+
+seas_precip_df_tect_ovo <- bind_rows(seas_precip_asexual_tect_ovo, seas_precip_sexual_tect_ovo)
+
+readr::write_csv(seas_precip_df_tect_ovo, 
+                 file.path(spread_path, "tect_ovo_precip_seasonality_df.csv"))
+
+tect_ovo_precip_seasonality_plot <- ggplot(data = seas_precip_df_tect_ovo, aes(x = reproductive_mode, y = precip_seasonality, color = reproductive_mode)) +
+  geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  scale_color_viridis_d(option = "magma") +
+  theme_dark()
+
+tect_ovo_precip_seasonality_plot
+
+ggsave(
+  "tect_ovo_precip_seasonality.png",
+  plot = tect_ovo_precip_seasonality_plot,
+  device = "png",
+  path = plot_path,
+  dpi = "retina"
+)
+
+seas_temp_asexual_tect_ovo <- raster::extract(w$bio4, tect_ovo_locs_asexual) %>% 
+  enframe(name = NULL, value = "temp_seasonality") %>% 
+  mutate(reproductive_mode = "asexual")
+
+seas_temp_sexual_tect_ovo <- raster::extract(w$bio4, tect_ovo_locs_sexual) %>% 
+  enframe(name = NULL, value = "temp_seasonality") %>% 
+  mutate(reproductive_mode = "sexual")
+
+seas_temp_df_tect_ovo <- bind_rows(seas_temp_asexual_tect_ovo, seas_temp_sexual_tect_ovo)
+
+readr::write_csv(seas_temp_df_tect_ovo, 
+                 file.path(spread_path, "tect_ovo_temp_seasonality_df.csv"))
+
+tect_ovo_temp_seasonality_plot <- ggplot(data = seas_temp_df_tect_ovo, aes(x = reproductive_mode, y = temp_seasonality, color = reproductive_mode)) +
+  geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  scale_color_viridis_d(option = "magma") +
+  theme_dark()
+
+tect_ovo_temp_seasonality_plot
+
+ggsave(
+  "tect_ovo_temp_seasonality.png",
+  plot = tect_ovo_temp_seasonality_plot,
+  device = "png",
+  path = plot_path,
+  dpi = "retina"
+)
+```
+##### Move output
 
 Put all output into species-specific subfolders.
 ```{r results="hide"}
@@ -2812,8 +3120,43 @@ move_to_species(in_path = obj_path,
 ```
 
 
-#### Tectarchus huttoni
+### Tectarchus huttoni
 
+```{r, warning=FALSE, message=TRUE}
+summary_list_tect_hutt <-
+  species_pca_fun(loc_clim,
+                  genus = "tectarchus",
+                  species = "huttoni")
+
+tect_hutt_plot <-
+  plot_clim_pca(summary_list_tect_hutt$loc_clim,
+                summary_list_tect_hutt$summary_pca,
+                factor = "reproductive_mode")
+
+tect_hutt_plot
+
+# save the plot
+htmlwidgets::saveWidget(tect_hutt_plot,
+                        file.path(interactive_path, "tect_hutt_pca.html"),
+                        selfcontained = TRUE)
+
+#filter localities for the focal species
+tect_hutt_loc <- loc %>%
+  filter(genus == "tectarchus", species == "huttoni")
+
+#use sourced plot_locs_leaflet script to plot localities
+tect_hutt_map <- plot_locs_leaflet(tect_hutt_loc, "reproductive_mode")
+
+tect_hutt_map
+# save the map
+mapview::mapshot(
+  tect_hutt_map,
+  url = file.path(interactive_path, "tect_hutt_map.html"),
+  file = file.path(interactive_path, "tect_hutt_map.pdf")
+)
+```
+
+##### ENFA
 Now I'm going to perform environmental niche factor analysis with sexual and asexual populations within the species.
 ```{r cache=TRUE, warning=FALSE, message=FALSE}
 # get background env't for the species
@@ -2938,6 +3281,7 @@ ggsave("tect_hutt_total_pca.png",
 
 ```
 
+###### ENFA Reduced
 Trying out a repeat of the analyses with reduced environmental space.
 Prioritizing variables that will limit their distribution (i.e. variables that represent the extremes). After correlation analysis, we're left with BIO4, BIO8, BIO11, BIO15, BIO17
 ```{r message=FALSE, warning=FALSE}
@@ -3096,16 +3440,18 @@ saveRDS(tect_hutt_asexual_enfa_subset,
 rm(tect_hutt_asexual_enfa_subset)
 ```
 
+
+#### Stabilityy
 We're also interested in seeing if asexual populations live in more unstable climatic areas relative to sexual populations. 
 ```{r warning=FALSE, message=FALSE}
-tect_hutt_locs_asexual <- tect_loc %>% 
+tect_hutt_locs_asexual <- tect_hutt_loc %>% 
   mutate(lat_long = str_c(latitude, longitude, sep = "_")) %>% 
   filter(reproductive_mode == "asexual",
          species == "huttoni",
          !duplicated(lat_long)) %>% 
   dplyr::select(longitude, latitude)
 
-tect_hutt_locs_sexual <- tect_loc %>% 
+tect_hutt_locs_sexual <- tect_hutt_loc %>% 
   mutate(lat_long = str_c(latitude, longitude, sep = "_")) %>% 
   filter(reproductive_mode == "sexual",
          species == "huttoni",
@@ -3194,6 +3540,68 @@ ggsave("tect_hutt_overall_stability.png",
        dpi = "retina")
 ```
 
+##### Seasonality
+```{r}
+seas_precip_asexual_tect_hutt <- raster::extract(w$bio15, tect_hutt_locs_asexual) %>% 
+  enframe(name = NULL, value = "precip_seasonality") %>% 
+  mutate(reproductive_mode = "asexual")
+
+seas_precip_sexual_tect_hutt <- raster::extract(w$bio15, tect_hutt_locs_sexual) %>% 
+  enframe(name = NULL, value = "precip_seasonality") %>% 
+  mutate(reproductive_mode = "sexual")
+
+seas_precip_df_tect_hutt <- bind_rows(seas_precip_asexual_tect_hutt, seas_precip_sexual_tect_hutt)
+
+readr::write_csv(seas_precip_df_tect_hutt, 
+                 file.path(spread_path, "tect_hutt_precip_seasonality_df.csv"))
+
+tect_hutt_precip_seasonality_plot <- ggplot(data = seas_precip_df_tect_hutt, aes(x = reproductive_mode, y = precip_seasonality, color = reproductive_mode)) +
+  geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  scale_color_viridis_d(option = "magma") +
+  theme_dark()
+
+tect_hutt_precip_seasonality_plot
+
+ggsave(
+  "tect_hutt_precip_seasonality.png",
+  plot = tect_hutt_precip_seasonality_plot,
+  device = "png",
+  path = plot_path,
+  dpi = "retina"
+)
+
+seas_temp_asexual_tect_hutt <- raster::extract(w$bio4, tect_hutt_locs_asexual) %>% 
+  enframe(name = NULL, value = "temp_seasonality") %>% 
+  mutate(reproductive_mode = "asexual")
+
+seas_temp_sexual_tect_hutt <- raster::extract(w$bio4, tect_hutt_locs_sexual) %>% 
+  enframe(name = NULL, value = "temp_seasonality") %>% 
+  mutate(reproductive_mode = "sexual")
+
+seas_temp_df_tect_hutt <- bind_rows(seas_temp_asexual_tect_hutt, seas_temp_sexual_tect_hutt)
+
+readr::write_csv(seas_temp_df_tect_hutt, 
+                 file.path(spread_path, "tect_hutt_temp_seasonality_df.csv"))
+
+tect_hutt_temp_seasonality_plot <- ggplot(data = seas_temp_df_tect_hutt, aes(x = reproductive_mode, y = temp_seasonality, color = reproductive_mode)) +
+  geom_boxplot(width = 0.5, color = "black", fill = "transparent") +
+  geom_jitter(width = 0.2, alpha = 0.6) +
+  scale_color_viridis_d(option = "magma") +
+  theme_dark()
+
+tect_hutt_temp_seasonality_plot
+
+ggsave(
+  "tect_hutt_temp_seasonality.png",
+  plot = tect_hutt_temp_seasonality_plot,
+  device = "png",
+  path = plot_path,
+  dpi = "retina"
+)
+```
+
+##### Move output
 Put all output into species-specific subfolders.
 ```{r results="hide"}
 tect_hutt_out_int_path <- file.path(interactive_path, "tectarchus_huttoni")
@@ -3221,10 +3629,6 @@ move_to_species(in_path = obj_path,
                 pattern = "tect_hutt")
 ```
 
-### Tepakiphasma
-Nothing. Only one locality.
-
-
 
 ## Convenience scripts
 *These scripts aren't crucial for reproducing this analysis, but were helpful for various reasons. Some of these have hard-coded paths and such, so no guarantees for use right out of the box.*
@@ -3243,7 +3647,7 @@ for (file in zip_files) {
   system(paste("unar", file, "-o", tempd))
   r <- raster(list.files(tempd, pattern = "*.tif", full.names = TRUE)) %>%
     crop(extent(166, 179, -48, -34))
-  writeRaster(r, filename = paste0("~/Desktop/", list.files(tempd, pattern = "*.tif")), format = "GTiff")
+  writeRaster(r, filename = paste0("~/Desktop/", list.files(tempd, pattern = "*.asc")), format = "ascii")
   unlink(tempd, recursive = TRUE)
 }
 ```
